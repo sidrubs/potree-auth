@@ -1,0 +1,24 @@
+[package]
+name = "potree-auth"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+path = "src/main.rs"
+name = "potree-auth"
+
+[dependencies]
+anyhow = "1.0.97"
+async-trait = "0.1.88"
+axum = "0.8.3"
+derive = "1.0.0"
+features = "0.10.0"
+http = "1.3.1"
+serde = { version = "1.0.219", features = ["derive"] }
+thiserror = "2.0.12"
+
+[dev-dependencies]
+fake = { version = "4.3.0", features = ["derive"] }
