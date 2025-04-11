@@ -1,14 +1,16 @@
+use std::fmt::Debug;
+
 use crate::{
     domain::{project::Project, user::User},
     error::ApplicationError,
 };
 
-pub mod basic_authorization;
+pub(crate) mod basic_authorization;
 
 /// Defines the functionality that needs to be implemented for the application
 /// to perform authentication.
 #[cfg_attr(test, mockall::automock)]
-pub trait AuthorizationService {
+pub trait AuthorizationService: Debug + Send + Sync + 'static {
     /// Determines if a `user` should be authorized to perform the `action` on
     /// the specified resource.
     ///

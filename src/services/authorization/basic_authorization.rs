@@ -9,9 +9,9 @@ use super::{Action, AuthorizationService, Resource};
 
 /// Handles authorization business logic for the application.
 #[derive(Debug, Clone)]
-pub struct BasicAuthorizationService;
+pub(crate) struct SimpleAuthorizationService;
 
-impl BasicAuthorizationService {
+impl SimpleAuthorizationService {
     pub fn assert_allowed(
         &self,
         user: &User,
@@ -40,7 +40,7 @@ impl BasicAuthorizationService {
     }
 }
 
-impl AuthorizationService for BasicAuthorizationService {
+impl AuthorizationService for SimpleAuthorizationService {
     fn assert_allowed(
         &self,
         user: &User,
@@ -68,7 +68,7 @@ mod authorization_service_tests {
             #[test]
             fn should_return_ok_if_the_user_is_an_admin() {
                 // Arrange
-                let authorization_service = BasicAuthorizationService;
+                let authorization_service = SimpleAuthorizationService;
 
                 let user = User::dummy_admin();
                 let project = Faker.fake::<Project>();
@@ -85,7 +85,7 @@ mod authorization_service_tests {
             #[test]
             fn should_return_ok_if_the_user_shares_a_group_with_the_project() {
                 // Arrange
-                let authorization_service = BasicAuthorizationService;
+                let authorization_service = SimpleAuthorizationService;
 
                 let shared_group = Faker.fake::<Group>();
                 let user = User {
@@ -109,7 +109,7 @@ mod authorization_service_tests {
             #[test]
             fn should_return_err_if_the_user_does_not_share_a_group_with_the_project() {
                 // Arrange
-                let authorization_service = BasicAuthorizationService;
+                let authorization_service = SimpleAuthorizationService;
 
                 let user = Faker.fake::<User>();
                 let project = Faker.fake::<Project>();

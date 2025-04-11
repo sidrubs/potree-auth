@@ -1,4 +1,4 @@
-/// Represents groups that are allowed to access a specific project.
+/// Represents groups that users and projects can be part of.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Deserialize)]
 #[cfg_attr(test, derive(fake::Dummy))]
 pub struct Group(String);
