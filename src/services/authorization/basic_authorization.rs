@@ -47,7 +47,7 @@ impl AuthorizationService for SimpleAuthorizationService {
         resource: &Resource,
         action: &Action,
     ) -> Result<(), ApplicationError> {
-        Self::assert_allowed(&self, user, resource, action)
+        Self::assert_allowed(self, user, resource, action)
     }
 }
 

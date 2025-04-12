@@ -13,7 +13,7 @@ pub(crate) use user::User;
 /// The various types of domain objects.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(test, derive(fake::Dummy))]
-pub(crate) enum ResourceType {
+pub enum ResourceType {
     Project,
 }
 

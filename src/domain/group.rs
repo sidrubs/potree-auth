@@ -1,5 +1,7 @@
+use serde::{Deserialize, Serialize};
+
 /// Represents groups that users and projects can be part of.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[cfg_attr(test, derive(fake::Dummy))]
 pub struct Group(String);
 

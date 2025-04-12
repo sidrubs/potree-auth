@@ -44,7 +44,7 @@ new_type![
 ];
 
 new_type![
-    /// The unique id of a [`crate::domain::Project`].
+    /// The unique identifying slug of a [`crate::domain::Project`].
     #[derive(Deserialize, Serialize)]
     #[cfg_attr(test, derive(fake::Dummy))]
     ProjectId(String)
