@@ -24,13 +24,13 @@ struct ProjectManifest {
 }
 
 impl ProjectManifest {
-    /// Converts a [`ProjectManifest`] into a [`Project`]. The `project_name`
-    /// represent the unique identifying of the project.
-    pub fn into_project(self, project_name: &str) -> Project {
+    /// Converts a [`ProjectManifest`] into a [`Project`]. The `project_id`
+    /// represent the unique identifying slug of the project.
+    pub fn into_project(self, project_id: &str) -> Project {
         let Self { groups } = self;
 
         Project {
-            name: project_name.to_owned(),
+            id: project_id.to_owned(),
             groups,
         }
     }

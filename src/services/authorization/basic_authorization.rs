@@ -30,9 +30,9 @@ impl SimpleAuthorizationService {
                     Ok(())
                 } else {
                     Err(ApplicationError::NotAuthorized {
-                        user_name: user.name.clone(),
-                        resource_name: project.name.clone(),
-                        resource_type: "project".to_owned(),
+                        user_name: user.name.clone().into(),
+                        resource_name: project.name.clone().into(),
+                        resource_type: resource.into(),
                     })
                 }
             }

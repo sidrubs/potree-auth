@@ -2,16 +2,20 @@
 
 use std::collections::HashSet;
 
-use super::group::Group;
+use serde::Deserialize;
+
+use super::{
+    group::Group,
+    value_objects::{EmailAddress, UserId, UserName},
+};
 
 /// Represents an authenticated user of the application.
-#[derive(Debug, Clone, PartialEq, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize)]
 #[cfg_attr(test, derive(fake::Dummy))]
 pub struct User {
-    #[cfg_attr(test, dummy(faker = "fake::faker::name::en::Name()"))]
-    pub name: String,
-    #[cfg_attr(test, dummy(faker = "fake::faker::internet::en::FreeEmail()"))]
-    pub email: String,
+    pub id: UserId,
+    pub name: UserName,
+    pub email: EmailAddress,
 
     /// The groups that a user is member of, thus has access to their respective
     /// projects.
