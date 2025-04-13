@@ -2,7 +2,7 @@ use std::ops::Deref;
 
 use serde::{Deserialize, Serialize};
 
-use super::utils::new_type;
+use super::utils::new_type::new_type;
 
 new_type![
     /// The name of a [`crate::domain::User`].

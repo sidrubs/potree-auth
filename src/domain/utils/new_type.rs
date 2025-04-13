@@ -116,4 +116,4 @@ macro_rules! new_type {
     }
 }
 
-pub(super) use new_type;
+pub(crate) use new_type;

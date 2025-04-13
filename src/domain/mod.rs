@@ -1,5 +1,6 @@
 pub(crate) mod group;
 pub(crate) mod project;
+pub(crate) mod static_asset;
 pub(crate) mod user;
 pub(crate) mod utils;
 pub(crate) mod value_objects;
@@ -8,6 +9,7 @@ use std::fmt;
 
 pub(crate) use group::Group;
 pub(crate) use project::Project;
+pub(crate) use static_asset::StaticAsset;
 pub(crate) use user::User;
 
 /// The various types of domain objects.
@@ -15,12 +17,14 @@ pub(crate) use user::User;
 #[cfg_attr(test, derive(fake::Dummy))]
 pub enum ResourceType {
     Project,
+    StaticAsset,
 }
 
 impl fmt::Display for ResourceType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             ResourceType::Project => write!(f, "project"),
+            ResourceType::StaticAsset => write!(f, "static asset"),
         }
     }
 }

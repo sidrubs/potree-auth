@@ -10,6 +10,12 @@ run:
     cargo run
 alias r := run
 
+# Builds the project
+[group('development')]
+build:
+    cargo build
+alias b := build
+
 # Runs the workspace's tests
 [group('development')]
 test:

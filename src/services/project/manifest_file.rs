@@ -114,10 +114,12 @@ mod manifest_file_project_service_tests {
 
     use super::*;
 
-    /// The name of the project manifest files for testing purposes (so tests can detect a change in filename).
+    /// The name of the project manifest files for testing purposes (so tests
+    /// can detect a change in filename).
     const TEST_MANIFEST_FILE_NAME: &str = "manifest.json";
 
-    /// Writes the `project` to `projects_dir` as a manifest file in the correct subdirectory.
+    /// Writes the `project` to `projects_dir` as a manifest file in the correct
+    /// subdirectory.
     fn write_to_project_manifest<P: AsRef<Path>>(project: &Project, projects_dir: P) {
         let project_dir = PathBuf::new().join(&projects_dir).join(project.id.as_str());
 
