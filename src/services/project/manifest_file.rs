@@ -38,7 +38,7 @@ pub(crate) struct ManifestFileProjectService {
 impl ManifestFileProjectService {
     /// Creates a new [`ManifestFileProjectService`] instance with the specified
     /// `projects_directory`.
-    fn new<P: AsRef<Path>>(projects_directory: P) -> Self {
+    pub fn new<P: AsRef<Path>>(projects_directory: P) -> Self {
         Self {
             projects_directory: projects_directory.as_ref().to_path_buf(),
         }

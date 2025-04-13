@@ -1,5 +1,6 @@
 mod health_check;
-mod state;
+mod potree_asset;
+pub(crate) mod state;
 
 use std::sync::Arc;
 
@@ -11,6 +12,7 @@ use crate::services::{
 };
 
 const HEALTH_CHECK: &str = "/_health";
+const POTREE_STATIC_ASSETS: &str = "/static/potree/{*path}";
 
 /// Initializes the application router, its state, and all of its routes.
 pub fn build_router<AZ, P, PA>(
@@ -33,12 +35,13 @@ where
     // Build the router.
     let router = Router::new()
         .route(HEALTH_CHECK, get(health_check::health_check))
+        .route(POTREE_STATIC_ASSETS, get(potree_asset::potree_asset))
         .layer(Extension(state));
 
     router
 }
 
-/// Integration tests for the entire router stack.
+/// Integration tests for the router stack.
 #[cfg(test)]
 mod router_integration_tests {
     use axum_test::TestServer;

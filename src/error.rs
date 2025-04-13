@@ -22,4 +22,8 @@ pub enum ApplicationError {
     /// A generic server error.
     #[error("{0}")]
     ServerError(String),
+
+    /// Occurs if unable to extract application state from the request parts.
+    #[error("unable to extract application state; ensure it was added as a router extension")]
+    StateExtraction,
 }
