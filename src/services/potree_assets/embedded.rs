@@ -20,7 +20,7 @@ impl EmbeddedPotreeAssetService {
             resource_type: ResourceType::StaticAsset,
         })?;
 
-        Ok(StaticAsset::from_rust_embed(embedded_asset, path))
+        Ok(StaticAsset::from_rust_embed(embedded_asset, path)?)
     }
 }
 
@@ -36,6 +36,8 @@ mod embedded_potree_asset_service_tests {
     use super::*;
 
     mod get_asset {
+        use http::header;
+
         use super::*;
 
         #[test]
@@ -49,7 +51,10 @@ mod embedded_potree_asset_service_tests {
                 .expect("unable to find asset");
 
             // Assert
-            assert_eq!(static_asset.mime, mime::TEXT_JAVASCRIPT)
+            assert_eq!(
+                static_asset.0.headers().get(header::CONTENT_TYPE).unwrap(),
+                mime::TEXT_JAVASCRIPT.as_ref()
+            )
         }
 
         #[test]

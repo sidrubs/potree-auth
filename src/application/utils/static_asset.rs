@@ -1,5 +1,4 @@
 use axum::response::{IntoResponse, Response};
-use http::header;
 
 use crate::domain::StaticAsset;
 
@@ -7,6 +6,8 @@ use crate::domain::StaticAsset;
 /// response.
 impl IntoResponse for StaticAsset {
     fn into_response(self) -> Response {
-        ([(header::CONTENT_TYPE, self.mime.as_ref())], self.data).into_response()
+        let response = self.0;
+        let (parts, body) = response.into_parts();
+        Response::from_parts(parts, axum::body::Body::from(body))
     }
 }

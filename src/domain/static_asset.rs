@@ -1,17 +1,12 @@
-use std::borrow::Cow;
-
-use mime::Mime;
+use bytes::Bytes;
+use http::{HeaderMap, Response, header};
 use rust_embed::EmbeddedFile;
+
+use crate::error::ApplicationError;
 
 /// Represents a static asset that can be served by a http server.
 #[derive(Debug, Clone)]
-pub(crate) struct StaticAsset {
-    /// The binary data of the asset.
-    pub data: Cow<'static, [u8]>,
-
-    /// The asset mime type.
-    pub mime: Mime,
-}
+pub(crate) struct StaticAsset(pub(crate) Response<Bytes>);
 
 impl StaticAsset {
     /// Convert from a `rust_embed::EmbeddedFile` to a [`StaticAsset`]. `path`
@@ -19,12 +14,35 @@ impl StaticAsset {
     pub fn from_rust_embed<P: AsRef<std::path::Path>>(
         embedded_file: EmbeddedFile,
         path: P,
-    ) -> Self {
-        let mime = mime_guess::from_path(path).first_or_octet_stream();
+    ) -> Result<Self, ApplicationError> {
+        let mime = mime_guess::from_path(&path).first_or_octet_stream();
 
-        Self {
-            data: embedded_file.data,
-            mime,
-        }
+        let mut headers = HeaderMap::new();
+        headers.append(
+            header::CONTENT_TYPE,
+            mime.as_ref().parse().map_err(|_err| {
+                ApplicationError::ServerError(format!(
+                    "unable to generate valid header from mime type: {mime}"
+                ))
+            })?,
+        );
+
+        let mut response = Response::builder()
+            .body(Bytes::from(embedded_file.data.into_owned()))
+            .map_err(|_err| {
+                ApplicationError::ServerError(format!(
+                    "unable to convert `{}` to bytes",
+                    path.as_ref().to_string_lossy()
+                ))
+            })?;
+
+        *response.headers_mut() = headers;
+
+        Ok(Self(response))
+    }
+
+    /// Return the data bytes associated with the asset.
+    pub fn data(&self) -> Vec<u8> {
+        self.0.body().to_vec()
     }
 }
