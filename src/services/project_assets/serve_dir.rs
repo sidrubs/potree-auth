@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 
 use async_trait::async_trait;
 use http::{HeaderMap, Request, Response, StatusCode};
@@ -36,6 +36,14 @@ impl ServeDirProjectAssets {
         path: &str,
         request_headers: Option<HeaderMap>,
     ) -> Result<StaticAsset, ApplicationError> {
+        // Ensure the `path` does not contain parent dir references as this could lead
+        // to illegal path traversal.
+        if contains_parent_dir_reference(path) {
+            return Err(ApplicationError::DisallowedAction(
+                "the `path` may not contain parent directory references".to_owned(),
+            ));
+        }
+
         // Build empty request containing only headers, as the headers are used by
         // [`ServeFile`] to determine how the data should be formatted.
         let mut request = Request::new(());
@@ -52,15 +60,16 @@ impl ServeDirProjectAssets {
         let response = serve_file.oneshot(request).await.map_err(|_err| {
             ApplicationError::ResourceNotFound {
                 resource_name: path.to_owned(),
-                resource_type: ResourceType::Project,
+                resource_type: ResourceType::ProjectAsset,
             }
         })?;
 
-        // Because this is a response which is always successful, we need to check the response status code.
+        // Because this is a response which is always successful, we need to check the
+        // response status code.
         if response.status() != StatusCode::OK && response.status() != StatusCode::PARTIAL_CONTENT {
             return Err(ApplicationError::ResourceNotFound {
                 resource_name: path.to_owned(),
-                resource_type: ResourceType::Project,
+                resource_type: ResourceType::ProjectAsset,
             });
         }
 
@@ -94,6 +103,13 @@ impl ProjectAssetService for ServeDirProjectAssets {
     }
 }
 
+/// Determines if a `path` contains any parent directory references.
+fn contains_parent_dir_reference<P: AsRef<Path>>(path: P) -> bool {
+    path.as_ref()
+        .components()
+        .any(|component| component == Component::ParentDir)
+}
+
 #[cfg(test)]
 mod serve_dir_project_assets_tests {
     use fake::{Fake, Faker};
@@ -102,7 +118,8 @@ mod serve_dir_project_assets_tests {
 
     const TEST_FILE_CONTENT: &str = "this is a test string";
 
-    /// Writes an asset to a text file in the `assets_dir`. Returns the path to the created asset within the `assets_dir`.
+    /// Writes an asset to a text file in the `assets_dir`. Returns the path to
+    /// the created asset within the `assets_dir`.
     fn create_asset_file<P: AsRef<Path>>(assets_dir: P) -> PathBuf {
         let asset_path = PathBuf::new().join(Faker.fake::<String>());
         let asset_name = "test.txt";
@@ -191,8 +208,25 @@ mod serve_dir_project_assets_tests {
 
             // Assert
             assert!(
-                matches!(res, Err(ApplicationError::ResourceNotFound { resource_name, resource_type }) if resource_name == non_existent_path && resource_type == ResourceType::Project)
+                matches!(res, Err(ApplicationError::ResourceNotFound { resource_name, resource_type }) if resource_name == non_existent_path && resource_type == ResourceType::ProjectAsset)
             )
+        }
+
+        #[test_case::test_case("../build/non/existent.txt" ; "at beginning of path")]
+        #[test_case::test_case("build/../non/existent.txt" ; "in middle of path")]
+        #[tokio::test]
+        async fn should_return_correct_error_if_path_contains_parent_dir_ref(invalid_path: &str) {
+            // Arrange
+            let assets_dir = tempfile::tempdir().unwrap();
+            let asset_service = ServeDirProjectAssets::new(&assets_dir);
+
+            // Act
+            let res = asset_service
+                .get_asset(invalid_path, Some(HeaderMap::new()))
+                .await;
+
+            // Assert
+            assert!(matches!(res, Err(ApplicationError::DisallowedAction(_))))
         }
     }
 }

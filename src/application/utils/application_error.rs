@@ -16,6 +16,9 @@ impl IntoResponse for ApplicationError {
             ApplicationError::StateExtraction => {
                 (StatusCode::INTERNAL_SERVER_ERROR, self.to_string())
             }
+            ApplicationError::DisallowedAction(msg) => {
+                (StatusCode::UNPROCESSABLE_ENTITY, msg.to_owned())
+            }
         }
         .into_response()
     }

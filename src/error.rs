@@ -23,6 +23,10 @@ pub enum ApplicationError {
     #[error("{0}")]
     ServerError(String),
 
+    /// A disallowed action was attempted.
+    #[error("{0}")]
+    DisallowedAction(String),
+
     /// Occurs if unable to extract application state from the request parts.
     #[error("unable to extract application state; ensure it was added as a router extension")]
     StateExtraction,
