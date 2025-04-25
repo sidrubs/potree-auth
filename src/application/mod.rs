@@ -14,6 +14,7 @@ use crate::{
 mod extractors;
 mod routes;
 mod utils;
+mod views;
 
 /// Sets up the required services and builds the application routes configured
 /// as per the `config`.
@@ -37,7 +38,12 @@ pub fn initialize_application(config: &ApplicationConfiguration) -> Router {
 mod router_integration_tests {
     use axum_test::TestServer;
     use fake::{Fake, Faker};
-    use http::StatusCode;
+    use http::{StatusCode, header};
+
+    use crate::test_utils::{
+        TEST_PROJECT_1_DATA_CONTENT, TEST_PROJECT_1_DATA_PATH, TEST_PROJECT_1_DATA_TYPE,
+        TEST_PROJECT_1_DIR, TEST_PROJECT_2_DATA_PATH, TEST_PROJECT_2_DIR, TEST_PROJECT_PARENT,
+    };
 
     use super::*;
 
@@ -104,14 +110,6 @@ mod router_integration_tests {
     }
 
     mod project_static_assets {
-
-        use http::header;
-
-        use crate::test_utils::{
-            TEST_PROJECT_1_DATA_CONTENT, TEST_PROJECT_1_DATA_PATH, TEST_PROJECT_1_DATA_TYPE,
-            TEST_PROJECT_1_DIR, TEST_PROJECT_2_DATA_PATH, TEST_PROJECT_2_DIR, TEST_PROJECT_PARENT,
-        };
-
         use super::*;
 
         #[tokio::test]
@@ -200,6 +198,29 @@ mod router_integration_tests {
 
             // Assert
             response.assert_status(StatusCode::NOT_FOUND);
+        }
+    }
+
+    mod potree_render {
+        use super::*;
+
+        #[tokio::test]
+        async fn should_return_the_correct_html() {
+            // Arrange
+            let config = ApplicationConfiguration {
+                projects_dir: TEST_PROJECT_PARENT.parse().unwrap(),
+            };
+            let test_server = TestServer::new(initialize_application(&config)).unwrap();
+
+            // Act
+            let response = test_server
+                .get(&format!("{TEST_PROJECT}/{TEST_PROJECT_1_DIR}"))
+                .await;
+
+            // Assert
+            response.assert_status(StatusCode::OK);
+            assert_eq!(response.content_type(), mime::TEXT_HTML_UTF_8.to_string());
+            assert!(response.text().contains(TEST_PROJECT_1_DIR))
         }
     }
 }

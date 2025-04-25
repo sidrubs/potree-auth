@@ -19,6 +19,10 @@ impl IntoResponse for ApplicationError {
             ApplicationError::DisallowedAction(msg) => {
                 (StatusCode::UNPROCESSABLE_ENTITY, msg.to_owned())
             }
+            ApplicationError::Render(err) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("unable to render page: {err}"),
+            ),
         }
         .into_response()
     }

@@ -1,6 +1,6 @@
 /// Creates a newtype with following code automatically generated:
 ///
-/// - Derives `Clone`, `Debug`, and `PartialEq`
+/// - Derives `Clone`, `Debug`, `PartialEq`, and `Display`.
 /// - Implements `new`, `Deref`, and `From`.
 /// - Allows one to implement additional traits and features as needed.
 ///
@@ -111,6 +111,11 @@ macro_rules! new_type {
         impl From<$name> for $type {
             fn from(t: $name) -> $type {
                 t.0
+            }
+        }
+        impl std::fmt::Display for $name {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(f, "{}", self.0)
             }
         }
     }

@@ -1,2 +1,3 @@
-pub mod application_error;
-pub mod static_asset;
+pub(crate) mod application_error;
+pub(crate) mod potree;
+pub(crate) mod static_asset;
