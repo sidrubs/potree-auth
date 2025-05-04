@@ -5,7 +5,8 @@ use crate::domain::value_objects::ProjectName;
 /// Represents the the `potree` render page. Populates and renders the
 /// `potree_render.html` template.
 ///
-/// This assumes that there is a `potree` config file fully defining the project.
+/// This assumes that there is a `potree` config file fully defining the
+/// project.
 #[derive(Debug, Template)]
 #[template(path = "potree_render.html")]
 pub struct PotreeRender {

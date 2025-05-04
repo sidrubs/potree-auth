@@ -68,6 +68,7 @@ impl ManifestFileProjectService {
         Ok(manifest.into_project(project_id))
     }
 }
+
 #[async_trait]
 impl ProjectService for ManifestFileProjectService {
     async fn read(&self, project_id: &ProjectId) -> Result<Project, ApplicationError> {

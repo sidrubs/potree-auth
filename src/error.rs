@@ -34,4 +34,8 @@ pub enum ApplicationError {
     /// An error experienced rendering a page.
     #[error(transparent)]
     Render(#[from] askama::Error),
+
+    /// Error in the OIDC flow.
+    #[error("{0}")]
+    Oidc(String),
 }

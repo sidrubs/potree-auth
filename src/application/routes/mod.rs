@@ -9,12 +9,9 @@ use std::{path::PathBuf, sync::Arc};
 use axum::{Extension, Router, routing::get};
 use state::ApplicationState;
 
-use crate::{
-    domain::value_objects::ProjectId,
-    services::{
-        authorization::AuthorizationService, potree_assets::PotreeAssetService,
-        project::ProjectService, project_assets::ProjectAssetService,
-    },
+use crate::services::{
+    authorization::AuthorizationService, potree_assets::PotreeAssetService,
+    project::ProjectService, project_assets::ProjectAssetService,
 };
 
 pub(crate) const HEALTH_CHECK: &str = "/_health";

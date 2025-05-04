@@ -23,6 +23,7 @@ impl IntoResponse for ApplicationError {
                 StatusCode::INTERNAL_SERVER_ERROR,
                 format!("unable to render page: {err}"),
             ),
+            ApplicationError::Oidc(msg) => (StatusCode::UNAUTHORIZED, msg.to_owned()),
         }
         .into_response()
     }
