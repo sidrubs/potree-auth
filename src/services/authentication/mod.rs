@@ -1,11 +1,12 @@
 pub(crate) mod oidc_authentication;
+pub(crate) mod unimplemented_authentication;
 pub(crate) mod utils;
 
 use std::fmt::Debug;
 
 use async_trait::async_trait;
 use openidconnect::{AuthorizationCode, CsrfToken, Nonce};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::{domain::user::User, error::ApplicationError};
@@ -43,14 +44,14 @@ pub trait AuthenticationService: Debug + Send + Sync + 'static {
 pub struct AuthorizeData {
     /// The url to which the user agent should be redirected to perform IdP
     /// authentication.
-    auth_url: Url,
+    pub auth_url: Url,
 
     /// Information that should be persisted so that it is available whn
     /// handling the callback from the IdP.
-    persisted_data: OidcSessionPersisted,
+    pub persisted_data: OidcSessionPersisted,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OidcSessionPersisted {
     /// The OIDC state. Should be persisted for validation in the callback
     /// handler.

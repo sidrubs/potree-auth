@@ -5,6 +5,7 @@ use crate::{
     config::ApplicationConfiguration,
     observability::init_tracing,
     services::{
+        authentication::unimplemented_authentication::UnimplementedAuthenticationService,
         authorization::basic_authorization::SimpleAuthorizationService,
         potree_assets::embedded::EmbeddedPotreeAssetService,
         project::manifest_file::ManifestFileProjectService,
@@ -23,12 +24,14 @@ mod views;
 pub fn initialize_application(config: &ApplicationConfiguration) -> Router {
     // Set up services.
     let authorization_service = SimpleAuthorizationService;
+    let authentication_service = UnimplementedAuthenticationService;
     let project_service = ManifestFileProjectService::new(&config.projects_dir);
     let project_asset_service = ServeDirProjectAssets::new(&config.projects_dir);
     let potree_asset_service = EmbeddedPotreeAssetService;
 
     build_router(
         authorization_service,
+        authentication_service,
         project_service,
         project_asset_service,
         potree_asset_service,

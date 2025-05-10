@@ -1,3 +1,4 @@
+pub(crate) mod authentication;
 pub(crate) mod potree_assets;
 pub(crate) mod project;
 pub(crate) mod project_assets;

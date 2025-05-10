@@ -8,7 +8,8 @@ use crate::error::ApplicationError;
 impl IntoResponse for ApplicationError {
     fn into_response(self) -> Response {
         match &self {
-            ApplicationError::NotAuthorized { .. } => (StatusCode::UNAUTHORIZED, self.to_string()),
+            ApplicationError::NotAuthorized { .. } => (StatusCode::FORBIDDEN, self.to_string()),
+            ApplicationError::NotAuthenticated => (StatusCode::UNAUTHORIZED, self.to_string()),
             ApplicationError::ResourceNotFound { .. } => (StatusCode::NOT_FOUND, self.to_string()),
             ApplicationError::ServerError(msg) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, msg.to_owned())

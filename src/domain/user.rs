@@ -2,7 +2,7 @@
 
 use std::collections::HashSet;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use super::{
     group::Group,
@@ -10,7 +10,7 @@ use super::{
 };
 
 /// Represents an authenticated user of the application.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[cfg_attr(test, derive(fake::Dummy))]
 pub struct User {
     pub id: UserId,

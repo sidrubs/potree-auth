@@ -5,14 +5,14 @@ use http::request::Parts;
 
 use crate::{
     application::routes::state::ApplicationState, error::ApplicationError,
-    services::project::ProjectService,
+    services::authentication::AuthenticationService,
 };
 
-pub(crate) struct Projects(pub(crate) Arc<dyn ProjectService>);
+pub(crate) struct Authentication(pub(crate) Arc<dyn AuthenticationService>);
 
-/// Defines how `axum` should extract the [`ProjectService`] from a
+/// Defines how `axum` should extract the [`AuthenticationService`] from a
 /// request.
-impl<S> FromRequestParts<S> for Projects
+impl<S> FromRequestParts<S> for Authentication
 where
     S: Send + Sync,
 {
@@ -20,8 +20,8 @@ where
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let state = ApplicationState::from_request_parts(parts, state).await?;
-        let projects_service = state.project_service;
+        let authentication_service = state.authentication_service;
 
-        Ok(Self(projects_service))
+        Ok(Self(authentication_service))
     }
 }

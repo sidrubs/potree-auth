@@ -12,6 +12,9 @@ pub enum ApplicationError {
         resource_type: ResourceType,
     },
 
+    #[error("user is not authenticated")]
+    NotAuthenticated,
+
     /// Indicates that a specific resource was not found.
     #[error("unable to find {resource_type}: {resource_name}")]
     ResourceNotFound {
