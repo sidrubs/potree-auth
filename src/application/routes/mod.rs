@@ -15,7 +15,7 @@ use crate::services::{
     project::ProjectService, project_assets::ProjectAssetService,
 };
 
-use super::middleware::session::apply_session_layer;
+use super::middleware::{session::apply_session_layer, tracing::apply_tracing_middleware};
 
 pub(crate) const HEALTH_CHECK: &str = "/_health";
 
@@ -77,8 +77,9 @@ where
         )
         .layer(Extension(state));
 
-    // Add web sessions
+    // Apply middleware
     let router = apply_session_layer(router, Duration::days(1));
+    let router = apply_tracing_middleware(router);
 
     router
 }

@@ -1,8 +1,11 @@
 use clap::Parser;
-use potree_auth::{cli::Cli, initialize_application};
+use potree_auth::{cli::Cli, init_tracing, initialize_application};
 
 #[tokio::main]
 async fn main() {
+    // Set up tracing subscribers
+    init_tracing();
+
     let cli = Cli::parse();
 
     let application = initialize_application(&cli.into());

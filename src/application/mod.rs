@@ -3,6 +3,7 @@ use routes::build_router;
 
 use crate::{
     config::ApplicationConfiguration,
+    observability::init_tracing,
     services::{
         authorization::basic_authorization::SimpleAuthorizationService,
         potree_assets::embedded::EmbeddedPotreeAssetService,
