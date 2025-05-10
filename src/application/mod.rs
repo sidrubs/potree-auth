@@ -12,6 +12,7 @@ use crate::{
 };
 
 mod extractors;
+mod middleware;
 mod routes;
 mod utils;
 mod views;

@@ -25,8 +25,6 @@ pub(crate) async fn potree_render(
 ) -> Result<Html<String>, ApplicationError> {
     let project = project_service.read(&project_id).await?;
 
-    dbg!(potree_config_path(&project.id));
-
     Ok(Html(
         PotreeRender {
             project_title: project.name,

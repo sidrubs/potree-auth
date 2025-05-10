@@ -8,11 +8,14 @@ use std::{path::PathBuf, sync::Arc};
 
 use axum::{Extension, Router, routing::get};
 use state::ApplicationState;
+use time::Duration;
 
 use crate::services::{
     authorization::AuthorizationService, potree_assets::PotreeAssetService,
     project::ProjectService, project_assets::ProjectAssetService,
 };
+
+use super::middleware::session::apply_session_layer;
 
 pub(crate) const HEALTH_CHECK: &str = "/_health";
 
@@ -73,6 +76,9 @@ where
             get(potree_render::potree_render),
         )
         .layer(Extension(state));
+
+    // Add web sessions
+    let router = apply_session_layer(router, Duration::days(1));
 
     router
 }
