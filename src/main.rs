@@ -1,3 +1,11 @@
+// Using `jemalloc` as opposed to the standard system allocator to reduce memory fragmentation.
+#[cfg(not(target_env = "msvc"))]
+use tikv_jemallocator::Jemalloc;
+
+#[cfg(not(target_env = "msvc"))]
+#[global_allocator]
+static GLOBAL: Jemalloc = Jemalloc;
+
 use clap::Parser;
 use potree_auth::{cli::Cli, init_tracing, initialize_application};
 
@@ -8,7 +16,7 @@ async fn main() {
 
     let cli = Cli::parse();
 
-    let application = initialize_application(&cli.into());
+    let application = initialize_application(&cli.into()).await.unwrap();
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
         .await

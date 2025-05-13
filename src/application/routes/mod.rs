@@ -73,27 +73,20 @@ fn callback_route() -> String {
 }
 
 /// Initializes the application router, its state, and all of its routes.
-pub fn build_router<AZ, AN, P, POA, PRA>(
-    authorization_service: AZ,
-    authentication_service: AN,
-    project_service: P,
-    project_asset_service: PRA,
-    potree_asset_service: POA,
-) -> Router
-where
-    AZ: AuthorizationService,
-    AN: AuthenticationService,
-    P: ProjectService,
-    POA: PotreeAssetService,
-    PRA: ProjectAssetService,
-{
+pub fn build_router(
+    authorization_service: Arc<dyn AuthorizationService>,
+    authentication_service: Arc<dyn AuthenticationService>,
+    project_service: Arc<dyn ProjectService>,
+    project_asset_service: Arc<dyn ProjectAssetService>,
+    potree_asset_service: Arc<dyn PotreeAssetService>,
+) -> Router {
     // Initialize application state.
     let state = ApplicationState {
-        authorization_service: Arc::new(authorization_service),
-        authentication_service: Arc::new(authentication_service),
-        project_service: Arc::new(project_service),
-        project_asset_service: Arc::new(project_asset_service),
-        potree_asset_service: Arc::new(potree_asset_service),
+        authorization_service,
+        authentication_service,
+        project_service,
+        project_asset_service,
+        potree_asset_service,
     };
 
     // Build the router.

@@ -18,6 +18,9 @@ impl From<Cli> for ApplicationConfiguration {
     fn from(value: Cli) -> Self {
         let Cli { projects_dir } = value;
 
-        Self { projects_dir }
+        Self {
+            projects_dir,
+            idp: None,
+        }
     }
 }

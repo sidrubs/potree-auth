@@ -1,11 +1,18 @@
+use std::sync::Arc;
+
 use axum::Router;
+use openidconnect::{ClientId, ClientSecret, IssuerUrl, RedirectUrl};
 use routes::build_router;
 
 use crate::{
     config::ApplicationConfiguration,
+    error::ApplicationError,
     observability::init_tracing,
     services::{
-        authentication::unimplemented_authentication::UnimplementedAuthenticationService,
+        authentication::{
+            AuthenticationService, oidc_authentication::OidcAuthenticationService,
+            unimplemented_authentication::UnimplementedAuthenticationService,
+        },
         authorization::basic_authorization::SimpleAuthorizationService,
         potree_assets::embedded::EmbeddedPotreeAssetService,
         project::manifest_file::ManifestFileProjectService,
@@ -21,21 +28,41 @@ mod views;
 
 /// Sets up the required services and builds the application routes configured
 /// as per the `config`.
-pub fn initialize_application(config: &ApplicationConfiguration) -> Router {
+pub async fn initialize_application(
+    config: &ApplicationConfiguration,
+) -> Result<Router, ApplicationError> {
     // Set up services.
-    let authorization_service = SimpleAuthorizationService;
-    let authentication_service = UnimplementedAuthenticationService;
-    let project_service = ManifestFileProjectService::new(&config.projects_dir);
-    let project_asset_service = ServeDirProjectAssets::new(&config.projects_dir);
-    let potree_asset_service = EmbeddedPotreeAssetService;
+    let authorization_service = Arc::new(SimpleAuthorizationService);
+    let project_service = Arc::new(ManifestFileProjectService::new(&config.projects_dir));
+    let project_asset_service = Arc::new(ServeDirProjectAssets::new(&config.projects_dir));
+    let potree_asset_service = Arc::new(EmbeddedPotreeAssetService);
 
-    build_router(
+    // Determine which authentication service to initialize based on the configuration.
+    let authentication_service: Arc<dyn AuthenticationService> =
+        if let Some(idp_configuration) = config.idp.clone() {
+            // Use IdP authenticated routes
+            Arc::new(
+                OidcAuthenticationService::new(
+                    IssuerUrl::from_url(idp_configuration.idp_url),
+                    RedirectUrl::from_url(idp_configuration.redirect_url),
+                    ClientId::new(idp_configuration.client_id),
+                    ClientSecret::new(idp_configuration.client_secret),
+                    idp_configuration.groups_claim,
+                )
+                .await?,
+            )
+        } else {
+            // Don't use authentication
+            Arc::new(UnimplementedAuthenticationService)
+        };
+
+    Ok(build_router(
         authorization_service,
         authentication_service,
         project_service,
         project_asset_service,
         potree_asset_service,
-    )
+    ))
 }
 
 /// End-to-end tests for the application stack.
@@ -63,7 +90,12 @@ mod router_integration_tests {
         #[tokio::test]
         async fn should_return_a_200() {
             // Arrange
-            let test_server = TestServer::new(initialize_application(&Faker.fake())).unwrap();
+            let test_server = TestServer::new(
+                initialize_application(&ApplicationConfiguration::dummy_with_no_idp())
+                    .await
+                    .unwrap(),
+            )
+            .unwrap();
 
             // Act
             let response = test_server.get(TEST_HEALTH_CHECK).await;
@@ -80,8 +112,12 @@ mod router_integration_tests {
         #[tokio::test]
         async fn should_return_the_asset_correctly_if_found() {
             // Arrange
-            let test_server = TestServer::new(initialize_application(&Faker.fake())).unwrap();
-
+            let test_server = TestServer::new(
+                initialize_application(&ApplicationConfiguration::dummy_with_no_idp())
+                    .await
+                    .unwrap(),
+            )
+            .unwrap();
             // Act
             let response = test_server
                 .get(&format!(
@@ -98,8 +134,12 @@ mod router_integration_tests {
         async fn should_return_a_404_if_not_found() {
             // Arrange
             let non_existent_path = "build/non/existent.txt";
-            let test_server = TestServer::new(initialize_application(&Faker.fake())).unwrap();
-
+            let test_server = TestServer::new(
+                initialize_application(&ApplicationConfiguration::dummy_with_no_idp())
+                    .await
+                    .unwrap(),
+            )
+            .unwrap();
             // Act
             let response = test_server
                 .get(&format!("{TEST_POTREE_STATIC_ASSETS}/{non_existent_path}"))
@@ -122,8 +162,10 @@ mod router_integration_tests {
             // Arrange
             let config = ApplicationConfiguration {
                 projects_dir: TEST_PROJECT_PARENT.parse().unwrap(),
+                ..ApplicationConfiguration::dummy_with_no_idp()
             };
-            let test_server = TestServer::new(initialize_application(&config)).unwrap();
+            let test_server =
+                TestServer::new(initialize_application(&config).await.unwrap()).unwrap();
 
             // Act
             let response = test_server
@@ -143,8 +185,10 @@ mod router_integration_tests {
             // Arrange
             let config = ApplicationConfiguration {
                 projects_dir: TEST_PROJECT_PARENT.parse().unwrap(),
+                ..ApplicationConfiguration::dummy_with_no_idp()
             };
-            let test_server = TestServer::new(initialize_application(&config)).unwrap();
+            let test_server =
+                TestServer::new(initialize_application(&config).await.unwrap()).unwrap();
 
             // Act
             let response = test_server
@@ -168,8 +212,10 @@ mod router_integration_tests {
 
             let config = ApplicationConfiguration {
                 projects_dir: TEST_PROJECT_PARENT.parse().unwrap(),
+                ..ApplicationConfiguration::dummy_with_no_idp()
             };
-            let test_server = TestServer::new(initialize_application(&config)).unwrap();
+            let test_server =
+                TestServer::new(initialize_application(&config).await.unwrap()).unwrap();
 
             // Act
             let response = test_server
@@ -191,8 +237,10 @@ mod router_integration_tests {
             // Arrange
             let config = ApplicationConfiguration {
                 projects_dir: TEST_PROJECT_PARENT.parse().unwrap(),
+                ..ApplicationConfiguration::dummy_with_no_idp()
             };
-            let test_server = TestServer::new(initialize_application(&config)).unwrap();
+            let test_server =
+                TestServer::new(initialize_application(&config).await.unwrap()).unwrap();
 
             // Act
             let response = test_server
@@ -214,8 +262,10 @@ mod router_integration_tests {
             // Arrange
             let config = ApplicationConfiguration {
                 projects_dir: TEST_PROJECT_PARENT.parse().unwrap(),
+                ..ApplicationConfiguration::dummy_with_no_idp()
             };
-            let test_server = TestServer::new(initialize_application(&config)).unwrap();
+            let test_server =
+                TestServer::new(initialize_application(&config).await.unwrap()).unwrap();
 
             // Act
             let response = test_server

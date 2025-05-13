@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use openidconnect::{
     AdditionalClaims, Client, ClientId, ClientSecret, CsrfToken, EmptyExtraTokenFields,
     EndpointMaybeSet, EndpointNotSet, EndpointSet, IdTokenFields, IssuerUrl, Nonce, RedirectUrl,
@@ -14,7 +15,7 @@ use serde::{Deserialize, Serialize};
 use crate::{domain::User, error::ApplicationError};
 
 use super::{
-    AuthorizeData, CallbackRequestParams, OidcSessionPersisted,
+    AuthenticationService, AuthorizeData, CallbackRequestParams, OidcSessionPersisted,
     utils::{extract_user_email, extract_user_groups, extract_user_id, extract_user_name},
 };
 
@@ -152,6 +153,21 @@ impl OidcAuthenticationService {
             email: extract_user_email(id_token_claims)?,
             groups: extract_user_groups(id_token_claims, &self.groups_claim),
         })
+    }
+}
+
+#[async_trait]
+impl AuthenticationService for OidcAuthenticationService {
+    async fn authorize(&self) -> Result<AuthorizeData, ApplicationError> {
+        Self::authorize(&self).await
+    }
+
+    async fn callback(
+        &self,
+        callback_params: CallbackRequestParams,
+        persisted_data: OidcSessionPersisted,
+    ) -> Result<User, ApplicationError> {
+        Self::callback(self, callback_params, persisted_data).await
     }
 }
 
