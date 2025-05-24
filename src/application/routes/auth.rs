@@ -13,13 +13,13 @@ pub const LOGIN_SESSION_KEY: &str = "login_session";
 
 /// The data to be persisted between the [`login`] and [`callback`] routes.
 #[derive(Debug, Serialize, Deserialize)]
-struct LoginSessionData {
+pub(crate) struct LoginSessionData {
     oidc_persisted_data: OidcSessionPersisted,
     next_path: String,
 }
 
 #[derive(Deserialize)]
-struct LoginParams {
+pub(crate) struct LoginParams {
     /// The path to which the user should be redirected after
     /// logging in.
     next_path: String,
@@ -44,7 +44,8 @@ pub(crate) async fn login(
         persisted_data: oidc_persisted_data,
     } = authentication_service.authorize().await?;
 
-    // Persist the required data so that it is available for the `callback` route to complete the login.
+    // Persist the required data so that it is available for the `callback` route to
+    // complete the login.
     session
         .insert(
             LOGIN_SESSION_KEY,

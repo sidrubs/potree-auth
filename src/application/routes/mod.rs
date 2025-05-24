@@ -32,15 +32,15 @@ pub(crate) const AUTH_LOGIN: &str = "login";
 pub(crate) const AUTH_CALLBACK: &str = "callback";
 
 /// Axum route to reference a static `potree` asset.
-fn potree_static_assets_route() -> String {
+pub(crate) fn potree_static_assets_route() -> String {
     Path::new(STATIC_POTREE)
-        .join("{*path}")
+        .join("{*asset_path}")
         .to_slash_lossy()
         .to_string()
 }
 
 /// Axum route to reference a specific project.
-fn project_route() -> String {
+pub(crate) fn project_route() -> String {
     Path::new(PROJECT_ROOT)
         .join("{project_id}")
         .to_slash_lossy()
@@ -48,7 +48,7 @@ fn project_route() -> String {
 }
 
 /// Axum route to reference a specific project asset.
-fn project_asset() -> String {
+pub(crate) fn project_asset() -> String {
     Path::new(&project_route())
         .join(PROJECT_ASSETS)
         .join("{*path}")
@@ -57,7 +57,7 @@ fn project_asset() -> String {
 }
 
 /// Route to initialize an OIDC login of the application.
-fn login_route() -> String {
+pub(crate) fn login_route() -> String {
     Path::new(AUTH_ROOT)
         .join(AUTH_LOGIN)
         .to_slash_lossy()
@@ -65,7 +65,7 @@ fn login_route() -> String {
 }
 
 /// Route to finalize an OIDC login of the application.
-fn callback_route() -> String {
+pub(crate) fn callback_route() -> String {
     Path::new(AUTH_ROOT)
         .join(AUTH_CALLBACK)
         .to_slash_lossy()
@@ -98,6 +98,8 @@ pub fn build_router(
         )
         .route(&project_asset(), get(project_asset::project_asset))
         .route(&project_route(), get(potree_render::potree_render))
+        .route(&login_route(), get(auth::login))
+        .route(&callback_route(), get(auth::callback))
         .layer(Extension(state));
 
     // Apply middleware

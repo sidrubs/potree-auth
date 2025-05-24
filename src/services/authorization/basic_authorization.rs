@@ -12,12 +12,19 @@ use super::{Action, AuthorizationService, Resource};
 pub(crate) struct SimpleAuthorizationService;
 
 impl SimpleAuthorizationService {
+    #[tracing::instrument]
     pub fn assert_allowed(
         &self,
-        user: &User,
+        user: &Option<User>,
         resource: &Resource,
         action: &Action,
     ) -> Result<(), ApplicationError> {
+        // If there is no user then the user is not authenticated.
+        let Some(user) = user else {
+            return Err(ApplicationError::NotAuthenticated);
+        };
+
+        // Determine if the user is authorized to access the resource.
         match (resource, action) {
             // Reading a `Project`.
             (Resource::Project(project), Action::Read) => {
@@ -43,7 +50,7 @@ impl SimpleAuthorizationService {
 impl AuthorizationService for SimpleAuthorizationService {
     fn assert_allowed(
         &self,
-        user: &User,
+        user: &Option<User>,
         resource: &Resource,
         action: &Action,
     ) -> Result<(), ApplicationError> {
@@ -76,7 +83,8 @@ mod authorization_service_tests {
                 let resource = Resource::Project(&project);
 
                 // Act
-                let res = authorization_service.assert_allowed(&user, &resource, &Action::Read);
+                let res =
+                    authorization_service.assert_allowed(&Some(user), &resource, &Action::Read);
 
                 // Assert
                 assert!(res.is_ok())
@@ -100,7 +108,8 @@ mod authorization_service_tests {
                 let resource = Resource::Project(&project);
 
                 // Act
-                let res = authorization_service.assert_allowed(&user, &resource, &Action::Read);
+                let res =
+                    authorization_service.assert_allowed(&Some(user), &resource, &Action::Read);
 
                 // Assert
                 assert!(res.is_ok())
@@ -117,7 +126,8 @@ mod authorization_service_tests {
                 let resource = Resource::Project(&project);
 
                 // Act
-                let res = authorization_service.assert_allowed(&user, &resource, &Action::Read);
+                let res =
+                    authorization_service.assert_allowed(&Some(user), &resource, &Action::Read);
 
                 // Assert
                 assert!(matches!(res, Err(ApplicationError::NotAuthorized { .. })))

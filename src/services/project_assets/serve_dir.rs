@@ -31,6 +31,7 @@ impl ServeDirProjectAssets {
         }
     }
 
+    #[tracing::instrument]
     pub async fn get_asset(
         &self,
         path: &str,

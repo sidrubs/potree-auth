@@ -5,6 +5,7 @@ use crate::{
     error::ApplicationError,
 };
 
+pub(crate) mod always_allowed;
 pub(crate) mod basic_authorization;
 
 /// Defines the functionality that needs to be implemented for the application
@@ -16,15 +17,17 @@ pub trait AuthorizationService: Debug + Send + Sync + 'static {
     ///
     /// # Errors
     ///
-    /// An [`ApplicationError::NotAuthorized`] is returned if the `user` is not
-    /// authorized.
+    /// - [`ApplicationError::NotAuthorized`] is returned if the `user` is not
+    ///   authorized.
+    /// - [`ApplicationError::NotAuthenticated`] is returned if the `user` is
+    ///   `None`.
     #[expect(
         clippy::needless_lifetimes,
         reason = "it seems mockall need the explicit lifetime declaration"
     )]
     fn assert_allowed<'a>(
         &self,
-        user: &User,
+        user: &Option<User>,
         resource: &Resource<'a>,
         action: &Action,
     ) -> Result<(), ApplicationError>;

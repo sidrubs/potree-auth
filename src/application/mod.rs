@@ -7,13 +7,15 @@ use routes::build_router;
 use crate::{
     config::ApplicationConfiguration,
     error::ApplicationError,
-    observability::init_tracing,
     services::{
         authentication::{
             AuthenticationService, oidc_authentication::OidcAuthenticationService,
             unimplemented_authentication::UnimplementedAuthenticationService,
         },
-        authorization::basic_authorization::SimpleAuthorizationService,
+        authorization::{
+            AuthorizationService, always_allowed::AlwaysAllowedAuthorizationService,
+            basic_authorization::SimpleAuthorizationService,
+        },
         potree_assets::embedded::EmbeddedPotreeAssetService,
         project::manifest_file::ManifestFileProjectService,
         project_assets::serve_dir::ServeDirProjectAssets,
@@ -32,29 +34,39 @@ pub async fn initialize_application(
     config: &ApplicationConfiguration,
 ) -> Result<Router, ApplicationError> {
     // Set up services.
-    let authorization_service = Arc::new(SimpleAuthorizationService);
     let project_service = Arc::new(ManifestFileProjectService::new(&config.projects_dir));
     let project_asset_service = Arc::new(ServeDirProjectAssets::new(&config.projects_dir));
     let potree_asset_service = Arc::new(EmbeddedPotreeAssetService);
 
-    // Determine which authentication service to initialize based on the configuration.
-    let authentication_service: Arc<dyn AuthenticationService> =
-        if let Some(idp_configuration) = config.idp.clone() {
-            // Use IdP authenticated routes
-            Arc::new(
-                OidcAuthenticationService::new(
-                    IssuerUrl::from_url(idp_configuration.idp_url),
-                    RedirectUrl::from_url(idp_configuration.redirect_url),
-                    ClientId::new(idp_configuration.client_id),
-                    ClientSecret::new(idp_configuration.client_secret),
-                    idp_configuration.groups_claim,
-                )
-                .await?,
+    // Determine which authentication and authorization service to initialize based on the
+    // configuration.
+    let (authentication_service, authorization_service): (
+        Arc<dyn AuthenticationService>,
+        Arc<dyn AuthorizationService>,
+    ) = if let Some(idp_configuration) = config.idp.clone() {
+        // Use IdP authenticated routes.
+        let authentication_service = Arc::new(
+            OidcAuthenticationService::new(
+                IssuerUrl::from_url(idp_configuration.idp_url),
+                RedirectUrl::from_url(idp_configuration.redirect_url),
+                ClientId::new(idp_configuration.client_id),
+                ClientSecret::new(idp_configuration.client_secret),
+                idp_configuration.groups_claim,
             )
-        } else {
-            // Don't use authentication
-            Arc::new(UnimplementedAuthenticationService)
-        };
+            .await?,
+        );
+
+        // Require authorization.
+        let authorization_service = Arc::new(SimpleAuthorizationService);
+
+        (authentication_service, authorization_service)
+    } else {
+        // Don't use authentication or authorization.
+        (
+            Arc::new(UnimplementedAuthenticationService),
+            Arc::new(AlwaysAllowedAuthorizationService),
+        )
+    };
 
     Ok(build_router(
         authorization_service,
@@ -69,7 +81,6 @@ pub async fn initialize_application(
 #[cfg(test)]
 mod router_integration_tests {
     use axum_test::TestServer;
-    use fake::{Fake, Faker};
     use http::{StatusCode, header};
 
     use crate::test_utils::{

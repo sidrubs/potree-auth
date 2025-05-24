@@ -5,23 +5,36 @@ use http::HeaderMap;
 use serde::Deserialize;
 
 use crate::{
-    application::extractors::project_assets::ProjectAssets, domain::StaticAsset,
+    application::extractors::{
+        authorization::Authorization, project::Projects, project_assets::ProjectAssets,
+        user::UserExtractor,
+    },
+    domain::{StaticAsset, value_objects::ProjectId},
     error::ApplicationError,
+    services::authorization::{Action, Resource},
 };
 
 #[derive(Deserialize)]
 pub(crate) struct Params {
-    project_id: String,
+    project_id: ProjectId,
     path: PathBuf,
 }
 
 /// Serves a static project asset.
 pub(crate) async fn project_asset(
+    Authorization(authorization_service): Authorization,
     Path(Params { project_id, path }): Path<Params>,
     headers: HeaderMap,
     ProjectAssets(project_assets): ProjectAssets,
+    Projects(project_service): Projects,
+    UserExtractor(user): UserExtractor,
 ) -> Result<StaticAsset, ApplicationError> {
-    let asset_path = PathBuf::new().join(project_id).join(path);
+    // Ensure that the `user` is allowed to read the project.
+    let project = project_service.read(&project_id).await?;
+    authorization_service.assert_allowed(&user, &Resource::Project(&project), &Action::Read)?;
+
+    // Built a path to the asset. It would be within the project dir.
+    let asset_path = PathBuf::new().join(project_id.as_str()).join(path);
 
     project_assets
         .get_asset(&asset_path.to_string_lossy(), Some(headers))

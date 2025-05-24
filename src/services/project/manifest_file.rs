@@ -44,6 +44,7 @@ impl ManifestFileProjectService {
         }
     }
 
+    #[tracing::instrument]
     async fn read(&self, project_id: &ProjectId) -> Result<Project, ApplicationError> {
         let project_manifest_path = self
             .projects_directory

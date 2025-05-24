@@ -81,6 +81,7 @@ impl OidcAuthenticationService {
     /// Returns the `auth_url` needed to redirect the user agent to the IdP's
     /// OIDC `/authorize` route. And the `persisted_data` that is needed to
     /// complete the authentication flow in the callback handler.
+    #[tracing::instrument]
     async fn login(&self) -> Result<AuthorizeData, ApplicationError> {
         let (auth_url, state, nonce) = self
             .oidc_client
@@ -100,6 +101,7 @@ impl OidcAuthenticationService {
     /// Finalizes the OIDC authentication flow with the IdP.
     ///
     /// Returns the authenticated [`User`].
+    #[tracing::instrument]
     async fn callback(
         &self,
         callback_params: CallbackRequestParams,

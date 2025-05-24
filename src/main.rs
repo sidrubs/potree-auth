@@ -1,4 +1,5 @@
-// Using `jemalloc` as opposed to the standard system allocator to reduce memory fragmentation.
+// Using `jemalloc` as opposed to the standard system allocator to reduce memory
+// fragmentation.
 #[cfg(not(target_env = "msvc"))]
 use tikv_jemallocator::Jemalloc;
 

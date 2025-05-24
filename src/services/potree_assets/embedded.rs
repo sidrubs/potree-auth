@@ -14,6 +14,7 @@ use super::PotreeAssetService;
 pub(crate) struct EmbeddedPotreeAssetService;
 
 impl EmbeddedPotreeAssetService {
+    #[tracing::instrument]
     fn get_asset(&self, path: &str) -> Result<StaticAsset, ApplicationError> {
         let embedded_asset = PotreeAssets::get(path).ok_or(ApplicationError::ResourceNotFound {
             resource_name: path.to_owned(),
