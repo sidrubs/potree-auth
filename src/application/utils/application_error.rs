@@ -11,7 +11,7 @@ impl IntoResponse for ApplicationError {
             ApplicationError::NotAuthorized { .. } => (StatusCode::FORBIDDEN, self.to_string()),
             ApplicationError::NotAuthenticated => (StatusCode::UNAUTHORIZED, self.to_string()),
             ApplicationError::ResourceNotFound { .. } => (StatusCode::NOT_FOUND, self.to_string()),
-            ApplicationError::ServerError(msg) => {
+            ApplicationError::ServerError(msg) | ApplicationError::Initialization(msg) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, msg.to_owned())
             }
             ApplicationError::StateExtraction => {

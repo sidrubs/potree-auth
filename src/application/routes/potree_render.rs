@@ -1,6 +1,6 @@
 use askama::Template;
 use axum::{
-    extract::Path,
+    extract::{Path, Request},
     response::{Html, IntoResponse, Redirect, Response},
 };
 use serde::Deserialize;
@@ -29,6 +29,7 @@ pub(crate) async fn potree_render(
     Path(Params { project_id }): Path<Params>,
     Projects(project_service): Projects,
     UserExtractor(user): UserExtractor,
+    request: Request,
 ) -> Result<Response, ApplicationError> {
     let project = project_service.read(&project_id).await?;
 
@@ -37,7 +38,8 @@ pub(crate) async fn potree_render(
 
     // If not authenticated, redirect the user to the login page.
     if matches!(&auth_decision, &Err(ApplicationError::NotAuthenticated)) {
-        return Ok(Redirect::to(&login_route()).into_response());
+        let login_route = format!("{}?next_path={}", login_route(), request.uri());
+        return Ok(Redirect::to(&login_route).into_response());
     }
 
     // Handle any other auth decisions.

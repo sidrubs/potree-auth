@@ -8,9 +8,11 @@ pub(crate) mod state;
 use std::{path::Path, sync::Arc};
 
 use axum::{Extension, Router, routing::get};
+use http::{HeaderValue, header};
 use path_slash::PathExt;
 use state::ApplicationState;
 use time::Duration;
+use tower_http::set_header::SetResponseHeaderLayer;
 
 use crate::services::{
     authentication::AuthenticationService, authorization::AuthorizationService,
@@ -89,6 +91,12 @@ pub fn build_router(
         potree_asset_service,
     };
 
+    // Middleware to add cache control in an attempt to stop CDNs from caching the data.
+    let add_cache_control = SetResponseHeaderLayer::overriding(
+        header::CACHE_CONTROL,
+        HeaderValue::from_static("no-store"),
+    );
+
     // Build the router.
     let router = Router::new()
         .route(HEALTH_CHECK, get(health_check::health_check))
@@ -96,7 +104,10 @@ pub fn build_router(
             &potree_static_assets_route(),
             get(potree_asset::potree_asset),
         )
-        .route(&project_asset(), get(project_asset::project_asset))
+        .route(
+            &project_asset(),
+            get(project_asset::project_asset).layer(add_cache_control),
+        )
         .route(&project_route(), get(potree_render::potree_render))
         .route(&login_route(), get(auth::login))
         .route(&callback_route(), get(auth::callback))

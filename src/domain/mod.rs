@@ -8,7 +8,6 @@ pub(crate) mod value_objects;
 use std::fmt;
 
 pub(crate) use group::Group;
-pub(crate) use project::Project;
 pub(crate) use static_asset::StaticAsset;
 pub(crate) use user::User;
 

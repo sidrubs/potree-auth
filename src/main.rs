@@ -1,3 +1,4 @@
+use dotenvy::dotenv;
 // Using `jemalloc` as opposed to the standard system allocator to reduce memory
 // fragmentation.
 #[cfg(not(target_env = "msvc"))]
@@ -12,6 +13,9 @@ use potree_auth::{cli::Cli, init_tracing, initialize_application};
 
 #[tokio::main]
 async fn main() {
+    // Load environment variables from a `.env` file if it exists.
+    let _ = dotenv();
+
     // Set up tracing subscribers
     init_tracing();
 

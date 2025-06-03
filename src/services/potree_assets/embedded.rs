@@ -21,7 +21,7 @@ impl EmbeddedPotreeAssetService {
             resource_type: ResourceType::StaticAsset,
         })?;
 
-        Ok(StaticAsset::from_rust_embed(embedded_asset, path)?)
+        StaticAsset::from_rust_embed(embedded_asset, path)
     }
 }
 

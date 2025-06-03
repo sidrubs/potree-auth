@@ -16,7 +16,7 @@ where
     type Rejection = ApplicationError;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let session = Session::from_request_parts(parts, state).await.map_err(|err| ApplicationError::ServerError("could not find tower sessions in request. ensure that tower sessions is in the middleware stack".to_owned()))?;
+        let session = Session::from_request_parts(parts, state).await.map_err(|_err| ApplicationError::ServerError("could not find tower sessions in request. ensure that tower sessions is in the middleware stack".to_owned()))?;
         let user = session.get::<User>(USER_SESSION_KEY).await.unwrap();
 
         Ok(Self(user))

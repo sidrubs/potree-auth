@@ -35,9 +35,12 @@ impl OidcAuthenticationService {
     ///
     /// # Arguments
     ///
-    /// - `idp_url`: The URL to the `IdP` service.
-    /// - `client_id`: The `id` of the `potree-auth` on the `IdP`.
-    /// - `client_secret`: The client secret registered with the `IdP`.
+    /// - `idp_url`: The URL to the IdP service.
+    /// - `redirect_url`: The URL to which the IdP should redirect the
+    ///   user-agent after successful authentication.
+    /// - `client_id`: The `id` of the application on the IdP.
+    /// - `client_secret`: The Authorization Code Flow client secret shared
+    ///   between the IdP and the application.
     /// - `groups_claim`: The name of the OIDC claim containing and array of
     ///   groups that a user is part of.
     pub async fn new(
@@ -56,7 +59,7 @@ impl OidcAuthenticationService {
                 ApplicationError::ServerError(format!("unable to build OIDC http client: {err}"))
             })?;
 
-        // Request the oidc config from the `IdP`.
+        // Request the oidc config from the IdP.
         let provider_metadata = CoreProviderMetadata::discover_async(idp_url, &http_client)
             .await
             .map_err(|err| {
@@ -161,7 +164,7 @@ impl OidcAuthenticationService {
 #[async_trait]
 impl AuthenticationService for OidcAuthenticationService {
     async fn authorize(&self) -> Result<AuthorizeData, ApplicationError> {
-        Self::authorize(&self).await
+        Self::login(self).await
     }
 
     async fn callback(
@@ -210,7 +213,7 @@ type PotreeAuthClient<
     HasUserInfoUrl,
 >;
 
-/// The claims from the `IdP` that are required to extract a [`User`].
+/// The claims from the IdP that are required to extract a [`User`].
 ///
 /// The custom claims are required because we don't know the id token claims
 /// that represent their associated groups at compile time (i.e. they are in the

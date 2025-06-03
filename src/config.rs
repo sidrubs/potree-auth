@@ -29,9 +29,21 @@ impl ApplicationConfiguration {
 #[derive(Debug, Clone)]
 #[cfg_attr(test, derive(fake::Dummy))]
 pub struct IdpConfiguration {
+    /// The URL to the IdP service.
     pub idp_url: Url,
-    pub redirect_url: Url,
+
+    /// The `id` of the `potree-auth` application on the IdP.
     pub client_id: String,
+
+    /// The Authorization Code Flow client secret shared between the IdP and the
+    /// application.
     pub client_secret: String,
+
+    /// The name of the OIDC claim containing and array of groups that a user is
+    /// part of.
     pub groups_claim: String,
+
+    /// The URL on which the application is publicly accessible (the OIDC
+    /// callback URL is calculated from this).
+    pub external_url: Url,
 }

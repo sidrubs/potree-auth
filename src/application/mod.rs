@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use axum::Router;
 use openidconnect::{ClientId, ClientSecret, IssuerUrl, RedirectUrl};
-use routes::build_router;
+use routes::{build_router, callback_route};
 
 use crate::{
     config::ApplicationConfiguration,
@@ -38,8 +38,8 @@ pub async fn initialize_application(
     let project_asset_service = Arc::new(ServeDirProjectAssets::new(&config.projects_dir));
     let potree_asset_service = Arc::new(EmbeddedPotreeAssetService);
 
-    // Determine which authentication and authorization service to initialize based on the
-    // configuration.
+    // Determine which authentication and authorization service to initialize based
+    // on the configuration.
     let (authentication_service, authorization_service): (
         Arc<dyn AuthenticationService>,
         Arc<dyn AuthorizationService>,
@@ -48,7 +48,16 @@ pub async fn initialize_application(
         let authentication_service = Arc::new(
             OidcAuthenticationService::new(
                 IssuerUrl::from_url(idp_configuration.idp_url),
-                RedirectUrl::from_url(idp_configuration.redirect_url),
+                RedirectUrl::from_url(
+                    idp_configuration
+                        .external_url
+                        .join(&callback_route())
+                        .map_err(|err| {
+                            ApplicationError::Initialization(format!(
+                                "unable to generate the OIDC callback URL: {err}"
+                            ))
+                        })?,
+                ),
                 ClientId::new(idp_configuration.client_id),
                 ClientSecret::new(idp_configuration.client_secret),
                 idp_configuration.groups_claim,
@@ -262,6 +271,27 @@ mod router_integration_tests {
 
             // Assert
             response.assert_status(StatusCode::NOT_FOUND);
+        }
+
+        #[tokio::test]
+        async fn should_contain_cache_control_response_header() {
+            // Arrange
+            let config = ApplicationConfiguration {
+                projects_dir: TEST_PROJECT_PARENT.parse().unwrap(),
+                ..ApplicationConfiguration::dummy_with_no_idp()
+            };
+            let test_server =
+                TestServer::new(initialize_application(&config).await.unwrap()).unwrap();
+
+            // Act
+            let response = test_server
+                .get(&format!(
+                    "{TEST_PROJECT}/{TEST_PROJECT_1_DIR}/assets/{TEST_PROJECT_1_DATA_PATH}"
+                ))
+                .await;
+
+            // Assert
+            assert!(response.headers().contains_key(header::CACHE_CONTROL));
         }
     }
 

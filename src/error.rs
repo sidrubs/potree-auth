@@ -41,4 +41,8 @@ pub enum ApplicationError {
     /// Error in the OIDC flow.
     #[error("{0}")]
     Oidc(String),
+
+    /// An error experienced during application initialization.
+    #[error("{0}")]
+    Initialization(String),
 }
