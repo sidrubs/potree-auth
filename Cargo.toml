@@ -24,9 +24,7 @@ mime = "0.3.17"
 mime_guess = "2.0.5"
 openidconnect = "4.0.0"
 path-slash = "0.2.1"
-potree_embed = { git = "https://github.com/cracky-scans/potree.git", rev = "154c1a8b9fa63e284cf2c16e0c88403974dc4c38", features = [
-    "compression",
-] }
+potree-embed = "0.1.0-alpha.2"
 reqwest = { version = "0.12.19", default-features = false, features = [
     "rustls-tls",
 ] }
@@ -42,6 +40,7 @@ tower-sessions = "0.14.0"
 tracing = "0.1.41"
 tracing-subscriber = "0.3.19"
 url = "2.5.4"
+
 
 [dev-dependencies]
 axum-test = "17.3.0"

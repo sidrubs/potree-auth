@@ -35,7 +35,7 @@ pub struct IdpConfiguration {
     #[arg(long, required = false, env = "IDP_URL")]
     pub idp_url: Url,
 
-    /// The URL of the application on the IdP.
+    /// The id of the application on the IdP.
     #[arg(long, required = false, env = "CLIENT_ID")]
     pub client_id: String,
 
@@ -44,7 +44,7 @@ pub struct IdpConfiguration {
     #[arg(long, required = false, env = "CLIENT_SECRET")]
     pub client_secret: String,
 
-    /// The claim in the Id Token that will contain an array of the groups that
+    /// The claim in the OIDC Id Token that will contain an array of the groups that
     /// the authenticated user is member of.
     #[arg(long, required = false, env = "GROUPS_CLAIM")]
     pub groups_claim: String,

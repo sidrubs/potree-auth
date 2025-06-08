@@ -32,3 +32,13 @@ alias lint := clippy
 [group('development')]
 fmt:
     cargo +nightly fmt
+
+# Builds the current codebase into a docker image `potree-auth:latest`
+[group('deployment')]
+docker-build:
+    ./scripts/build_docker.sh
+
+# Runs the `potree-auth:latest` image
+[group('deployment')]
+docker-run:
+    ./scripts/run_docker.sh
