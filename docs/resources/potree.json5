@@ -1,0 +1,80 @@
+{
+	type: 'Potree',
+	version: 1.7,
+	settings: {
+		pointBudget: 1000000,
+		fov: 60,
+		edlEnabled: true,
+		edlRadius: 1.4,
+		edlStrength: 0.4,
+		background: 'gradient',
+		minNodeSize: 30,
+		showBoundingBoxes: false,
+	},
+	view: {
+		position: [
+			0,
+			0,
+			0,
+		],
+		target: [
+			0,
+			0,
+			0,
+		],
+	},
+	classification: {
+	},
+	pointclouds: [
+		{
+			name: 'Lion',
+			url: '<project_id>/assets/<project-relative-path>/cloud.js',
+			position: [
+				0,
+				0,
+				0,
+			],
+			rotation: [
+				0,
+				0,
+				0,
+				'XYZ',
+			],
+			scale: [
+				1,
+				1,
+				1,
+			],
+			material: {
+				activeAttributeName: 'rgba',
+				ranges: [
+					{
+						name: 'elevationRange',
+						value: [
+							2.547821283340454,
+							7.195710657650866,
+						],
+					},
+					{
+						name: 'intensityRange',
+						value: [
+							0,
+							0,
+						],
+					},
+				],
+				size: 0.6,
+				minSize: 2,
+				pointSizeType: 'ADAPTIVE',
+				matcap: 'matcap.jpg',
+			},
+		},
+	],
+	measurements: [],
+	volumes: [],
+	cameraAnimations: [],
+	profiles: [],
+	annotations: [],
+	orientedImages: [],
+	geopackages: [],
+}
