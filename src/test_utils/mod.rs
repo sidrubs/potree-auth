@@ -11,6 +11,3 @@ pub const TEST_PROJECT_2_DATA_PATH: &str = "data/other_data.csv";
 pub static TEST_PROJECT_1_DATA_CONTENT: &str =
     include_str!("project_dir/project_1/data/some_data.txt");
 pub static TEST_PROJECT_1_DATA_TYPE: mime::Mime = mime::TEXT_PLAIN;
-pub static TEST_PROJECT_2_DATA_CONTENT: &str =
-    include_str!("project_dir/project_2/data/other_data.csv");
-pub static TEST_PROJECT_2_DATA_TYPE: mime::Mime = mime::TEXT_CSV;

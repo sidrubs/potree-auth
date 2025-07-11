@@ -1,1 +1,6 @@
 /target
+
+.env
+
+# Directory containing development data
+/project-data
