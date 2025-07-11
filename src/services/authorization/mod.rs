@@ -21,7 +21,7 @@ pub trait AuthorizationService: Debug + Send + Sync + 'static {
     ///   authorized.
     /// - [`ApplicationError::NotAuthenticated`] is returned if the `user` is
     ///   `None`.
-    #[expect(
+    #[allow(
         clippy::needless_lifetimes,
         reason = "it seems mockall need the explicit lifetime declaration"
     )]

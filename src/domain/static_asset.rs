@@ -40,7 +40,10 @@ impl StaticAsset {
 
         Ok(Self(response))
     }
+}
 
+#[cfg(test)]
+impl StaticAsset {
     /// Return the data bytes associated with the asset.
     pub fn data(&self) -> Vec<u8> {
         self.0.body().to_vec()

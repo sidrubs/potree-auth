@@ -1,4 +1,5 @@
 use askama::Template;
+use web_route::WebRoute;
 
 use crate::domain::value_objects::ProjectName;
 
@@ -17,5 +18,5 @@ pub struct PotreeRender {
     pub potree_static_assets_path: String,
 
     /// The path to the `potree` project config file.
-    pub potree_config_path: String,
+    pub potree_config_path: WebRoute,
 }

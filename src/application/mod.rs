@@ -2,9 +2,10 @@ use std::sync::Arc;
 
 use axum::Router;
 use openidconnect::{ClientId, ClientSecret, IssuerUrl, RedirectUrl};
-use routes::{build_router, callback_route};
+use routes::build_router;
 
 use crate::{
+    application::routes::AUTH_CALLBACK,
     config::ApplicationConfiguration,
     error::ApplicationError,
     services::{
@@ -51,7 +52,7 @@ pub async fn initialize_application(
                 RedirectUrl::from_url(
                     idp_configuration
                         .external_url
-                        .join(&callback_route())
+                        .join(&AUTH_CALLBACK)
                         .map_err(|err| {
                             ApplicationError::Initialization(format!(
                                 "unable to generate the OIDC callback URL: {err}"
@@ -89,8 +90,11 @@ pub async fn initialize_application(
 /// End-to-end tests for the application stack.
 #[cfg(test)]
 mod router_integration_tests {
+    use std::sync::LazyLock;
+
     use axum_test::TestServer;
     use http::{StatusCode, header};
+    use web_route::ParameterizedRoute;
 
     use crate::test_utils::{
         TEST_PROJECT_1_DATA_CONTENT, TEST_PROJECT_1_DATA_PATH, TEST_PROJECT_1_DATA_TYPE,
@@ -99,9 +103,20 @@ mod router_integration_tests {
 
     use super::*;
 
-    const TEST_HEALTH_CHECK: &str = "/_health";
-    const TEST_POTREE_STATIC_ASSETS: &str = "/static/potree";
-    const TEST_PROJECT: &str = "/project";
+    pub(crate) static TEST_HEALTH_CHECK: LazyLock<ParameterizedRoute> =
+        LazyLock::new(|| ParameterizedRoute::new("/_health"));
+
+    pub(crate) static TEST_STATIC_POTREE: LazyLock<ParameterizedRoute> =
+        LazyLock::new(|| ParameterizedRoute::new("/static/potree"));
+    pub(crate) static TEST_STATIC_POTREE_ASSET_ROUTE: LazyLock<ParameterizedRoute> =
+        LazyLock::new(|| TEST_STATIC_POTREE.join("{*asset_path}"));
+
+    pub(crate) static TEST_PROJECT_ROOT: LazyLock<ParameterizedRoute> =
+        LazyLock::new(|| ParameterizedRoute::new("/project"));
+    pub(crate) static TEST_PROJECT_ROUTE: LazyLock<ParameterizedRoute> =
+        LazyLock::new(|| TEST_PROJECT_ROOT.join("/{project_id}"));
+    pub(crate) static TEST_PROJECT_ASSET: LazyLock<ParameterizedRoute> =
+        LazyLock::new(|| TEST_PROJECT_ROUTE.join("/assets/{*path}"));
 
     mod health_check {
 
@@ -118,7 +133,7 @@ mod router_integration_tests {
             .unwrap();
 
             // Act
-            let response = test_server.get(TEST_HEALTH_CHECK).await;
+            let response = test_server.get(&TEST_HEALTH_CHECK).await;
 
             // Assert
             response.assert_status(StatusCode::OK);
@@ -138,11 +153,16 @@ mod router_integration_tests {
                     .unwrap(),
             )
             .unwrap();
+
             // Act
             let response = test_server
-                .get(&format!(
-                    "{TEST_POTREE_STATIC_ASSETS}/build/potree/potree.js"
-                ))
+                .get(
+                    &TEST_STATIC_POTREE_ASSET_ROUTE
+                        .to_web_route(&serde_json::json!({
+                            "asset_path": "build/potree/potree.js",
+                        }))
+                        .unwrap(),
+                )
                 .await;
 
             // Assert
@@ -160,9 +180,16 @@ mod router_integration_tests {
                     .unwrap(),
             )
             .unwrap();
+
             // Act
             let response = test_server
-                .get(&format!("{TEST_POTREE_STATIC_ASSETS}/{non_existent_path}"))
+                .get(
+                    &TEST_STATIC_POTREE_ASSET_ROUTE
+                        .to_web_route(&serde_json::json!({
+                            "asset_path": non_existent_path,
+                        }))
+                        .unwrap(),
+                )
                 .await;
 
             // Assert
@@ -175,6 +202,12 @@ mod router_integration_tests {
     }
 
     mod project_static_assets {
+        use std::ops::Deref;
+
+        use web_route::WebRoute;
+
+        use crate::{application::routes::ProjectAssetParams, domain::value_objects::ProjectId};
+
         use super::*;
 
         #[tokio::test]
@@ -189,9 +222,14 @@ mod router_integration_tests {
 
             // Act
             let response = test_server
-                .get(&format!(
-                    "{TEST_PROJECT}/{TEST_PROJECT_1_DIR}/assets/{TEST_PROJECT_1_DATA_PATH}"
-                ))
+                .get(
+                    &TEST_PROJECT_ASSET
+                        .to_web_route(&ProjectAssetParams {
+                            project_id: ProjectId::new(TEST_PROJECT_1_DIR.to_owned()),
+                            path: WebRoute::new(TEST_PROJECT_1_DATA_PATH),
+                        })
+                        .unwrap(),
+                )
                 .await;
 
             // Assert
@@ -212,9 +250,14 @@ mod router_integration_tests {
 
             // Act
             let response = test_server
-                .get(&format!(
-                    "{TEST_PROJECT}/{TEST_PROJECT_1_DIR}/assets/{TEST_PROJECT_1_DATA_PATH}"
-                ))
+                .get(
+                    &TEST_PROJECT_ASSET
+                        .to_web_route(&ProjectAssetParams {
+                            project_id: ProjectId::new(TEST_PROJECT_1_DIR.to_owned()),
+                            path: WebRoute::new(TEST_PROJECT_1_DATA_PATH),
+                        })
+                        .unwrap(),
+                )
                 .add_header(header::RANGE, "bytes=2-6")
                 .await;
 
@@ -228,7 +271,7 @@ mod router_integration_tests {
         #[tokio::test]
         async fn should_return_a_404_if_not_found() {
             // Arrange
-            let non_existent_path = "build/non/existent.txt";
+            let non_existent_path = WebRoute::new("build/non/existent.txt");
 
             let config = ApplicationConfiguration {
                 projects_dir: TEST_PROJECT_PARENT.parse().unwrap(),
@@ -239,16 +282,25 @@ mod router_integration_tests {
 
             // Act
             let response = test_server
-                .get(&format!(
-                    "{TEST_PROJECT}/{TEST_PROJECT_1_DIR}/assets/{non_existent_path}"
-                ))
+                .get(
+                    &TEST_PROJECT_ASSET
+                        .to_web_route(&ProjectAssetParams {
+                            project_id: ProjectId::new(TEST_PROJECT_1_DIR.to_owned()),
+                            path: non_existent_path.clone(),
+                        })
+                        .unwrap(),
+                )
                 .await;
 
             // Assert
             response.assert_status(StatusCode::NOT_FOUND);
             assert_eq!(
                 response.text(),
-                format!("unable to find project asset: {TEST_PROJECT_1_DIR}/{non_existent_path}")
+                format!(
+                    "unable to find project asset: {}{}",
+                    TEST_PROJECT_1_DIR,
+                    non_existent_path.deref()
+                )
             );
         }
 
@@ -265,8 +317,7 @@ mod router_integration_tests {
             // Act
             let response = test_server
                 .get(&format!(
-                    "{TEST_PROJECT}/{TEST_PROJECT_1_DIR}/assets/../{TEST_PROJECT_2_DIR}/{TEST_PROJECT_2_DATA_PATH}"
-                ))
+                    "{}/{TEST_PROJECT_1_DIR}/assets/../{TEST_PROJECT_2_DIR}/{TEST_PROJECT_2_DATA_PATH}", TEST_PROJECT_ROOT.deref()))
                 .await;
 
             // Assert
@@ -285,9 +336,14 @@ mod router_integration_tests {
 
             // Act
             let response = test_server
-                .get(&format!(
-                    "{TEST_PROJECT}/{TEST_PROJECT_1_DIR}/assets/{TEST_PROJECT_1_DATA_PATH}"
-                ))
+                .get(
+                    &TEST_PROJECT_ASSET
+                        .to_web_route(&ProjectAssetParams {
+                            project_id: ProjectId::new(TEST_PROJECT_1_DIR.to_owned()),
+                            path: WebRoute::new(TEST_PROJECT_1_DATA_PATH),
+                        })
+                        .unwrap(),
+                )
                 .await;
 
             // Assert
@@ -310,7 +366,11 @@ mod router_integration_tests {
 
             // Act
             let response = test_server
-                .get(&format!("{TEST_PROJECT}/{TEST_PROJECT_1_DIR}"))
+                .get(
+                    &TEST_PROJECT_ROUTE
+                        .to_web_route(&serde_json::json!({"project_id": TEST_PROJECT_1_DIR}))
+                        .unwrap(),
+                )
                 .await;
 
             // Assert

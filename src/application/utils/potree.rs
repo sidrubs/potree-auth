@@ -1,17 +1,18 @@
-use std::path::PathBuf;
+use web_route::WebRoute;
 
 use crate::{
-    application::routes::{PROJECT_ASSETS, PROJECT_ROOT},
+    application::routes::{PROJECT_ASSET, ProjectAssetParams},
     domain::value_objects::ProjectId,
 };
 
 /// Path to the `potree` config file for a specific project.
-pub fn potree_config_path(project_id: &ProjectId) -> PathBuf {
-    PathBuf::new()
-        .join(PROJECT_ROOT)
-        .join(project_id.as_str())
-        .join(PROJECT_ASSETS)
-        .join("potree.json5")
+pub fn potree_config_path(project_id: &ProjectId) -> WebRoute {
+    let params = ProjectAssetParams {
+        project_id: project_id.clone(),
+        path: WebRoute::new("potree.json5"),
+    };
+
+    PROJECT_ASSET.to_web_route(&params).unwrap()
 }
 
 #[cfg(test)]
@@ -26,7 +27,7 @@ mod potree_config_path {
         // Assert
         assert_eq!(
             config_path,
-            PathBuf::from("/project/test_project/assets/potree.json5")
+            WebRoute::new("/project/test_project/assets/potree.json5")
         );
     }
 }

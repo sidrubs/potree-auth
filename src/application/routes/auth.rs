@@ -1,6 +1,7 @@
 use axum::{extract::Query, response::Redirect};
 use serde::{Deserialize, Serialize};
 use tower_sessions::Session;
+use web_route::WebRoute;
 
 use crate::{
     application::{extractors::authentication::Authentication, utils::auth::USER_SESSION_KEY},
@@ -15,14 +16,14 @@ pub const LOGIN_SESSION_KEY: &str = "login_session";
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct LoginSessionData {
     oidc_persisted_data: OidcSessionPersisted,
-    next_path: String,
+    next_path: WebRoute,
 }
 
 #[derive(Deserialize)]
 pub(crate) struct LoginParams {
     /// The path to which the user should be redirected after
     /// logging in.
-    next_path: String,
+    next_path: WebRoute,
 }
 
 /// Initiates an OIDC login flow with the configured IdP.

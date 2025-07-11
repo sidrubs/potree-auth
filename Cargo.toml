@@ -16,16 +16,15 @@ askama = "0.14.0"
 async-trait = "0.1.88"
 axum = "0.8.4"
 bytes = "1.10.1"
-clap = { version = "4.5.39", features = ["derive", "env"] }
+clap = { version = "4.5.41", features = ["derive", "env"] }
 dotenvy = "0.15.7"
 http = "1.3.1"
 http-body-util = "0.1.3"
 mime = "0.3.17"
 mime_guess = "2.0.5"
-openidconnect = "4.0.0"
-path-slash = "0.2.1"
+openidconnect = "4.0.1"
 potree-embed = "0.1.0-alpha.2"
-reqwest = { version = "0.12.19", default-features = false, features = [
+reqwest = { version = "0.12.22", default-features = false, features = [
     "rustls-tls",
 ] }
 rust-embed = "8.7.2"
@@ -33,13 +32,14 @@ serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 thiserror = "2.0.12"
 time = "0.3.41"
-tokio = { version = "1.45.1", features = ["fs", "macros", "rt-multi-thread"] }
+tokio = { version = "1.46.1", features = ["fs", "macros", "rt-multi-thread"] }
 tower = "0.5.2"
 tower-http = { version = "0.6.4", features = ["fs", "trace", "set-header"] }
 tower-sessions = "0.14.0"
 tracing = "0.1.41"
 tracing-subscriber = "0.3.19"
 url = "2.5.4"
+web-route = "0.2.2"
 
 
 [dev-dependencies]

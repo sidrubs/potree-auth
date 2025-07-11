@@ -8,6 +8,7 @@ use serde::Deserialize;
 use crate::{
     application::{
         extractors::{authorization::Authorization, project::Projects, user::UserExtractor},
+        routes::AUTH_LOGIN,
         utils::potree::potree_config_path,
         views::potree_render::PotreeRender,
     },
@@ -16,7 +17,7 @@ use crate::{
     services::authorization::{Action, Resource},
 };
 
-use super::{STATIC_POTREE, login_route};
+use super::STATIC_POTREE;
 
 #[derive(Deserialize)]
 pub(crate) struct Params {
@@ -38,7 +39,7 @@ pub(crate) async fn potree_render(
 
     // If not authenticated, redirect the user to the login page.
     if matches!(&auth_decision, &Err(ApplicationError::NotAuthenticated)) {
-        let login_route = format!("{}?next_path={}", login_route(), request.uri());
+        let login_route = format!("{}?next_path={}", *AUTH_LOGIN, request.uri());
         return Ok(Redirect::to(&login_route).into_response());
     }
 
@@ -48,10 +49,8 @@ pub(crate) async fn potree_render(
     Ok(Html(
         PotreeRender {
             project_title: project.name,
-            potree_config_path: potree_config_path(&project.id)
-                .to_string_lossy()
-                .to_string(),
-            potree_static_assets_path: STATIC_POTREE.to_owned(),
+            potree_config_path: potree_config_path(&project.id),
+            potree_static_assets_path: STATIC_POTREE.to_string(),
         }
         .render()?,
     )

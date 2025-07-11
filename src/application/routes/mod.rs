@@ -5,74 +5,50 @@ mod potree_render;
 mod project_asset;
 pub(crate) mod state;
 
-use std::{path::Path, sync::Arc};
+use std::sync::{Arc, LazyLock};
 
 use axum::{Extension, Router, routing::get};
 use http::{HeaderValue, header};
-use path_slash::PathExt;
 use state::ApplicationState;
 use time::Duration;
 use tower_http::set_header::SetResponseHeaderLayer;
+use web_route::{ParameterizedRoute, WebRoute};
 
-use crate::services::{
-    authentication::AuthenticationService, authorization::AuthorizationService,
-    potree_assets::PotreeAssetService, project::ProjectService,
-    project_assets::ProjectAssetService,
+use crate::{
+    domain::value_objects::ProjectId,
+    services::{
+        authentication::AuthenticationService, authorization::AuthorizationService,
+        potree_assets::PotreeAssetService, project::ProjectService,
+        project_assets::ProjectAssetService,
+    },
 };
 
 use super::middleware::{session::apply_session_layer, tracing::apply_tracing_middleware};
 
-pub(crate) const HEALTH_CHECK: &str = "/_health";
+pub(crate) static HEALTH_CHECK: LazyLock<ParameterizedRoute> =
+    LazyLock::new(|| ParameterizedRoute::new("/_health"));
 
-pub(crate) const STATIC_POTREE: &str = "/static/potree";
+pub(crate) static STATIC_POTREE: LazyLock<ParameterizedRoute> =
+    LazyLock::new(|| ParameterizedRoute::new("/static/potree"));
+pub(crate) static STATIC_POTREE_ASSET_ROUTE: LazyLock<ParameterizedRoute> =
+    LazyLock::new(|| STATIC_POTREE.join("{*asset_path}"));
 
-pub(crate) const PROJECT_ROOT: &str = "/project";
-pub(crate) const PROJECT_ASSETS: &str = "assets";
+pub(crate) static PROJECT_ROOT: LazyLock<ParameterizedRoute> =
+    LazyLock::new(|| ParameterizedRoute::new("/project"));
+pub(crate) static PROJECT_ROUTE: LazyLock<ParameterizedRoute> =
+    LazyLock::new(|| PROJECT_ROOT.join("/{project_id}"));
+pub(crate) static PROJECT_ASSET: LazyLock<ParameterizedRoute> =
+    LazyLock::new(|| PROJECT_ROUTE.join("/assets/{*path}"));
 
-pub(crate) const AUTH_ROOT: &str = "/auth";
-pub(crate) const AUTH_LOGIN: &str = "login";
-pub(crate) const AUTH_CALLBACK: &str = "callback";
-
-/// Axum route to reference a static `potree` asset.
-pub(crate) fn potree_static_assets_route() -> String {
-    Path::new(STATIC_POTREE)
-        .join("{*asset_path}")
-        .to_slash_lossy()
-        .to_string()
+#[derive(Debug, Clone, serde::Serialize)]
+pub(crate) struct ProjectAssetParams {
+    pub(crate) project_id: ProjectId,
+    pub(crate) path: WebRoute,
 }
 
-/// Axum route to reference a specific project.
-pub(crate) fn project_route() -> String {
-    Path::new(PROJECT_ROOT)
-        .join("{project_id}")
-        .to_slash_lossy()
-        .to_string()
-}
-
-/// Axum route to reference a specific project asset.
-pub(crate) fn project_asset() -> String {
-    Path::new(&project_route())
-        .join(PROJECT_ASSETS)
-        .join("{*path}")
-        .to_slash_lossy()
-        .to_string()
-}
-
-/// Route to initialize an OIDC login of the application.
-pub(crate) fn login_route() -> String {
-    Path::new(AUTH_ROOT)
-        .join(AUTH_LOGIN)
-        .to_slash_lossy()
-        .to_string()
-}
-
-/// Route to finalize an OIDC login of the application.
-pub(crate) fn callback_route() -> String {
-    Path::new(AUTH_ROOT)
-        .join(AUTH_CALLBACK)
-        .to_slash_lossy()
-        .to_string()
-}
+pub(crate) static AUTH_ROOT: LazyLock<WebRoute> = LazyLock::new(|| WebRoute::new("/auth"));
+pub(crate) static AUTH_LOGIN: LazyLock<WebRoute> = LazyLock::new(|| AUTH_ROOT.join("/login"));
+pub(crate) static AUTH_CALLBACK: LazyLock<WebRoute> = LazyLock::new(|| AUTH_ROOT.join("/callback"));
 
 /// Initializes the application router, its state, and all of its routes.
 pub fn build_router(
@@ -99,23 +75,18 @@ pub fn build_router(
 
     // Build the router.
     let router = Router::new()
-        .route(HEALTH_CHECK, get(health_check::health_check))
+        .route(&HEALTH_CHECK, get(health_check::health_check))
+        .route(&STATIC_POTREE_ASSET_ROUTE, get(potree_asset::potree_asset))
         .route(
-            &potree_static_assets_route(),
-            get(potree_asset::potree_asset),
-        )
-        .route(
-            &project_asset(),
+            &PROJECT_ASSET,
             get(project_asset::project_asset).layer(add_cache_control),
         )
-        .route(&project_route(), get(potree_render::potree_render))
-        .route(&login_route(), get(auth::login))
-        .route(&callback_route(), get(auth::callback))
+        .route(&PROJECT_ROUTE, get(potree_render::potree_render))
+        .route(&AUTH_LOGIN, get(auth::login))
+        .route(&AUTH_CALLBACK, get(auth::callback))
         .layer(Extension(state));
 
     // Apply middleware
     let router = apply_session_layer(router, Duration::days(1));
-    let router = apply_tracing_middleware(router);
-
-    router
+    apply_tracing_middleware(router)
 }
