@@ -11,9 +11,9 @@ The core components of the application are:
 
 ### Project
 
-Groups data and manages access to it. Project metadata is defined in the [manifest file](./docs/resources/manifest.yml).
+Groups data and manages access to it. Project metadata is defined in a [manifest file](./docs/resources/manifest.yml).
 
-A project is created by placing a YAML-formatted `manifest.yml` (note: use `.yml`, not `.yaml`) in a subdirectory of the _project data_ directory (as specified in the application config).
+A project is created by placing a YAML-formatted `manifest.yml` (note: use `.yml`, not `.yaml`) in a subdirectory of the _data directory_ (as specified in the [application config](#configuration)).
 
 The subdirectory (_project directory_) name serves as the `project_id` and should be URL-safe — `kebab-case` is recommended.
 
@@ -34,13 +34,13 @@ Served at `/potree-assets/{*path}`.
 
 ### Potree Rendering Template
 
-A pre-configured Potree HTML template ([example](./templates/potree_render.html)) is available. It loads settings from a [`potree.json5`](./docs/resources/potree.json5) file in the root of the project's directory (`project_id`).
+A pre-configured Potree HTML template ([example](./templates/potree_render.html)) is available. It loads settings from a [`potree.json5`](./docs/resources/potree.json5) file in the root of the _project directory_ (`project_id`).
 
 Access requires the user to belong to at least one of the [project](#project) groups.
 
 Served at `/potree/{project_id}`.
 
-> To use custom Potree HTML, create it in an `index.html` file and add it to the project's directory. Access it via `/project-assets/{project_id}/index.html`.
+> To use custom Potree HTML, create it in an `index.html` file and add it to the _project directory_. Access it via `/project-assets/{project_id}/index.html`.
 
 
 ## Installation
@@ -73,48 +73,47 @@ You can also build a Docker container by running the following from the root of 
 make docker-build
 ```
 
-
-
 ## Usage
+
+### Data Directory
+
+A directory containing all the [_project directories_](#project) should be set up. An example directory structure is shown below.
+
+```
+.
+└── data-dir/
+    ├── project-1/
+    │   ├── manifest.yml
+    │   ├── potree.json5
+    │   └── point-cloud/
+    │       ├── file-one.bin
+    │       └── file-two.bin
+    └── project-2/
+        ├── manifest.yml
+        ├── potree.json5
+        └── point-cloud/
+            ├── file-one.bin
+            └── file-two.bin
+```
 
 ### Configuration
 
-Various options are available either by command line arguments or as environment variables (or a mixture of the two).
+Configuration options can be set via command-line arguments, environment variables, or a mixture of both.
 
-The command line arguments are most accessible if running the application from the binary. The various options can be viewed by running the following.
+Command-line arguments are most convenient when running the application from the binary. To view available options, run:
 
 ```bash
 potree-auth --help
 ```
+Each CLI argument has a corresponding environment variable, shown in angle brackets (`<>`). If the environment variable is set, it overrides the need to specify the CLI argument.
 
-To the right of the CLI argument, the name in angle brackets (`<>`) indicates the environment variable representing the argument. If the environment variable is set, this will be used without having to specify it in the CLI arguments.
+`potree-auth` also supports a `.env` file in the current working directory. An example is available [here](example.env).
 
-`potree-auth` will also respect a `.env` file in the directory from which the application is called. An example `.env` file is available [here](example.env).
+For authentication-specific settings, see the [Authentication section](#authentication).
 
-### Docker
+### Authentication
 
-A Docker Compose file is provided ([here](./docker-compose.yml)) to provide the necessary arguments to run the container. This can be run with the following. It will also respect a `.env` file.
+Authentication is handled via the OIDC Authorization Code flow, supported by most modern Identity Providers (IdPs). Relevant configuration parameters are prefixed with `idp_`. If these values are not set, authentication is disabled and all users are granted access to all projects.
 
-```bash
-make docker-run
-```
+> **Note:** Users in the `admin` group have full access to all projects, even if `admin` is not explicitly listed in the project metadata.
 
-## Adding Projects
-
-### Project Configuration
-
-#### Project Directory
-
-Contains all the data for a project.
-
-#### Manifest File
-
-#### Potree Config
-
-When a project is loaded the application will look for a `potree.json5` file ([example](./docs/resources/potree.json5)) in the root of the [project directory](#project-directory). It configures which data potree should load and how to display it.
-
-### Project Data
-
-### Recommended Project Structure.
-
-### Viewing a Project

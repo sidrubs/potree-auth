@@ -36,8 +36,8 @@ pub async fn initialize_application(
     config: &ApplicationConfiguration,
 ) -> Result<IntoMakeService<NormalizePath<Router>>, ApplicationError> {
     // Set up services.
-    let project_service = Arc::new(ManifestFileProjectService::new(&config.projects_dir));
-    let project_asset_service = Arc::new(ServeDirProjectAssets::new(&config.projects_dir));
+    let project_service = Arc::new(ManifestFileProjectService::new(&config.data_dir));
+    let project_asset_service = Arc::new(ServeDirProjectAssets::new(&config.data_dir));
     let potree_asset_service = Arc::new(EmbeddedPotreeAssetService);
 
     // Determine which authentication and authorization service to initialize based
@@ -206,7 +206,7 @@ mod router_integration_tests {
         async fn should_return_the_asset_correctly_if_found() {
             // Arrange
             let config = ApplicationConfiguration {
-                projects_dir: TEST_PROJECT_PARENT.parse().unwrap(),
+                data_dir: TEST_PROJECT_PARENT.parse().unwrap(),
                 ..ApplicationConfiguration::dummy_with_no_idp()
             };
             let test_server =
@@ -234,7 +234,7 @@ mod router_integration_tests {
         async fn should_return_an_asset_range_correctly() {
             // Arrange
             let config = ApplicationConfiguration {
-                projects_dir: TEST_PROJECT_PARENT.parse().unwrap(),
+                data_dir: TEST_PROJECT_PARENT.parse().unwrap(),
                 ..ApplicationConfiguration::dummy_with_no_idp()
             };
             let test_server =
@@ -266,7 +266,7 @@ mod router_integration_tests {
             let non_existent_path = WebRoute::new("build/non/existent.txt");
 
             let config = ApplicationConfiguration {
-                projects_dir: TEST_PROJECT_PARENT.parse().unwrap(),
+                data_dir: TEST_PROJECT_PARENT.parse().unwrap(),
                 ..ApplicationConfiguration::dummy_with_no_idp()
             };
             let test_server =
@@ -301,7 +301,7 @@ mod router_integration_tests {
         async fn should_return_a_404_if_parent_directory_reference_in_path() {
             // Arrange
             let config = ApplicationConfiguration {
-                projects_dir: TEST_PROJECT_PARENT.parse().unwrap(),
+                data_dir: TEST_PROJECT_PARENT.parse().unwrap(),
                 ..ApplicationConfiguration::dummy_with_no_idp()
             };
             let test_server =
@@ -321,7 +321,7 @@ mod router_integration_tests {
         async fn should_contain_cache_control_response_header() {
             // Arrange
             let config = ApplicationConfiguration {
-                projects_dir: TEST_PROJECT_PARENT.parse().unwrap(),
+                data_dir: TEST_PROJECT_PARENT.parse().unwrap(),
                 ..ApplicationConfiguration::dummy_with_no_idp()
             };
             let test_server =
@@ -353,7 +353,7 @@ mod router_integration_tests {
         async fn should_return_the_correct_html() {
             // Arrange
             let config = ApplicationConfiguration {
-                projects_dir: TEST_PROJECT_PARENT.parse().unwrap(),
+                data_dir: TEST_PROJECT_PARENT.parse().unwrap(),
                 ..ApplicationConfiguration::dummy_with_no_idp()
             };
             let test_server =
