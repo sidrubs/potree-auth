@@ -29,7 +29,6 @@ pub(crate) async fn project_asset(
     Projects(project_service): Projects,
     UserExtractor(user): UserExtractor,
 ) -> Result<StaticAsset, ApplicationError> {
-    dbg!(&project_id);
     // Ensure that the `user` is allowed to read the project.
     let project = project_service.read(&project_id).await?;
     authorization_service.assert_allowed(&user, &Resource::Project(&project), &Action::Read)?;

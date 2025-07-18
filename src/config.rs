@@ -6,8 +6,8 @@ use url::Url;
 #[derive(Debug, Clone)]
 #[cfg_attr(test, derive(fake::Dummy))]
 pub struct ApplicationConfiguration {
-    /// The parent directory to all the `potree` projects being served.
-    pub projects_dir: PathBuf,
+    /// The parent directory to all the projects being served.
+    pub data_dir: PathBuf,
 
     /// Populated to use an IdP for authentication.
     pub idp: Option<IdpConfiguration>,

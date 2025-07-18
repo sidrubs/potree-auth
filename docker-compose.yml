@@ -13,16 +13,16 @@ services:
     # `potree-auth` application won't start.
     environment:
       IDP_URL: ${IDP_URL}
-      CLIENT_ID: ${CLIENT_ID}
-      CLIENT_SECRET: ${CLIENT_SECRET}
-      GROUPS_CLAIM: ${GROUPS_CLAIM}
-      EXTERNAL_URL: ${EXTERNAL_URL}
-      PROJECTS_DIR: /project_data
+      IDP_CLIENT_ID: ${IDP_CLIENT_ID}
+      IDP_CLIENT_SECRET: ${IDP_CLIENT_SECRET}
+      IDP_GROUPS_CLAIM: ${IDP_GROUPS_CLAIM}
+      IDP_APPLICATION_EXTERNAL_URL: ${IDP_APPLICATION_EXTERNAL_URL}
+      DATA_DIR: /application-data
 
     volumes:
       # The local path to the directory into which the project data
       # (point clouds, etc.) will be stored.
-      - ${PROJECTS_DIR:?path to project data required}:/project_data
+      - ${DATA_DIR:?path to project data required}:/application-data
     
     # # Check that the container is ready to accept queries.
     # healthcheck:
