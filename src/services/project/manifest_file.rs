@@ -19,7 +19,7 @@ use crate::{
 use super::ProjectService;
 
 /// The name of the project manifest files.
-const MANIFEST_FILE_NAME: &str = "manifest.json";
+const MANIFEST_FILE_NAME: &str = "manifest.yml";
 
 /// A manifest file backed implementation of the [`ProjectService`] trait.
 ///
@@ -27,7 +27,7 @@ const MANIFEST_FILE_NAME: &str = "manifest.json";
 /// of project directories, each representing a project. The name of the
 /// directory is the name of the project (it is thus inherently a unique
 /// identifier). To be considered a valid project, the subdirectory needs to
-/// contain a `manifest.json` file that can be deserialized to a
+/// contain a `manifest.yml` file that can be deserialized to a
 /// [`ProjectManifest`] struct.
 #[derive(Debug, Clone)]
 pub(crate) struct ManifestFileProjectService {
@@ -59,7 +59,7 @@ impl ManifestFileProjectService {
             })?;
 
         let manifest =
-            serde_json::from_slice::<ProjectManifest>(&manifest_bytes).map_err(|err| {
+            serde_yml::from_slice::<ProjectManifest>(&manifest_bytes).map_err(|err| {
                 ApplicationError::ServerError(format!(
                     "unable to parse {:?}: {}",
                     project_manifest_path, err
@@ -118,7 +118,7 @@ mod manifest_file_project_service_tests {
 
     /// The name of the project manifest files for testing purposes (so tests
     /// can detect a change in filename).
-    const TEST_MANIFEST_FILE_NAME: &str = "manifest.json";
+    const TEST_MANIFEST_FILE_NAME: &str = "manifest.yml";
 
     /// Writes the `project` to `projects_dir` as a manifest file in the correct
     /// subdirectory.
@@ -131,7 +131,7 @@ mod manifest_file_project_service_tests {
 
         std::fs::write(
             project_dir.join(TEST_MANIFEST_FILE_NAME),
-            serde_json::to_vec(&manifest_file).unwrap(),
+            serde_yml::to_string(&manifest_file).unwrap(),
         )
         .unwrap();
     }
@@ -191,7 +191,7 @@ mod manifest_file_project_service_tests {
 
         std::fs::write(
             project_dir.join(TEST_MANIFEST_FILE_NAME),
-            serde_json::to_vec(&invalid_manifest_file).unwrap(),
+            serde_yml::to_string(&invalid_manifest_file).unwrap(),
         )
         .unwrap();
 
