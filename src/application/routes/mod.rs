@@ -73,7 +73,8 @@ pub fn build_router(
         potree_asset_service,
     };
 
-    // Middleware to add cache control in an attempt to stop CDNs from caching the data.
+    // Middleware to add cache control in an attempt to stop CDNs from caching the
+    // data.
     let add_cache_control = SetResponseHeaderLayer::overriding(
         header::CACHE_CONTROL,
         HeaderValue::from_static("no-store"),
