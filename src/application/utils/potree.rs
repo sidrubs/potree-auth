@@ -1,7 +1,7 @@
 use web_route::WebRoute;
 
 use crate::{
-    application::routes::{PROJECT_ASSET, ProjectAssetParams},
+    application::routes::{PROJECT_ASSETS, ProjectAssetParams},
     domain::value_objects::ProjectId,
 };
 
@@ -12,7 +12,7 @@ pub fn potree_config_path(project_id: &ProjectId) -> WebRoute {
         path: WebRoute::new("potree.json5"),
     };
 
-    PROJECT_ASSET.to_web_route(&params).unwrap()
+    PROJECT_ASSETS.to_web_route(&params).unwrap()
 }
 
 #[cfg(test)]
@@ -27,7 +27,7 @@ mod potree_config_path {
         // Assert
         assert_eq!(
             config_path,
-            WebRoute::new("/project/test_project/assets/potree.json5")
+            WebRoute::new("/project-assets/test_project/potree.json5")
         );
     }
 }

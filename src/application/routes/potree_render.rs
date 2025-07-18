@@ -8,7 +8,7 @@ use serde::Deserialize;
 use crate::{
     application::{
         extractors::{authorization::Authorization, project::Projects, user::UserExtractor},
-        routes::AUTH_LOGIN,
+        routes::{AUTH_LOGIN, POTREE_ASSETS_ROOT},
         utils::potree::potree_config_path,
         views::potree_render::PotreeRender,
     },
@@ -16,8 +16,6 @@ use crate::{
     error::ApplicationError,
     services::authorization::{Action, Resource},
 };
-
-use super::STATIC_POTREE;
 
 #[derive(Deserialize)]
 pub(crate) struct Params {
@@ -50,7 +48,7 @@ pub(crate) async fn potree_render(
         PotreeRender {
             project_title: project.name,
             potree_config_path: potree_config_path(&project.id),
-            potree_static_assets_path: STATIC_POTREE.to_string(),
+            potree_static_assets_path: POTREE_ASSETS_ROOT.to_string(),
         }
         .render()?,
     )
