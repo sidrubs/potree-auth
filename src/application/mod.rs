@@ -11,12 +11,12 @@ use crate::{
     error::ApplicationError,
     services::{
         authentication::{
-            AuthenticationService, oidc_authentication::OidcAuthenticationService,
-            unimplemented_authentication::UnimplementedAuthenticationService,
+            AuthenticationService, no_op::NoOpAuthenticationService,
+            oidc::OidcAuthenticationService,
         },
         authorization::{
-            AuthorizationService, always_allowed::AlwaysAllowedAuthorizationService,
-            basic_authorization::SimpleAuthorizationService,
+            AuthorizationService, basic_authorization::SimpleAuthorizationService,
+            no_op::NoOpAuthorizationService,
         },
         potree_assets::embedded::EmbeddedPotreeAssetService,
         project::manifest_file::ManifestFileProjectService,
@@ -74,8 +74,8 @@ pub async fn initialize_application(
     } else {
         // Don't use authentication or authorization.
         (
-            Arc::new(UnimplementedAuthenticationService),
-            Arc::new(AlwaysAllowedAuthorizationService),
+            Arc::new(NoOpAuthenticationService),
+            Arc::new(NoOpAuthorizationService),
         )
     };
 

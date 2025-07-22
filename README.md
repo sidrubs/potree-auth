@@ -1,5 +1,9 @@
 # Potree Auth
 
+## Todo
+
+-[] Domain, Application, Infrastructure, and HTTP layers 
+
 ## Application Overview
 
 The core components of the application are:

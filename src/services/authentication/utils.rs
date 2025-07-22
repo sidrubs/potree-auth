@@ -10,7 +10,7 @@ use crate::{
     error::ApplicationError,
 };
 
-use super::oidc_authentication::PotreeAuthClaims;
+use super::oidc::PotreeAuthClaims;
 
 pub(crate) fn extract_user_groups(
     id_token_claims: &IdTokenClaims<PotreeAuthClaims, CoreGenderClaim>,

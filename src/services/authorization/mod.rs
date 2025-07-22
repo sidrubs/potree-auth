@@ -5,8 +5,8 @@ use crate::{
     error::ApplicationError,
 };
 
-pub(crate) mod always_allowed;
 pub(crate) mod basic_authorization;
+pub(crate) mod no_op;
 
 /// Defines the functionality that needs to be implemented for the application
 /// to perform authentication.

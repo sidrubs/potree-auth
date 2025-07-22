@@ -1,5 +1,5 @@
-pub(crate) mod oidc_authentication;
-pub(crate) mod unimplemented_authentication;
+pub(crate) mod no_op;
+pub(crate) mod oidc;
 pub(crate) mod utils;
 
 use std::fmt::Debug;

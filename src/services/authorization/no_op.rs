@@ -8,9 +8,9 @@ use crate::{domain::user::User, error::ApplicationError};
 use super::{Action, AuthorizationService, Resource};
 
 #[derive(Debug, Clone)]
-pub(crate) struct AlwaysAllowedAuthorizationService;
+pub(crate) struct NoOpAuthorizationService;
 
-impl AlwaysAllowedAuthorizationService {
+impl NoOpAuthorizationService {
     #[tracing::instrument]
     pub fn assert_allowed(
         &self,
@@ -22,7 +22,7 @@ impl AlwaysAllowedAuthorizationService {
     }
 }
 
-impl AuthorizationService for AlwaysAllowedAuthorizationService {
+impl AuthorizationService for NoOpAuthorizationService {
     fn assert_allowed(
         &self,
         user: &Option<User>,

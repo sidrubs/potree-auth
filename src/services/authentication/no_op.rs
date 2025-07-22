@@ -7,10 +7,10 @@ use super::{AuthenticationService, AuthorizeData, CallbackRequestParams, OidcSes
 /// A blank authentication service. Would be used if the application does not
 /// require authentication.
 #[derive(Debug, Clone)]
-pub(crate) struct UnimplementedAuthenticationService;
+pub(crate) struct NoOpAuthenticationService;
 
 #[async_trait]
-impl AuthenticationService for UnimplementedAuthenticationService {
+impl AuthenticationService for NoOpAuthenticationService {
     #[tracing::instrument]
     async fn authorize(&self) -> Result<AuthorizeData, ApplicationError> {
         Err(ApplicationError::ServerError(
