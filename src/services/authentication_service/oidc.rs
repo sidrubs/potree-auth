@@ -1,23 +1,46 @@
 use async_trait::async_trait;
-use openidconnect::{
-    AdditionalClaims, Client, ClientId, ClientSecret, CsrfToken, EmptyExtraTokenFields,
-    EndpointMaybeSet, EndpointNotSet, EndpointSet, IdTokenFields, IssuerUrl, Nonce, RedirectUrl,
-    StandardErrorResponse, StandardTokenResponse, TokenResponse,
-    core::{
-        CoreAuthDisplay, CoreAuthPrompt, CoreAuthenticationFlow, CoreErrorResponseType,
-        CoreGenderClaim, CoreJsonWebKey, CoreJweContentEncryptionAlgorithm,
-        CoreJwsSigningAlgorithm, CoreProviderMetadata, CoreRevocableToken,
-        CoreRevocationErrorResponse, CoreTokenIntrospectionResponse, CoreTokenType,
-    },
-};
-use serde::{Deserialize, Serialize};
+use openidconnect::AdditionalClaims;
+use openidconnect::Client;
+use openidconnect::ClientId;
+use openidconnect::ClientSecret;
+use openidconnect::CsrfToken;
+use openidconnect::EmptyExtraTokenFields;
+use openidconnect::EndpointMaybeSet;
+use openidconnect::EndpointNotSet;
+use openidconnect::EndpointSet;
+use openidconnect::IdTokenFields;
+use openidconnect::IssuerUrl;
+use openidconnect::Nonce;
+use openidconnect::RedirectUrl;
+use openidconnect::StandardErrorResponse;
+use openidconnect::StandardTokenResponse;
+use openidconnect::TokenResponse;
+use openidconnect::core::CoreAuthDisplay;
+use openidconnect::core::CoreAuthPrompt;
+use openidconnect::core::CoreAuthenticationFlow;
+use openidconnect::core::CoreErrorResponseType;
+use openidconnect::core::CoreGenderClaim;
+use openidconnect::core::CoreJsonWebKey;
+use openidconnect::core::CoreJweContentEncryptionAlgorithm;
+use openidconnect::core::CoreJwsSigningAlgorithm;
+use openidconnect::core::CoreProviderMetadata;
+use openidconnect::core::CoreRevocableToken;
+use openidconnect::core::CoreRevocationErrorResponse;
+use openidconnect::core::CoreTokenIntrospectionResponse;
+use openidconnect::core::CoreTokenType;
+use serde::Deserialize;
+use serde::Serialize;
 
-use crate::{domain::User, error::ApplicationError};
-
-use super::{
-    AuthenticationService, AuthorizeData, CallbackRequestParams, OidcSessionPersisted,
-    utils::{extract_user_email, extract_user_groups, extract_user_id, extract_user_name},
-};
+use super::AuthenticationService;
+use super::AuthorizeData;
+use super::CallbackRequestParams;
+use super::OidcSessionPersisted;
+use super::utils::extract_user_email;
+use super::utils::extract_user_groups;
+use super::utils::extract_user_id;
+use super::utils::extract_user_name;
+use crate::domain::User;
+use crate::error::ApplicationError;
 
 #[derive(Debug, Clone)]
 pub(crate) struct OidcAuthenticationService {

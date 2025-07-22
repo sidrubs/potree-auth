@@ -1,22 +1,18 @@
-use std::{
-    collections::HashSet,
-    path::{Path, PathBuf},
-};
+use std::collections::HashSet;
+use std::path::Path;
+use std::path::PathBuf;
 
 use async_trait::async_trait;
-use serde::{Deserialize, Serialize};
-
-use crate::{
-    domain::{
-        ResourceType,
-        group::Group,
-        project::Project,
-        value_objects::{ProjectId, ProjectName},
-    },
-    error::ApplicationError,
-};
+use serde::Deserialize;
+use serde::Serialize;
 
 use super::ProjectService;
+use crate::domain::ResourceType;
+use crate::domain::group::Group;
+use crate::domain::project::Project;
+use crate::domain::value_objects::ProjectId;
+use crate::domain::value_objects::ProjectName;
+use crate::error::ApplicationError;
 
 /// The name of the project manifest files.
 const MANIFEST_FILE_NAME: &str = "manifest.yml";
@@ -112,7 +108,8 @@ impl ProjectManifest {
 
 #[cfg(test)]
 mod manifest_file_project_service_tests {
-    use fake::{Fake, Faker};
+    use fake::Fake;
+    use fake::Faker;
 
     use super::*;
 

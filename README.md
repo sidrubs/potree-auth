@@ -2,7 +2,8 @@
 
 ## Todo
 
--[] Domain, Application, Infrastructure, and HTTP layers 
+- [ ] See [here](https://github.com/howtocodeit/hexarch/tree/3-simple-service) for how to organize
+- [ ] Domain, Application, Infrastructure, and HTTP layers 
 
 ## Application Overview
 

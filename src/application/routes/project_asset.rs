@@ -4,15 +4,15 @@ use axum::extract::Path;
 use http::HeaderMap;
 use serde::Deserialize;
 
-use crate::{
-    application::extractors::{
-        authorization::Authorization, project::Projects, project_assets::ProjectAssets,
-        user::UserExtractor,
-    },
-    domain::{StaticAsset, value_objects::ProjectId},
-    error::ApplicationError,
-    services::authorization_engine::{Action, Resource},
-};
+use crate::application::extractors::authorization::Authorization;
+use crate::application::extractors::project::Projects;
+use crate::application::extractors::project_assets::ProjectAssets;
+use crate::application::extractors::user::UserExtractor;
+use crate::domain::StaticAsset;
+use crate::domain::value_objects::ProjectId;
+use crate::error::ApplicationError;
+use crate::services::authorization_engine::Action;
+use crate::services::authorization_engine::Resource;
 
 #[derive(Deserialize)]
 pub(crate) struct Params {

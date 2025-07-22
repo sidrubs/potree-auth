@@ -1,12 +1,10 @@
 use async_trait::async_trait;
 use potree_embed::PotreeAssets;
 
-use crate::{
-    domain::{ResourceType, StaticAsset},
-    error::ApplicationError,
-};
-
 use super::PotreeAssetStore;
+use crate::domain::ResourceType;
+use crate::domain::StaticAsset;
+use crate::error::ApplicationError;
 
 /// Provides access to built `potree` static assets that are embedded in the
 /// Rust binary.

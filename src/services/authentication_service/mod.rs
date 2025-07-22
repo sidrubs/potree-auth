@@ -5,11 +5,15 @@ pub(crate) mod utils;
 use std::fmt::Debug;
 
 use async_trait::async_trait;
-use openidconnect::{AuthorizationCode, CsrfToken, Nonce};
-use serde::{Deserialize, Serialize};
+use openidconnect::AuthorizationCode;
+use openidconnect::CsrfToken;
+use openidconnect::Nonce;
+use serde::Deserialize;
+use serde::Serialize;
 use url::Url;
 
-use crate::{domain::user::User, error::ApplicationError};
+use crate::domain::user::User;
+use crate::error::ApplicationError;
 
 /// Defines the functionality that needs to be implemented for the application
 /// to perform OIDC authentication.

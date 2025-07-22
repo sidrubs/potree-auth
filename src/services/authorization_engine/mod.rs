@@ -1,9 +1,8 @@
 use std::fmt::Debug;
 
-use crate::{
-    domain::{project::Project, user::User},
-    error::ApplicationError,
-};
+use crate::domain::project::Project;
+use crate::domain::user::User;
+use crate::error::ApplicationError;
 
 pub(crate) mod basic_authorization;
 pub(crate) mod no_op;

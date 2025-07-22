@@ -3,10 +3,9 @@ use std::path::PathBuf;
 use axum::extract::Path;
 use serde::Deserialize;
 
-use crate::{
-    application::extractors::potree_assets::PotreeAssets, domain::StaticAsset,
-    error::ApplicationError,
-};
+use crate::application::extractors::potree_assets::PotreeAssets;
+use crate::domain::StaticAsset;
+use crate::error::ApplicationError;
 
 #[derive(Deserialize)]
 pub(crate) struct Params {

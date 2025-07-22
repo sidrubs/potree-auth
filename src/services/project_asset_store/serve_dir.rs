@@ -1,17 +1,20 @@
-use std::path::{Component, Path, PathBuf};
+use std::path::Component;
+use std::path::Path;
+use std::path::PathBuf;
 
 use async_trait::async_trait;
-use http::{HeaderMap, Request, Response, StatusCode};
+use http::HeaderMap;
+use http::Request;
+use http::Response;
+use http::StatusCode;
 use http_body_util::BodyExt;
 use tower::util::ServiceExt;
 use tower_http::services::ServeFile;
 
-use crate::{
-    domain::{ResourceType, StaticAsset},
-    error::ApplicationError,
-};
-
 use super::ProjectAssetStore;
+use crate::domain::ResourceType;
+use crate::domain::StaticAsset;
+use crate::error::ApplicationError;
 
 /// An implementation of the [`ProjectAssetService`]. It uses
 /// [`tower_http::services::ServeFile`] under the hood, as its logic is robust
@@ -113,7 +116,8 @@ fn contains_parent_dir_reference<P: AsRef<Path>>(path: P) -> bool {
 
 #[cfg(test)]
 mod serve_dir_project_assets_tests {
-    use fake::{Fake, Faker};
+    use fake::Fake;
+    use fake::Faker;
 
     use super::*;
 
@@ -134,7 +138,8 @@ mod serve_dir_project_assets_tests {
     }
 
     mod get_asset {
-        use http::{HeaderValue, header};
+        use http::HeaderValue;
+        use http::header;
 
         use super::*;
 

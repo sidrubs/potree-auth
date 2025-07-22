@@ -2,7 +2,9 @@ use axum::extract::FromRequestParts;
 use http::request::Parts;
 use tower_sessions::Session;
 
-use crate::{application::utils::auth::USER_SESSION_KEY, domain::User, error::ApplicationError};
+use crate::application::utils::auth::USER_SESSION_KEY;
+use crate::domain::User;
+use crate::error::ApplicationError;
 
 pub(crate) struct UserExtractor(pub(crate) Option<User>);
 

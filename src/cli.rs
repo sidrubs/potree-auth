@@ -5,7 +5,8 @@ use std::path::PathBuf;
 use clap::Parser;
 use url::Url;
 
-use crate::config::{ApplicationConfiguration, IdpConfiguration as ApplicationIdpConfiguration};
+use crate::config::ApplicationConfiguration;
+use crate::config::IdpConfiguration as ApplicationIdpConfiguration;
 
 #[derive(Debug, Clone, Parser)]
 #[command(version, about = None, long_about = None)]

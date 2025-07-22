@@ -1,4 +1,5 @@
-use axum::response::{IntoResponse, Response};
+use axum::response::IntoResponse;
+use axum::response::Response;
 
 use crate::domain::StaticAsset;
 

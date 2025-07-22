@@ -1,6 +1,9 @@
 use axum::Router;
 use time::Duration;
-use tower_sessions::{Expiry, MemoryStore, SessionManagerLayer, cookie};
+use tower_sessions::Expiry;
+use tower_sessions::MemoryStore;
+use tower_sessions::SessionManagerLayer;
+use tower_sessions::cookie;
 
 /// Applies a web session management layer to the router.
 pub fn apply_session_layer(router: Router, session_expiry: Duration) -> Router {

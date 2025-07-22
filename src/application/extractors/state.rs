@@ -1,7 +1,8 @@
 use axum::extract::FromRequestParts;
 use http::request::Parts;
 
-use crate::{application::routes::state::ApplicationState, error::ApplicationError};
+use crate::application::routes::state::ApplicationState;
+use crate::error::ApplicationError;
 
 /// Defines how `axum` should extract the application state from the request
 /// extensions.

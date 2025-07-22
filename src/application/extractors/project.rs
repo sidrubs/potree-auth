@@ -3,10 +3,9 @@ use std::sync::Arc;
 use axum::extract::FromRequestParts;
 use http::request::Parts;
 
-use crate::{
-    application::routes::state::ApplicationState, error::ApplicationError,
-    services::project_store::ProjectService,
-};
+use crate::application::routes::state::ApplicationState;
+use crate::error::ApplicationError;
+use crate::services::project_store::ProjectService;
 
 pub(crate) struct Projects(pub(crate) Arc<dyn ProjectService>);
 

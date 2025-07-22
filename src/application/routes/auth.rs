@@ -1,15 +1,16 @@
-use axum::{extract::Query, response::Redirect};
-use serde::{Deserialize, Serialize};
+use axum::extract::Query;
+use axum::response::Redirect;
+use serde::Deserialize;
+use serde::Serialize;
 use tower_sessions::Session;
 use web_route::WebRoute;
 
-use crate::{
-    application::{extractors::authentication::Authentication, utils::auth::USER_SESSION_KEY},
-    error::ApplicationError,
-    services::authentication_service::{
-        AuthorizeData, CallbackRequestParams, OidcSessionPersisted,
-    },
-};
+use crate::application::extractors::authentication::Authentication;
+use crate::application::utils::auth::USER_SESSION_KEY;
+use crate::error::ApplicationError;
+use crate::services::authentication_service::AuthorizeData;
+use crate::services::authentication_service::CallbackRequestParams;
+use crate::services::authentication_service::OidcSessionPersisted;
 
 /// The key to which login data will be stored in a session.
 pub const LOGIN_SESSION_KEY: &str = "login_session";

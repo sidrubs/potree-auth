@@ -1,6 +1,7 @@
 use std::ops::Deref;
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
 use super::utils::new_type::new_type;
 

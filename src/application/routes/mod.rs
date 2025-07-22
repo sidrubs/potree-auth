@@ -5,29 +5,31 @@ mod potree_render;
 mod project_asset;
 pub(crate) mod state;
 
-use std::sync::{Arc, LazyLock};
+use std::sync::Arc;
+use std::sync::LazyLock;
 
-use axum::{Extension, Router, routing::get};
-use http::{HeaderValue, header};
+use axum::Extension;
+use axum::Router;
+use axum::routing::get;
+use http::HeaderValue;
+use http::header;
 use state::ApplicationState;
 use time::Duration;
 use tower::Layer;
-use tower_http::{
-    normalize_path::{NormalizePath, NormalizePathLayer},
-    set_header::SetResponseHeaderLayer,
-};
-use web_route::{ParameterizedRoute, WebRoute};
+use tower_http::normalize_path::NormalizePath;
+use tower_http::normalize_path::NormalizePathLayer;
+use tower_http::set_header::SetResponseHeaderLayer;
+use web_route::ParameterizedRoute;
+use web_route::WebRoute;
 
-use crate::{
-    domain::value_objects::ProjectId,
-    services::{
-        authentication_service::AuthenticationService, authorization_engine::AuthorizationEngine,
-        potree_asset_store::PotreeAssetStore, project_asset_store::ProjectAssetStore,
-        project_store::ProjectService,
-    },
-};
-
-use super::middleware::{session::apply_session_layer, tracing::apply_tracing_middleware};
+use super::middleware::session::apply_session_layer;
+use super::middleware::tracing::apply_tracing_middleware;
+use crate::domain::value_objects::ProjectId;
+use crate::services::authentication_service::AuthenticationService;
+use crate::services::authorization_engine::AuthorizationEngine;
+use crate::services::potree_asset_store::PotreeAssetStore;
+use crate::services::project_asset_store::ProjectAssetStore;
+use crate::services::project_store::ProjectService;
 
 pub(crate) static HEALTH_CHECK: LazyLock<ParameterizedRoute> =
     LazyLock::new(|| ParameterizedRoute::new("/_health"));

@@ -1,4 +1,5 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
 /// Represents groups that users and projects can be part of.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]

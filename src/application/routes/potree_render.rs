@@ -1,21 +1,23 @@
 use askama::Template;
-use axum::{
-    extract::{Path, Request},
-    response::{Html, IntoResponse, Redirect, Response},
-};
+use axum::extract::Path;
+use axum::extract::Request;
+use axum::response::Html;
+use axum::response::IntoResponse;
+use axum::response::Redirect;
+use axum::response::Response;
 use serde::Deserialize;
 
-use crate::{
-    application::{
-        extractors::{authorization::Authorization, project::Projects, user::UserExtractor},
-        routes::{AUTH_LOGIN, POTREE_ASSETS_ROOT},
-        utils::potree::potree_config_path,
-        views::potree_render::PotreeRender,
-    },
-    domain::value_objects::ProjectId,
-    error::ApplicationError,
-    services::authorization_engine::{Action, Resource},
-};
+use crate::application::extractors::authorization::Authorization;
+use crate::application::extractors::project::Projects;
+use crate::application::extractors::user::UserExtractor;
+use crate::application::routes::AUTH_LOGIN;
+use crate::application::routes::POTREE_ASSETS_ROOT;
+use crate::application::utils::potree::potree_config_path;
+use crate::application::views::potree_render::PotreeRender;
+use crate::domain::value_objects::ProjectId;
+use crate::error::ApplicationError;
+use crate::services::authorization_engine::Action;
+use crate::services::authorization_engine::Resource;
 
 #[derive(Deserialize)]
 pub(crate) struct Params {

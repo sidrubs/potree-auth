@@ -3,10 +3,9 @@ use std::sync::Arc;
 use axum::extract::FromRequestParts;
 use http::request::Parts;
 
-use crate::{
-    application::routes::state::ApplicationState, error::ApplicationError,
-    services::authorization_engine::AuthorizationEngine,
-};
+use crate::application::routes::state::ApplicationState;
+use crate::error::ApplicationError;
+use crate::services::authorization_engine::AuthorizationEngine;
 
 pub(crate) struct Authorization(pub(crate) Arc<dyn AuthorizationEngine>);
 

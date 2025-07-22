@@ -9,7 +9,9 @@ use tikv_jemallocator::Jemalloc;
 static GLOBAL: Jemalloc = Jemalloc;
 
 use clap::Parser;
-use potree_auth::{cli::Cli, init_tracing, initialize_application};
+use potree_auth::cli::Cli;
+use potree_auth::init_tracing;
+use potree_auth::initialize_application;
 
 #[tokio::main]
 async fn main() {

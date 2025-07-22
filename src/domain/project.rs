@@ -1,9 +1,8 @@
 use std::collections::HashSet;
 
-use super::{
-    group::Group,
-    value_objects::{ProjectId, ProjectName},
-};
+use super::group::Group;
+use super::value_objects::ProjectId;
+use super::value_objects::ProjectName;
 
 /// Represents the metadata associated with a 3D model project.
 #[derive(Debug, Clone, PartialEq)]

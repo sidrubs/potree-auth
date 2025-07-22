@@ -1,12 +1,12 @@
 pub(crate) mod manifest_file;
 
-use async_trait::async_trait;
 use std::fmt::Debug;
 
-use crate::{
-    domain::{project::Project, value_objects::ProjectId},
-    error::ApplicationError,
-};
+use async_trait::async_trait;
+
+use crate::domain::project::Project;
+use crate::domain::value_objects::ProjectId;
+use crate::error::ApplicationError;
 
 /// Defines the functionality needed to for the application to interact with
 /// persisted [`Project`]s.

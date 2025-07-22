@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
-use crate::services::{
-    authentication_service::AuthenticationService, authorization_engine::AuthorizationEngine,
-    potree_asset_store::PotreeAssetStore, project_asset_store::ProjectAssetStore,
-    project_store::ProjectService,
-};
+use crate::services::authentication_service::AuthenticationService;
+use crate::services::authorization_engine::AuthorizationEngine;
+use crate::services::potree_asset_store::PotreeAssetStore;
+use crate::services::project_asset_store::ProjectAssetStore;
+use crate::services::project_store::ProjectService;
 
 /// The state that is available throughout the application router.
 #[derive(Debug, Clone)]

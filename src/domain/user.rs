@@ -2,12 +2,13 @@
 
 use std::collections::HashSet;
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
-use super::{
-    group::Group,
-    value_objects::{EmailAddress, UserId, UserName},
-};
+use super::group::Group;
+use super::value_objects::EmailAddress;
+use super::value_objects::UserId;
+use super::value_objects::UserName;
 
 /// Represents an authenticated user of the application.
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
@@ -32,7 +33,8 @@ impl User {
 #[cfg(test)]
 impl User {
     pub fn dummy_admin() -> Self {
-        use fake::{Fake, Faker};
+        use fake::Fake;
+        use fake::Faker;
 
         Self {
             groups: [Group::new("admin"), Faker.fake()].into(),
@@ -43,7 +45,8 @@ impl User {
 
 #[cfg(test)]
 mod user_tests {
-    use fake::{Fake, Faker};
+    use fake::Fake;
+    use fake::Faker;
 
     use super::*;
 

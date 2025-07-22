@@ -3,9 +3,11 @@
 //!
 //! This could be replaced by more robust policy engine in the future.
 
-use crate::{domain::user::User, error::ApplicationError};
-
-use super::{Action, AuthorizationEngine, Resource};
+use super::Action;
+use super::AuthorizationEngine;
+use super::Resource;
+use crate::domain::user::User;
+use crate::error::ApplicationError;
 
 /// Handles authorization business logic for the application.
 #[derive(Debug, Clone)]
@@ -60,10 +62,12 @@ impl AuthorizationEngine for SimpleAuthorizationEngine {
 
 #[cfg(test)]
 mod authorization_service_tests {
-    use crate::domain::{group::Group, project::Project};
-    use fake::{Fake, Faker};
+    use fake::Fake;
+    use fake::Faker;
 
     use super::*;
+    use crate::domain::group::Group;
+    use crate::domain::project::Project;
 
     mod assert_allowed {
         use super::*;

@@ -1,16 +1,14 @@
 use std::collections::HashSet;
 
-use openidconnect::{IdTokenClaims, core::CoreGenderClaim};
-
-use crate::{
-    domain::{
-        Group,
-        value_objects::{EmailAddress, UserId, UserName},
-    },
-    error::ApplicationError,
-};
+use openidconnect::IdTokenClaims;
+use openidconnect::core::CoreGenderClaim;
 
 use super::oidc::PotreeAuthClaims;
+use crate::domain::Group;
+use crate::domain::value_objects::EmailAddress;
+use crate::domain::value_objects::UserId;
+use crate::domain::value_objects::UserName;
+use crate::error::ApplicationError;
 
 pub(crate) fn extract_user_groups(
     id_token_claims: &IdTokenClaims<PotreeAuthClaims, CoreGenderClaim>,

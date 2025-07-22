@@ -1,28 +1,28 @@
 use std::sync::Arc;
 
-use axum::{Router, ServiceExt, extract::Request, routing::IntoMakeService};
-use openidconnect::{ClientId, ClientSecret, IssuerUrl, RedirectUrl};
+use axum::Router;
+use axum::ServiceExt;
+use axum::extract::Request;
+use axum::routing::IntoMakeService;
+use openidconnect::ClientId;
+use openidconnect::ClientSecret;
+use openidconnect::IssuerUrl;
+use openidconnect::RedirectUrl;
 use routes::build_router;
 use tower_http::normalize_path::NormalizePath;
 
-use crate::{
-    application::routes::AUTH_CALLBACK,
-    config::ApplicationConfiguration,
-    error::ApplicationError,
-    services::{
-        authentication_service::{
-            AuthenticationService, no_op::NoOpAuthenticationService,
-            oidc::OidcAuthenticationService,
-        },
-        authorization_engine::{
-            AuthorizationEngine, basic_authorization::SimpleAuthorizationEngine,
-            no_op::NoOpAuthorizationEngine,
-        },
-        potree_asset_store::embedded::EmbeddedPotreeAssetService,
-        project_asset_store::serve_dir::ServeDirProjectAssets,
-        project_store::manifest_file::ManifestFileProjectService,
-    },
-};
+use crate::application::routes::AUTH_CALLBACK;
+use crate::config::ApplicationConfiguration;
+use crate::error::ApplicationError;
+use crate::services::authentication_service::AuthenticationService;
+use crate::services::authentication_service::no_op::NoOpAuthenticationService;
+use crate::services::authentication_service::oidc::OidcAuthenticationService;
+use crate::services::authorization_engine::AuthorizationEngine;
+use crate::services::authorization_engine::basic_authorization::SimpleAuthorizationEngine;
+use crate::services::authorization_engine::no_op::NoOpAuthorizationEngine;
+use crate::services::potree_asset_store::embedded::EmbeddedPotreeAssetService;
+use crate::services::project_asset_store::serve_dir::ServeDirProjectAssets;
+use crate::services::project_store::manifest_file::ManifestFileProjectService;
 
 mod extractors;
 mod middleware;
@@ -96,12 +96,14 @@ pub async fn initialize_application(
 #[cfg(test)]
 mod router_integration_tests {
     use axum_test::TestServer;
-    use http::{StatusCode, header};
+    use http::StatusCode;
+    use http::header;
 
     use super::*;
-    use crate::application::routes::{
-        HEALTH_CHECK, POTREE_ASSETS, POTREE_UI_PROJECT, PROJECT_ASSETS,
-    };
+    use crate::application::routes::HEALTH_CHECK;
+    use crate::application::routes::POTREE_ASSETS;
+    use crate::application::routes::POTREE_UI_PROJECT;
+    use crate::application::routes::PROJECT_ASSETS;
 
     mod health_check {
 
@@ -190,17 +192,16 @@ mod router_integration_tests {
 
         use web_route::WebRoute;
 
-        use crate::{
-            application::routes::ProjectAssetParams,
-            domain::value_objects::ProjectId,
-            test_utils::{
-                TEST_PROJECT_1_DATA_CONTENT, TEST_PROJECT_1_DATA_PATH, TEST_PROJECT_1_DATA_TYPE,
-                TEST_PROJECT_1_DIR, TEST_PROJECT_2_DATA_PATH, TEST_PROJECT_2_DIR,
-                TEST_PROJECT_PARENT,
-            },
-        };
-
         use super::*;
+        use crate::application::routes::ProjectAssetParams;
+        use crate::domain::value_objects::ProjectId;
+        use crate::test_utils::TEST_PROJECT_1_DATA_CONTENT;
+        use crate::test_utils::TEST_PROJECT_1_DATA_PATH;
+        use crate::test_utils::TEST_PROJECT_1_DATA_TYPE;
+        use crate::test_utils::TEST_PROJECT_1_DIR;
+        use crate::test_utils::TEST_PROJECT_2_DATA_PATH;
+        use crate::test_utils::TEST_PROJECT_2_DIR;
+        use crate::test_utils::TEST_PROJECT_PARENT;
 
         #[tokio::test]
         async fn should_return_the_asset_correctly_if_found() {
@@ -345,9 +346,9 @@ mod router_integration_tests {
     }
 
     mod potree_render {
-        use crate::test_utils::{TEST_PROJECT_1_DIR, TEST_PROJECT_PARENT};
-
         use super::*;
+        use crate::test_utils::TEST_PROJECT_1_DIR;
+        use crate::test_utils::TEST_PROJECT_PARENT;
 
         #[tokio::test]
         async fn should_return_the_correct_html() {

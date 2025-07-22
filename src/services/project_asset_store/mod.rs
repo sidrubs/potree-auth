@@ -1,10 +1,12 @@
 pub(crate) mod serve_dir;
 
-use async_trait::async_trait;
-use http::HeaderMap;
 use std::fmt::Debug;
 
-use crate::{domain::static_asset::StaticAsset, error::ApplicationError};
+use async_trait::async_trait;
+use http::HeaderMap;
+
+use crate::domain::static_asset::StaticAsset;
+use crate::error::ApplicationError;
 
 /// Defines the functionality needed to for the application to request static
 /// project assets.

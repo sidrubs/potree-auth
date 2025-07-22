@@ -1,8 +1,8 @@
 use axum::Router;
-use tower_http::{
-    LatencyUnit,
-    trace::{DefaultOnRequest, DefaultOnResponse, TraceLayer},
-};
+use tower_http::LatencyUnit;
+use tower_http::trace::DefaultOnRequest;
+use tower_http::trace::DefaultOnResponse;
+use tower_http::trace::TraceLayer;
 use tracing::Level;
 
 /// Adds tracing middleware to the `router`

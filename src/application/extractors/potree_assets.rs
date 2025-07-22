@@ -3,10 +3,9 @@ use std::sync::Arc;
 use axum::extract::FromRequestParts;
 use http::request::Parts;
 
-use crate::{
-    application::routes::state::ApplicationState, error::ApplicationError,
-    services::potree_asset_store::PotreeAssetStore,
-};
+use crate::application::routes::state::ApplicationState;
+use crate::error::ApplicationError;
+use crate::services::potree_asset_store::PotreeAssetStore;
 
 pub(crate) struct PotreeAssets(pub(crate) Arc<dyn PotreeAssetStore>);
 

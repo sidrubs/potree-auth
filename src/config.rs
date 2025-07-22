@@ -16,7 +16,8 @@ pub struct ApplicationConfiguration {
 #[cfg(test)]
 impl ApplicationConfiguration {
     pub fn dummy_with_no_idp() -> Self {
-        use fake::{Fake, Faker};
+        use fake::Fake;
+        use fake::Faker;
 
         Self {
             idp: None,

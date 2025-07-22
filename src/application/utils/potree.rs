@@ -1,9 +1,8 @@
 use web_route::WebRoute;
 
-use crate::{
-    application::routes::{PROJECT_ASSETS, ProjectAssetParams},
-    domain::value_objects::ProjectId,
-};
+use crate::application::routes::PROJECT_ASSETS;
+use crate::application::routes::ProjectAssetParams;
+use crate::domain::value_objects::ProjectId;
 
 /// Path to the `potree` config file for a specific project.
 pub fn potree_config_path(project_id: &ProjectId) -> WebRoute {
