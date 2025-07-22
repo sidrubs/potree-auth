@@ -11,7 +11,7 @@ pub(crate) mod no_op;
 /// Defines the functionality that needs to be implemented for the application
 /// to perform authentication.
 #[cfg_attr(test, mockall::automock)]
-pub trait AuthorizationService: Debug + Send + Sync + 'static {
+pub trait AuthorizationEngine: Debug + Send + Sync + 'static {
     /// Determines if a `user` should be authorized to perform the `action` on
     /// the specified resource.
     ///

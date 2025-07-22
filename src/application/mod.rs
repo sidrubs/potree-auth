@@ -10,17 +10,17 @@ use crate::{
     config::ApplicationConfiguration,
     error::ApplicationError,
     services::{
-        authentication::{
+        authentication_service::{
             AuthenticationService, no_op::NoOpAuthenticationService,
             oidc::OidcAuthenticationService,
         },
-        authorization::{
-            AuthorizationService, basic_authorization::SimpleAuthorizationService,
-            no_op::NoOpAuthorizationService,
+        authorization_engine::{
+            AuthorizationEngine, basic_authorization::SimpleAuthorizationEngine,
+            no_op::NoOpAuthorizationEngine,
         },
-        potree_assets::embedded::EmbeddedPotreeAssetService,
-        project::manifest_file::ManifestFileProjectService,
-        project_assets::serve_dir::ServeDirProjectAssets,
+        potree_asset_store::embedded::EmbeddedPotreeAssetService,
+        project_asset_store::serve_dir::ServeDirProjectAssets,
+        project_store::manifest_file::ManifestFileProjectService,
     },
 };
 
@@ -44,7 +44,7 @@ pub async fn initialize_application(
     // on the configuration.
     let (authentication_service, authorization_service): (
         Arc<dyn AuthenticationService>,
-        Arc<dyn AuthorizationService>,
+        Arc<dyn AuthorizationEngine>,
     ) = if let Some(idp_configuration) = config.idp.clone() {
         // Use IdP authenticated routes.
         let authentication_service = Arc::new(
@@ -68,14 +68,14 @@ pub async fn initialize_application(
         );
 
         // Require authorization.
-        let authorization_service = Arc::new(SimpleAuthorizationService);
+        let authorization_service = Arc::new(SimpleAuthorizationEngine);
 
         (authentication_service, authorization_service)
     } else {
         // Don't use authentication or authorization.
         (
             Arc::new(NoOpAuthenticationService),
-            Arc::new(NoOpAuthorizationService),
+            Arc::new(NoOpAuthorizationEngine),
         )
     };
 

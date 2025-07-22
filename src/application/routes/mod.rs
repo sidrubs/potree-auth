@@ -21,9 +21,9 @@ use web_route::{ParameterizedRoute, WebRoute};
 use crate::{
     domain::value_objects::ProjectId,
     services::{
-        authentication::AuthenticationService, authorization::AuthorizationService,
-        potree_assets::PotreeAssetService, project::ProjectService,
-        project_assets::ProjectAssetService,
+        authentication_service::AuthenticationService, authorization_engine::AuthorizationEngine,
+        potree_asset_store::PotreeAssetStore, project_asset_store::ProjectAssetStore,
+        project_store::ProjectService,
     },
 };
 
@@ -58,11 +58,11 @@ pub(crate) static AUTH_CALLBACK: LazyLock<WebRoute> = LazyLock::new(|| AUTH_ROOT
 
 /// Initializes the application router, its state, and all of its routes.
 pub fn build_router(
-    authorization_service: Arc<dyn AuthorizationService>,
+    authorization_service: Arc<dyn AuthorizationEngine>,
     authentication_service: Arc<dyn AuthenticationService>,
     project_service: Arc<dyn ProjectService>,
-    project_asset_service: Arc<dyn ProjectAssetService>,
-    potree_asset_service: Arc<dyn PotreeAssetService>,
+    project_asset_service: Arc<dyn ProjectAssetStore>,
+    potree_asset_service: Arc<dyn PotreeAssetStore>,
 ) -> NormalizePath<Router> {
     // Initialize application state.
     let state = ApplicationState {

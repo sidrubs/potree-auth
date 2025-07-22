@@ -30,10 +30,10 @@ impl fmt::Display for ResourceType {
     }
 }
 
-impl From<&crate::services::authorization::Resource<'_>> for ResourceType {
-    fn from(value: &crate::services::authorization::Resource) -> Self {
+impl From<&crate::services::authorization_engine::Resource<'_>> for ResourceType {
+    fn from(value: &crate::services::authorization_engine::Resource) -> Self {
         match value {
-            crate::services::authorization::Resource::Project(_) => Self::Project,
+            crate::services::authorization_engine::Resource::Project(_) => Self::Project,
         }
     }
 }

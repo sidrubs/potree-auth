@@ -1,16 +1,16 @@
 //! An authorization service that allows all requests. It implements the
-//! [`AuthorizationService`] trait.
+//! [`AuthorizationEngine`] trait.
 //!
 //! This would be used in cases where authorization is not needed.
 
 use crate::{domain::user::User, error::ApplicationError};
 
-use super::{Action, AuthorizationService, Resource};
+use super::{Action, AuthorizationEngine, Resource};
 
 #[derive(Debug, Clone)]
-pub(crate) struct NoOpAuthorizationService;
+pub(crate) struct NoOpAuthorizationEngine;
 
-impl NoOpAuthorizationService {
+impl NoOpAuthorizationEngine {
     #[tracing::instrument]
     pub fn assert_allowed(
         &self,
@@ -22,7 +22,7 @@ impl NoOpAuthorizationService {
     }
 }
 
-impl AuthorizationService for NoOpAuthorizationService {
+impl AuthorizationEngine for NoOpAuthorizationEngine {
     fn assert_allowed(
         &self,
         user: &Option<User>,

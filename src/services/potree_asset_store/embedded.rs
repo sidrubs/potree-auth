@@ -6,7 +6,7 @@ use crate::{
     error::ApplicationError,
 };
 
-use super::PotreeAssetService;
+use super::PotreeAssetStore;
 
 /// Provides access to built `potree` static assets that are embedded in the
 /// Rust binary.
@@ -26,7 +26,7 @@ impl EmbeddedPotreeAssetService {
 }
 
 #[async_trait]
-impl PotreeAssetService for EmbeddedPotreeAssetService {
+impl PotreeAssetStore for EmbeddedPotreeAssetService {
     async fn get_asset(&self, path: &str) -> Result<StaticAsset, ApplicationError> {
         Self::get_asset(self, path)
     }

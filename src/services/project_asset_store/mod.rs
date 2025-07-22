@@ -10,7 +10,7 @@ use crate::{domain::static_asset::StaticAsset, error::ApplicationError};
 /// project assets.
 #[cfg_attr(test, mockall::automock)]
 #[async_trait]
-pub trait ProjectAssetService: Debug + Send + Sync + 'static {
+pub trait ProjectAssetStore: Debug + Send + Sync + 'static {
     /// Read a specific project asset by its path and request headers as the
     /// headers provide various instructions as to how to format the data.
     ///

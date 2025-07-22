@@ -14,7 +14,7 @@ use crate::{
     },
     domain::value_objects::ProjectId,
     error::ApplicationError,
-    services::authorization::{Action, Resource},
+    services::authorization_engine::{Action, Resource},
 };
 
 #[derive(Deserialize)]

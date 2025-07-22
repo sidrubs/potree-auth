@@ -5,7 +5,7 @@ use http::request::Parts;
 
 use crate::{
     application::routes::state::ApplicationState, error::ApplicationError,
-    services::project::ProjectService,
+    services::project_store::ProjectService,
 };
 
 pub(crate) struct Projects(pub(crate) Arc<dyn ProjectService>);

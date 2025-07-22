@@ -5,10 +5,10 @@ use http::request::Parts;
 
 use crate::{
     application::routes::state::ApplicationState, error::ApplicationError,
-    services::authorization::AuthorizationService,
+    services::authorization_engine::AuthorizationEngine,
 };
 
-pub(crate) struct Authorization(pub(crate) Arc<dyn AuthorizationService>);
+pub(crate) struct Authorization(pub(crate) Arc<dyn AuthorizationEngine>);
 
 /// Defines how `axum` should extract the [`AuthorizationService`] from a
 /// request.

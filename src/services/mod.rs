@@ -1,5 +1,5 @@
-pub mod authentication;
-pub mod authorization;
-pub mod potree_assets;
-pub mod project;
-pub mod project_assets;
+pub mod authentication_service;
+pub mod authorization_engine;
+pub mod potree_asset_store;
+pub mod project_asset_store;
+pub mod project_store;

@@ -9,7 +9,7 @@ use crate::{
 };
 
 /// Defines the functionality needed to for the application to interact with
-/// [`Project`]s.
+/// persisted [`Project`]s.
 #[cfg_attr(test, mockall::automock)]
 #[async_trait]
 pub trait ProjectService: Debug + Send + Sync + 'static {

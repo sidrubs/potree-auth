@@ -11,7 +11,7 @@ use crate::{
     error::ApplicationError,
 };
 
-use super::ProjectAssetService;
+use super::ProjectAssetStore;
 
 /// An implementation of the [`ProjectAssetService`]. It uses
 /// [`tower_http::services::ServeFile`] under the hood, as its logic is robust
@@ -94,7 +94,7 @@ impl ServeDirProjectAssets {
 }
 
 #[async_trait]
-impl ProjectAssetService for ServeDirProjectAssets {
+impl ProjectAssetStore for ServeDirProjectAssets {
     async fn get_asset(
         &self,
         path: &str,

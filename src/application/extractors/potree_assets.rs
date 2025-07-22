@@ -5,10 +5,10 @@ use http::request::Parts;
 
 use crate::{
     application::routes::state::ApplicationState, error::ApplicationError,
-    services::potree_assets::PotreeAssetService,
+    services::potree_asset_store::PotreeAssetStore,
 };
 
-pub(crate) struct PotreeAssets(pub(crate) Arc<dyn PotreeAssetService>);
+pub(crate) struct PotreeAssets(pub(crate) Arc<dyn PotreeAssetStore>);
 
 /// Defines how `axum` should extract the [`PotreeAssetService`] from a request.
 impl<S> FromRequestParts<S> for PotreeAssets

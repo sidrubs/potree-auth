@@ -6,7 +6,9 @@ use web_route::WebRoute;
 use crate::{
     application::{extractors::authentication::Authentication, utils::auth::USER_SESSION_KEY},
     error::ApplicationError,
-    services::authentication::{AuthorizeData, CallbackRequestParams, OidcSessionPersisted},
+    services::authentication_service::{
+        AuthorizeData, CallbackRequestParams, OidcSessionPersisted,
+    },
 };
 
 /// The key to which login data will be stored in a session.

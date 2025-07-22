@@ -5,10 +5,10 @@ use http::request::Parts;
 
 use crate::{
     application::routes::state::ApplicationState, error::ApplicationError,
-    services::project_assets::ProjectAssetService,
+    services::project_asset_store::ProjectAssetStore,
 };
 
-pub(crate) struct ProjectAssets(pub(crate) Arc<dyn ProjectAssetService>);
+pub(crate) struct ProjectAssets(pub(crate) Arc<dyn ProjectAssetStore>);
 
 /// Defines how `axum` should extract the [`ProjectAssetService`] from a
 /// request.

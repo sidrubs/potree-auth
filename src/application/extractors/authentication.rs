@@ -5,7 +5,7 @@ use http::request::Parts;
 
 use crate::{
     application::routes::state::ApplicationState, error::ApplicationError,
-    services::authentication::AuthenticationService,
+    services::authentication_service::AuthenticationService,
 };
 
 pub(crate) struct Authentication(pub(crate) Arc<dyn AuthenticationService>);

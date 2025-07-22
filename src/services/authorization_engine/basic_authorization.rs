@@ -1,17 +1,17 @@
 //! A pretty rudimentary authorization service that implements the
-//! [`AuthorizationService`] trait.
+//! [`AuthorizationEngine`] trait.
 //!
 //! This could be replaced by more robust policy engine in the future.
 
 use crate::{domain::user::User, error::ApplicationError};
 
-use super::{Action, AuthorizationService, Resource};
+use super::{Action, AuthorizationEngine, Resource};
 
 /// Handles authorization business logic for the application.
 #[derive(Debug, Clone)]
-pub(crate) struct SimpleAuthorizationService;
+pub(crate) struct SimpleAuthorizationEngine;
 
-impl SimpleAuthorizationService {
+impl SimpleAuthorizationEngine {
     #[tracing::instrument]
     pub fn assert_allowed(
         &self,
@@ -47,7 +47,7 @@ impl SimpleAuthorizationService {
     }
 }
 
-impl AuthorizationService for SimpleAuthorizationService {
+impl AuthorizationEngine for SimpleAuthorizationEngine {
     fn assert_allowed(
         &self,
         user: &Option<User>,
@@ -75,7 +75,7 @@ mod authorization_service_tests {
             #[test]
             fn should_return_ok_if_the_user_is_an_admin() {
                 // Arrange
-                let authorization_service = SimpleAuthorizationService;
+                let authorization_service = SimpleAuthorizationEngine;
 
                 let user = User::dummy_admin();
                 let project = Faker.fake::<Project>();
@@ -93,7 +93,7 @@ mod authorization_service_tests {
             #[test]
             fn should_return_ok_if_the_user_shares_a_group_with_the_project() {
                 // Arrange
-                let authorization_service = SimpleAuthorizationService;
+                let authorization_service = SimpleAuthorizationEngine;
 
                 let shared_group = Faker.fake::<Group>();
                 let user = User {
@@ -118,7 +118,7 @@ mod authorization_service_tests {
             #[test]
             fn should_return_err_if_the_user_does_not_share_a_group_with_the_project() {
                 // Arrange
-                let authorization_service = SimpleAuthorizationService;
+                let authorization_service = SimpleAuthorizationEngine;
 
                 let user = Faker.fake::<User>();
                 let project = Faker.fake::<Project>();
