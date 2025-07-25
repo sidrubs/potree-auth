@@ -1705,9 +1705,9 @@ dependencies = [
 
 [[package]]
 name = "potree-embed"
-version = "0.1.0-alpha.2"
+version = "0.1.0-alpha.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2c525c5c41ff81373e54074289f8179065c608ed6984117cfbe595a81ebc56f"
+checksum = "a63c859ebd27924d4593876069efe42c796da8f4a92232f6bee19b21b1f19278"
 dependencies = [
  "rust-embed",
 ]
