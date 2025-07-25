@@ -4,9 +4,10 @@
 //! This could be replaced by more robust policy engine in the future.
 
 use crate::common::domain::user::User;
-use crate::common::ports::authorization_engine::{
-    Action, AuthorizationEngine, AuthorizationEngineError, Resource,
-};
+use crate::common::ports::authorization_engine::Action;
+use crate::common::ports::authorization_engine::AuthorizationEngine;
+use crate::common::ports::authorization_engine::AuthorizationEngineError;
+use crate::common::ports::authorization_engine::Resource;
 
 /// Handles authorization business logic for the application.
 #[derive(Debug, Clone)]

@@ -4,9 +4,10 @@
 //! This would be used in cases where authorization is not needed.
 
 use crate::common::domain::user::User;
-use crate::common::ports::authorization_engine::{
-    Action, AuthorizationEngine, AuthorizationEngineError, Resource,
-};
+use crate::common::ports::authorization_engine::Action;
+use crate::common::ports::authorization_engine::AuthorizationEngine;
+use crate::common::ports::authorization_engine::AuthorizationEngineError;
+use crate::common::ports::authorization_engine::Resource;
 
 #[derive(Debug, Clone)]
 pub(crate) struct NoOpAuthorizationEngine;

@@ -31,15 +31,15 @@ use openidconnect::core::CoreTokenType;
 use serde::Deserialize;
 use serde::Serialize;
 
-use super::AuthenticationService;
-use super::AuthorizeData;
-use super::CallbackRequestParams;
-use super::OidcSessionPersisted;
 use super::utils::extract_user_email;
 use super::utils::extract_user_groups;
 use super::utils::extract_user_id;
 use super::utils::extract_user_name;
-use crate::domain::User;
+use crate::common::domain::User;
+use crate::common::ports::authentication_service::AuthenticationService;
+use crate::common::ports::authentication_service::AuthorizeData;
+use crate::common::ports::authentication_service::CallbackRequestParams;
+use crate::common::ports::authentication_service::OidcSessionPersisted;
 use crate::error::ApplicationError;
 
 #[derive(Debug, Clone)]

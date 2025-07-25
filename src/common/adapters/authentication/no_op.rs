@@ -1,10 +1,9 @@
 use async_trait::async_trait;
 
-use super::AuthenticationService;
-use super::AuthorizeData;
-use super::CallbackRequestParams;
-use super::OidcSessionPersisted;
-use crate::domain::User;
+use crate::common::domain::User;
+use crate::common::ports::authentication_service::{
+    AuthenticationService, AuthorizeData, CallbackRequestParams, OidcSessionPersisted,
+};
 use crate::error::ApplicationError;
 
 /// A blank authentication service. Would be used if the application does not

@@ -1,19 +1,15 @@
-pub(crate) mod no_op;
-pub(crate) mod oidc;
-pub(crate) mod utils;
-
 use std::fmt::Debug;
 
 use async_trait::async_trait;
+
+use crate::common::domain::user::User;
+use crate::error::ApplicationError;
 use openidconnect::AuthorizationCode;
 use openidconnect::CsrfToken;
 use openidconnect::Nonce;
 use serde::Deserialize;
 use serde::Serialize;
 use url::Url;
-
-use crate::domain::user::User;
-use crate::error::ApplicationError;
 
 /// Defines the functionality that needs to be implemented for the application
 /// to perform OIDC authentication.
@@ -59,11 +55,11 @@ pub struct AuthorizeData {
 pub struct OidcSessionPersisted {
     /// The OIDC state. Should be persisted for validation in the callback
     /// handler.
-    state: CsrfToken,
+    pub state: CsrfToken,
 
-    ///the OIDC nonce. Should be persisted for validation in the callback
+    /// The OIDC nonce. Should be persisted for validation in the callback
     /// handler.
-    nonce: Nonce,
+    pub nonce: Nonce,
 }
 
 /// The query params that are supplied in the callback url from the IdP.
@@ -72,6 +68,6 @@ pub struct OidcSessionPersisted {
 /// > extracted from query params.
 #[derive(Debug, Clone, Deserialize)]
 pub struct CallbackRequestParams {
-    code: AuthorizationCode,
-    state: CsrfToken,
+    pub code: AuthorizationCode,
+    pub state: CsrfToken,
 }

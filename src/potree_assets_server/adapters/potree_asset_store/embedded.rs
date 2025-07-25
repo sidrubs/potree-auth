@@ -4,9 +4,8 @@ use async_trait::async_trait;
 use potree_embed::PotreeAssets;
 
 use crate::common::domain::StaticAsset;
-use crate::potree_assets_server::ports::potree_asset_store::{
-    PotreeAssetStore, PotreeAssetStoreError,
-};
+use crate::potree_assets_server::ports::potree_asset_store::PotreeAssetStore;
+use crate::potree_assets_server::ports::potree_asset_store::PotreeAssetStoreError;
 
 /// Provides access to built `potree` static assets that are embedded in the
 /// Rust binary.
