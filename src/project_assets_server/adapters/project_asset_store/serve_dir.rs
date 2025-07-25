@@ -72,7 +72,7 @@ impl ServeDirProjectAssets {
         let bytes = body
             .collect()
             .await
-            .map_err(|_err| ProjectAssetStoreError::InvalidFormat {
+            .map_err(|_err| ProjectAssetStoreError::Parsing {
                 path: path.to_owned(),
             })?
             .to_bytes();

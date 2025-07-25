@@ -26,6 +26,6 @@ pub enum ProjectAssetStoreError {
     #[error("the asset ({path}) could not be found")]
     AssetNotFound { path: PathBuf },
 
-    #[error("the asset ({path}) could not be formatted")]
-    InvalidFormat { path: PathBuf },
+    #[error("the asset ({path}) could not be parsed")]
+    Parsing { path: PathBuf },
 }

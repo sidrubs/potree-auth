@@ -5,7 +5,7 @@ use http::HeaderMap;
 
 use super::super::ports::project_asset_store::ProjectAssetStore;
 use super::super::ports::project_datastore::ProjectDatastore;
-use super::error::ProjectServiceError;
+use super::error::ProjectAssetsServiceError;
 use crate::common::domain::StaticAsset;
 use crate::common::domain::User;
 use crate::common::domain::value_objects::ProjectId;
@@ -42,7 +42,7 @@ impl ProjectAssetService {
         project_id: &ProjectId,
         asset_path: &Path,
         request_headers: Option<HeaderMap>,
-    ) -> Result<StaticAsset, ProjectServiceError> {
+    ) -> Result<StaticAsset, ProjectAssetsServiceError> {
         let project = self.project_datastore.read(project_id).await?;
         self.authorization_engine.assert_allowed(
             user,
@@ -102,7 +102,10 @@ mod project_asset_service_tests {
                 .await;
 
             // Assert
-            assert!(matches!(res, Err(ProjectServiceError::NotAuthenticated)))
+            assert!(matches!(
+                res,
+                Err(ProjectAssetsServiceError::NotAuthenticated)
+            ))
         }
     }
 
@@ -140,7 +143,7 @@ mod project_asset_service_tests {
         // Assert
         assert!(matches!(
             res,
-            Err(ProjectServiceError::NotAuthorized { .. })
+            Err(ProjectAssetsServiceError::NotAuthorized { .. })
         ))
     }
 }

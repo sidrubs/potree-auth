@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use super::super::ports::project_asset_store::ProjectAssetStoreError;
 use super::super::ports::project_datastore::ProjectDatastoreError;
 use crate::common::domain::User;
@@ -6,7 +8,7 @@ use crate::common::ports::authorization_engine::AuthorizationEngineError;
 use crate::common::ports::authorization_engine::ResourceType;
 
 #[derive(Debug, thiserror::Error)]
-pub enum ProjectServiceError {
+pub enum ProjectAssetsServiceError {
     #[error("project ({id}) not found")]
     ProjectNotFound { id: ProjectId },
 
@@ -20,11 +22,11 @@ pub enum ProjectServiceError {
     #[error("user is not authenticated")]
     NotAuthenticated,
 
-    #[error("{0}")]
-    ProjectAsset(String),
+    #[error("the asset ({path}) could not be found")]
+    AssetNotFound { path: PathBuf },
 }
 
-impl From<ProjectDatastoreError> for ProjectServiceError {
+impl From<ProjectDatastoreError> for ProjectAssetsServiceError {
     fn from(value: ProjectDatastoreError) -> Self {
         match value {
             ProjectDatastoreError::ResourceNotFound { id }
@@ -33,13 +35,16 @@ impl From<ProjectDatastoreError> for ProjectServiceError {
     }
 }
 
-impl From<ProjectAssetStoreError> for ProjectServiceError {
+impl From<ProjectAssetStoreError> for ProjectAssetsServiceError {
     fn from(value: ProjectAssetStoreError) -> Self {
-        Self::ProjectAsset(value.to_string())
+        match value {
+            ProjectAssetStoreError::AssetNotFound { path }
+            | ProjectAssetStoreError::Parsing { path } => Self::AssetNotFound { path },
+        }
     }
 }
 
-impl From<AuthorizationEngineError> for ProjectServiceError {
+impl From<AuthorizationEngineError> for ProjectAssetsServiceError {
     fn from(value: AuthorizationEngineError) -> Self {
         match value {
             AuthorizationEngineError::NotAuthorized {
