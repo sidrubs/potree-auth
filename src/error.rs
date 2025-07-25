@@ -1,4 +1,4 @@
-use crate::domain::ResourceType;
+use crate::common::domain::ResourceType;
 
 /// Describes all the errors that can be expected by the application.
 #[derive(Debug, thiserror::Error)]

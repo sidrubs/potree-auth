@@ -1,12 +1,15 @@
-pub mod application;
-pub mod cli;
-pub mod config;
-pub(crate) mod domain;
+// pub(crate) mod application;
+// pub mod cli;
+// pub mod config;
+pub(crate) mod common;
 pub mod error;
-pub mod observability;
-pub(crate) mod services;
-#[cfg(test)]
-pub(crate) mod test_utils;
+pub mod project_assets_server;
+// pub mod http;
+// pub mod observability;
+// pub(crate) mod outbound;
+// pub(crate) mod services;
+// #[cfg(test)]
+// pub(crate) mod test_utils;
 
-pub use application::initialize_application;
-pub use observability::init_tracing;
+// pub use http::initialize_application;
+// pub use observability::init_tracing;
