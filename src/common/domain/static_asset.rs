@@ -8,7 +8,7 @@ use crate::error::ApplicationError;
 
 /// Represents a static asset that can be served by a http server.
 #[derive(Debug, Clone)]
-pub(crate) struct StaticAsset(pub(crate) Response<Bytes>);
+pub struct StaticAsset(pub Response<Bytes>);
 
 impl StaticAsset {
     /// Convert from a `rust_embed::EmbeddedFile` to a [`StaticAsset`]. `path`
