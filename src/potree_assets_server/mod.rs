@@ -1,3 +1,4 @@
-pub(crate) mod adapters;
-pub(crate) mod application;
-pub(crate) mod ports;
+pub mod adapters;
+mod application;
+pub mod http;
+mod ports;

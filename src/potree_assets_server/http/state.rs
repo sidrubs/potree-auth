@@ -1,0 +1,6 @@
+use crate::potree_assets_server::application::service::PotreeAssetService;
+
+#[derive(Debug, Clone)]
+pub struct State {
+    pub potree_asset_service: PotreeAssetService,
+}

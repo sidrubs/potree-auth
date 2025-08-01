@@ -5,6 +5,7 @@ pub(crate) mod common;
 pub mod error;
 pub mod potree_assets_server;
 pub mod project_assets_server;
+pub mod rendering_server;
 // pub mod http;
 // pub mod observability;
 // pub(crate) mod outbound;

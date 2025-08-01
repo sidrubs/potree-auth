@@ -6,6 +6,7 @@ use crate::potree_assets_server::application::error::PotreeAssetsServiceError;
 use crate::potree_assets_server::ports::potree_asset_store::PotreeAssetStore;
 
 /// A service for loading potree assets.
+#[derive(Debug, Clone)]
 pub struct PotreeAssetService {
     potree_asset_store: Arc<dyn PotreeAssetStore>,
 }
