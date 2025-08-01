@@ -9,17 +9,16 @@ use serde::Serialize;
 use url::Url;
 
 use crate::common::domain::user::User;
-use crate::error::ApplicationError;
 
 /// Defines the functionality that needs to be implemented for the application
 /// to perform OIDC authentication.
 #[async_trait]
 #[cfg_attr(test, mockall::automock)]
-pub trait AuthenticationService: Debug + Send + Sync + 'static {
+pub trait AuthenticationEngine: Debug + Send + Sync + 'static {
     /// Called as part of the OIDC [`/authorize`] endpoint.
     ///
     /// [`/authorize`]: https://openid.net/specs/openid-connect-core-1_0.html#AuthorizationEndpoint
-    async fn authorize(&self) -> Result<AuthorizeData, ApplicationError>;
+    async fn authorize(&self) -> Result<AuthorizeData, AuthenticationEngineError>;
 
     /// After authentication, the IdP would redirect the user agent to the
     /// callback route. This would handle the finalizing the OIDC flow to return
@@ -33,7 +32,7 @@ pub trait AuthenticationService: Debug + Send + Sync + 'static {
         &self,
         callback_params: CallbackRequestParams,
         persisted_data: OidcSessionPersisted,
-    ) -> Result<User, ApplicationError>;
+    ) -> Result<User, AuthenticationEngineError>;
 }
 
 /// OIDC data generated from the OIDC Authentication Request (`/authorize`
@@ -70,4 +69,16 @@ pub struct OidcSessionPersisted {
 pub struct CallbackRequestParams {
     pub code: AuthorizationCode,
     pub state: CsrfToken,
+}
+
+#[derive(Debug, Clone, thiserror::Error)]
+pub enum AuthenticationEngineError {
+    #[error("unable to set up infrastructure: {message}")]
+    Infrastructure { message: String },
+
+    #[error("unable exchange information with the IdP: {message}")]
+    IdpExchange { message: String },
+
+    #[error("unable to validate IdP data: {message}")]
+    Validation { message: String },
 }

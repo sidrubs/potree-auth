@@ -31,19 +31,20 @@ use openidconnect::core::CoreTokenType;
 use serde::Deserialize;
 use serde::Serialize;
 
+use super::super::super::ports::authentication_engine::AuthenticationEngine;
+use super::super::super::ports::authentication_engine::AuthorizeData;
+use super::super::super::ports::authentication_engine::CallbackRequestParams;
+use super::super::super::ports::authentication_engine::OidcSessionPersisted;
 use super::utils::extract_user_email;
 use super::utils::extract_user_groups;
 use super::utils::extract_user_id;
 use super::utils::extract_user_name;
+use crate::authentication::ports::authentication_engine::AuthenticationEngineError;
 use crate::common::domain::User;
-use crate::common::ports::authentication_service::AuthenticationService;
-use crate::common::ports::authentication_service::AuthorizeData;
-use crate::common::ports::authentication_service::CallbackRequestParams;
-use crate::common::ports::authentication_service::OidcSessionPersisted;
 use crate::error::ApplicationError;
 
 #[derive(Debug, Clone)]
-pub(crate) struct OidcAuthenticationService {
+pub(crate) struct OidcAuthenticationEngine {
     /// The oidc client that is performing interaction with the IdP.
     oidc_client: PotreeAuthClient,
 
@@ -52,7 +53,7 @@ pub(crate) struct OidcAuthenticationService {
     groups_claim: String,
 }
 
-impl OidcAuthenticationService {
+impl OidcAuthenticationEngine {
     /// Creates a new [`OidcAuthenticationService`] instance with the specified
     /// `projects_directory`.
     ///
@@ -72,21 +73,21 @@ impl OidcAuthenticationService {
         client_id: ClientId,
         client_secret: ClientSecret,
         groups_claim: String,
-    ) -> Result<Self, ApplicationError> {
+    ) -> Result<Self, AuthenticationEngineError> {
         // Sets up an http client to interact with the IdP
         let http_client = reqwest::ClientBuilder::new()
             // Following redirects opens the client up to SSRF vulnerabilities.
             .redirect(reqwest::redirect::Policy::none())
             .build()
-            .map_err(|err| {
-                ApplicationError::ServerError(format!("unable to build OIDC http client: {err}"))
+            .map_err(|e| AuthenticationEngineError::Infrastructure {
+                message: format!("unable to build OIDC http client: {e}"),
             })?;
 
         // Request the oidc config from the IdP.
         let provider_metadata = CoreProviderMetadata::discover_async(idp_url, &http_client)
             .await
-            .map_err(|err| {
-                ApplicationError::ServerError(format!("unable to perform OIDC discovery: {err}"))
+            .map_err(|e| AuthenticationEngineError::IdpExchange {
+                message: format!("unable to perform OIDC discovery: {e}"),
             })?;
 
         let oidc_client = PotreeAuthClient::from_provider_metadata(
@@ -108,7 +109,7 @@ impl OidcAuthenticationService {
     /// OIDC `/authorize` route. And the `persisted_data` that is needed to
     /// complete the authentication flow in the callback handler.
     #[tracing::instrument]
-    async fn login(&self) -> Result<AuthorizeData, ApplicationError> {
+    async fn login(&self) -> Result<AuthorizeData, AuthenticationEngineError> {
         let (auth_url, state, nonce) = self
             .oidc_client
             .authorize_url(
@@ -132,47 +133,45 @@ impl OidcAuthenticationService {
         &self,
         callback_params: CallbackRequestParams,
         persisted_data: OidcSessionPersisted,
-    ) -> Result<User, ApplicationError> {
+    ) -> Result<User, AuthenticationEngineError> {
         // Sets up an http client to interact with the IdP
         let http_client = reqwest::ClientBuilder::new()
             // Following redirects opens the client up to SSRF vulnerabilities.
             .redirect(reqwest::redirect::Policy::none())
             .build()
-            .map_err(|err| {
-                ApplicationError::ServerError(format!("unable to build OIDC http client: {err}"))
+            .map_err(|e| AuthenticationEngineError::Infrastructure {
+                message: format!("unable to build OIDC http client: {e}"),
             })?;
 
         // Verify that state matches that from the session
         if callback_params.state.secret() != persisted_data.state.secret() {
-            return Err(ApplicationError::Oidc(
-                "the session and request `state`s do not match".to_owned(),
-            ));
+            return Err(AuthenticationEngineError::Validation {
+                message: "the session and request `state`s do not match".to_owned(),
+            });
         }
 
         // Request the tokens from the IdP
         let token_response = self
             .oidc_client
             .exchange_code(callback_params.code)
-            .map_err(|err| {
-                ApplicationError::ServerError(format!(
-                    "unable to initialize OIDC code exchange client: {err}"
-                ))
+            .map_err(|e| AuthenticationEngineError::Infrastructure {
+                message: format!("unable to initialize OIDC code exchange client: {e}"),
             })?
             .request_async(&http_client)
             .await
-            .map_err(|err| {
-                ApplicationError::Oidc(format!("unable to perform token request: {err}"))
+            .map_err(|e| AuthenticationEngineError::IdpExchange {
+                message: format!("unable to perform token request: {e}"),
             })?;
 
         // Extract the claims from the id token.
         let id_token_claims = token_response
             .id_token()
-            .ok_or(ApplicationError::Oidc(
-                "IdP did not return id_token".to_owned(),
-            ))?
+            .ok_or(AuthenticationEngineError::Validation {
+                message: "IdP did not return id_token".to_owned(),
+            })?
             .claims(&self.oidc_client.id_token_verifier(), &persisted_data.nonce)
-            .map_err(|err| {
-                ApplicationError::Oidc(format!("unable to extract claims from id_token: {err}"))
+            .map_err(|err| AuthenticationEngineError::Validation {
+                message: format!("unable to extract claims from id_token: {err}"),
             })?;
 
         Ok(User {
@@ -185,8 +184,8 @@ impl OidcAuthenticationService {
 }
 
 #[async_trait]
-impl AuthenticationService for OidcAuthenticationService {
-    async fn authorize(&self) -> Result<AuthorizeData, ApplicationError> {
+impl AuthenticationEngine for OidcAuthenticationEngine {
+    async fn authorize(&self) -> Result<AuthorizeData, AuthenticationEngineError> {
         Self::login(self).await
     }
 
@@ -194,7 +193,7 @@ impl AuthenticationService for OidcAuthenticationService {
         &self,
         callback_params: CallbackRequestParams,
         persisted_data: OidcSessionPersisted,
-    ) -> Result<User, ApplicationError> {
+    ) -> Result<User, AuthenticationEngineError> {
         Self::callback(self, callback_params, persisted_data).await
     }
 }

@@ -4,11 +4,11 @@ use openidconnect::IdTokenClaims;
 use openidconnect::core::CoreGenderClaim;
 
 use super::oidc::PotreeAuthClaims;
+use crate::authentication::ports::authentication_engine::AuthenticationEngineError;
 use crate::common::domain::Group;
 use crate::common::domain::value_objects::EmailAddress;
 use crate::common::domain::value_objects::UserId;
 use crate::common::domain::value_objects::UserName;
-use crate::error::ApplicationError;
 
 pub(crate) fn extract_user_groups(
     id_token_claims: &IdTokenClaims<PotreeAuthClaims, CoreGenderClaim>,
@@ -35,30 +35,30 @@ pub(crate) fn extract_user_id(
 
 pub(crate) fn extract_user_name(
     id_token_claims: &IdTokenClaims<PotreeAuthClaims, CoreGenderClaim>,
-) -> Result<UserName, ApplicationError> {
+) -> Result<UserName, AuthenticationEngineError> {
     Ok(UserName::new(
         id_token_claims
             .name()
-            .ok_or(ApplicationError::Oidc(
-                "no `name` associated with user".to_owned(),
-            ))?
+            .ok_or(AuthenticationEngineError::Validation {
+                message: "no `name` associated with user".to_owned(),
+            })?
             .get(None)
-            .ok_or(ApplicationError::Oidc(
-                "no `name` associated with user".to_owned(),
-            ))?
+            .ok_or(AuthenticationEngineError::Validation {
+                message: "no `name` associated with user".to_owned(),
+            })?
             .to_string(),
     ))
 }
 
 pub(crate) fn extract_user_email(
     id_token_claims: &IdTokenClaims<PotreeAuthClaims, CoreGenderClaim>,
-) -> Result<EmailAddress, ApplicationError> {
+) -> Result<EmailAddress, AuthenticationEngineError> {
     Ok(EmailAddress::new(
         id_token_claims
             .email()
-            .ok_or(ApplicationError::Oidc(
-                "no `email` associated with user".to_owned(),
-            ))?
+            .ok_or(AuthenticationEngineError::Validation {
+                message: "no `email` associated with user".to_owned(),
+            })?
             .to_string(),
     ))
 }

@@ -1,3 +1,4 @@
+pub(crate) mod authentication;
 pub(crate) mod common;
 pub mod error;
 pub(crate) mod potree_assets;
