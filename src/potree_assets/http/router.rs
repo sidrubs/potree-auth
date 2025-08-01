@@ -6,9 +6,9 @@ use axum::Router;
 use axum::routing::get;
 use web_route::ParameterizedRoute;
 
+use super::super::application::service::PotreeAssetService;
 use super::routes;
 use super::state::State;
-use crate::potree_assets_server::application::service::PotreeAssetService;
 
 static ASSET_PATH: LazyLock<ParameterizedRoute> =
     LazyLock::new(|| ParameterizedRoute::new("/{*path}"));

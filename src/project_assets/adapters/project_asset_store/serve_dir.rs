@@ -11,8 +11,8 @@ use tower::util::ServiceExt;
 use tower_http::services::ServeFile;
 
 use super::super::super::ports::project_asset_store::ProjectAssetStore;
+use super::super::super::ports::project_asset_store::ProjectAssetStoreError;
 use crate::common::domain::StaticAsset;
-use crate::project_assets_server::ports::project_asset_store::ProjectAssetStoreError;
 
 /// An implementation of the [`ProjectAssetService`]. It uses
 /// [`tower_http::services::ServeFile`] under the hood, as its logic is robust

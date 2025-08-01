@@ -1,9 +1,9 @@
 use axum::extract::FromRequestParts;
 use http::request::Parts;
 
+use super::super::application::service::PotreeAssetService;
 use super::state::State;
 use crate::common::utils::axum::api_error::ApiError;
-use crate::potree_assets_server::application::service::PotreeAssetService;
 
 impl<S> FromRequestParts<S> for State
 where

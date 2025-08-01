@@ -1,9 +1,9 @@
 use std::path::Path;
 use std::sync::Arc;
 
+use super::super::application::error::PotreeAssetsServiceError;
+use super::super::ports::potree_asset_store::PotreeAssetStore;
 use crate::common::domain::StaticAsset;
-use crate::potree_assets_server::application::error::PotreeAssetsServiceError;
-use crate::potree_assets_server::ports::potree_asset_store::PotreeAssetStore;
 
 /// A service for loading potree assets.
 #[derive(Debug, Clone)]

@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use crate::potree_assets_server::ports::potree_asset_store::PotreeAssetStoreError;
+use super::super::ports::potree_asset_store::PotreeAssetStoreError;
 
 #[derive(Debug, thiserror::Error)]
 pub enum PotreeAssetsServiceError {

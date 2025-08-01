@@ -99,11 +99,11 @@ mod project_rendering_service_tests {
     use web_route::ParameterizedRoute;
     use web_route::WebRoute;
 
+    use super::super::super::application::error::RenderingServiceError;
+    use super::super::super::application::service::ProjectRenderingService;
     use crate::common::ports::authorization_engine::AuthorizationEngineError;
     use crate::common::ports::authorization_engine::MockAuthorizationEngine;
     use crate::common::ports::project_datastore::MockProjectDatastore;
-    use crate::rendering_server::application::error::RenderingServiceError;
-    use crate::rendering_server::application::service::ProjectRenderingService;
 
     mod render_potree {
 

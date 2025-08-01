@@ -3,9 +3,9 @@ use std::path::Path;
 use async_trait::async_trait;
 use potree_embed::PotreeAssets;
 
+use super::super::super::ports::potree_asset_store::PotreeAssetStore;
+use super::super::super::ports::potree_asset_store::PotreeAssetStoreError;
 use crate::common::domain::StaticAsset;
-use crate::potree_assets_server::ports::potree_asset_store::PotreeAssetStore;
-use crate::potree_assets_server::ports::potree_asset_store::PotreeAssetStoreError;
 
 /// Provides access to built `potree` static assets that are embedded in the
 /// Rust binary.
