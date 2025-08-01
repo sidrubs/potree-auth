@@ -54,6 +54,7 @@ fake = { version = "4.3.0", features = ["derive", "url", "http"] }
 mockall = "0.13.1"
 tempfile = "3.20.0"
 test-case = "3.3.1"
+web-route = { version = "0.2.4", features = ["fake"] }
 
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = "0.6"

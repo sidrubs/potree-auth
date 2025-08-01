@@ -10,8 +10,8 @@ use crate::common::domain::group::Group;
 use crate::common::domain::project::Project;
 use crate::common::domain::value_objects::ProjectId;
 use crate::common::domain::value_objects::ProjectName;
-use crate::project_assets_server::ports::project_datastore::ProjectDatastore;
-use crate::project_assets_server::ports::project_datastore::ProjectDatastoreError;
+use crate::common::ports::project_datastore::ProjectDatastore;
+use crate::common::ports::project_datastore::ProjectDatastoreError;
 
 /// The name of the project manifest files.
 const MANIFEST_FILE_NAME: &str = "manifest.yml";
@@ -25,7 +25,7 @@ const MANIFEST_FILE_NAME: &str = "manifest.yml";
 /// contain a `manifest.yml` file that can be deserialized to a
 /// [`ProjectManifest`] struct.
 #[derive(Debug, Clone)]
-pub(crate) struct ManifestFileProjectDatastore {
+pub struct ManifestFileProjectDatastore {
     /// The directory containing all the projects.
     projects_directory: PathBuf,
 }

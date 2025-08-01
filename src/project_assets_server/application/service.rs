@@ -4,7 +4,6 @@ use std::sync::Arc;
 use http::HeaderMap;
 
 use super::super::ports::project_asset_store::ProjectAssetStore;
-use super::super::ports::project_datastore::ProjectDatastore;
 use super::error::ProjectAssetsServiceError;
 use crate::common::domain::StaticAsset;
 use crate::common::domain::User;
@@ -12,6 +11,7 @@ use crate::common::domain::value_objects::ProjectId;
 use crate::common::ports::authorization_engine::Action;
 use crate::common::ports::authorization_engine::AuthorizationEngine;
 use crate::common::ports::authorization_engine::Resource;
+use crate::common::ports::project_datastore::ProjectDatastore;
 
 /// A service for interacting with project assets.
 #[derive(Debug, Clone)]
@@ -67,12 +67,12 @@ mod project_asset_service_tests {
     use fake::Faker;
 
     use super::super::super::ports::project_asset_store::MockProjectAssetStore;
-    use super::super::super::ports::project_datastore::MockProjectDatastore;
     use super::*;
     use crate::common::domain::ResourceType;
     use crate::common::domain::project::Project;
     use crate::common::ports::authorization_engine::AuthorizationEngineError;
     use crate::common::ports::authorization_engine::MockAuthorizationEngine;
+    use crate::common::ports::project_datastore::MockProjectDatastore;
 
     mod request_asset {
 

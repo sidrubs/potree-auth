@@ -3032,6 +3032,7 @@ version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d3ab8f75639897a5a90c1772a6747e9e0a047dbee67e04ef94b13fd9965a55cb"
 dependencies = [
+ "fake",
  "serde",
  "serde_json",
  "thiserror 2.0.12",

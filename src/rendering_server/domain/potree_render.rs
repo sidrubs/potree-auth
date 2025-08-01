@@ -15,7 +15,7 @@ pub struct PotreeRender {
     pub project_title: ProjectName,
 
     /// The path where the `potree` static assets are served.
-    pub potree_static_assets_path: String,
+    pub potree_static_assets_path: WebRoute,
 
     /// The path to the `potree` project config file.
     pub potree_config_path: WebRoute,

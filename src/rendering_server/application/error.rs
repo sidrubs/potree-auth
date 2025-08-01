@@ -1,6 +1,3 @@
-use std::path::PathBuf;
-
-use super::super::ports::project_asset_store::ProjectAssetStoreError;
 use crate::common::domain::ResourceType;
 use crate::common::domain::User;
 use crate::common::domain::value_objects::ProjectId;
@@ -8,7 +5,7 @@ use crate::common::ports::authorization_engine::AuthorizationEngineError;
 use crate::common::ports::project_datastore::ProjectDatastoreError;
 
 #[derive(Debug, thiserror::Error)]
-pub enum ProjectAssetsServiceError {
+pub enum RenderingServiceError {
     #[error("project ({id}) not found")]
     ProjectNotFound { id: ProjectId },
 
@@ -22,11 +19,11 @@ pub enum ProjectAssetsServiceError {
     #[error("user is not authenticated")]
     NotAuthenticated,
 
-    #[error("the asset ({path}) could not be found")]
-    AssetNotFound { path: PathBuf },
+    #[error("the server is not configured correctly: {message}")]
+    ServerConfiguration { message: String },
 }
 
-impl From<ProjectDatastoreError> for ProjectAssetsServiceError {
+impl From<ProjectDatastoreError> for RenderingServiceError {
     fn from(value: ProjectDatastoreError) -> Self {
         match value {
             ProjectDatastoreError::ResourceNotFound { id }
@@ -35,16 +32,7 @@ impl From<ProjectDatastoreError> for ProjectAssetsServiceError {
     }
 }
 
-impl From<ProjectAssetStoreError> for ProjectAssetsServiceError {
-    fn from(value: ProjectAssetStoreError) -> Self {
-        match value {
-            ProjectAssetStoreError::AssetNotFound { path }
-            | ProjectAssetStoreError::Parsing { path } => Self::AssetNotFound { path },
-        }
-    }
-}
-
-impl From<AuthorizationEngineError> for ProjectAssetsServiceError {
+impl From<AuthorizationEngineError> for RenderingServiceError {
     fn from(value: AuthorizationEngineError) -> Self {
         match value {
             AuthorizationEngineError::NotAuthorized {
@@ -57,6 +45,14 @@ impl From<AuthorizationEngineError> for ProjectAssetsServiceError {
                 resource_type,
             },
             AuthorizationEngineError::NotAuthenticated => Self::NotAuthenticated,
+        }
+    }
+}
+
+impl From<web_route::error::WebRouteError> for RenderingServiceError {
+    fn from(value: web_route::error::WebRouteError) -> Self {
+        Self::ServerConfiguration {
+            message: format!("unable to build `WebRoute`: {value}"),
         }
     }
 }

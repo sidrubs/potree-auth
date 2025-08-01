@@ -1,1 +1,1 @@
-mod potree_render;
+pub mod potree_render;
