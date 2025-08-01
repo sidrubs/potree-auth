@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 
+use crate::common::domain::ResourceType;
 use crate::common::domain::project::Project;
 use crate::common::domain::user::User;
 
@@ -43,11 +44,6 @@ pub enum Action {
     Write,
     Update,
     Delete,
-}
-
-#[derive(Debug, Clone)]
-pub enum ResourceType {
-    Project,
 }
 
 impl From<&Resource<'_>> for ResourceType {

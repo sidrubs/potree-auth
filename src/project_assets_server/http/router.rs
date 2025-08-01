@@ -6,24 +6,26 @@ use axum::Router;
 use axum::routing::get;
 use web_route::ParameterizedRoute;
 
+use super::super::application::service::ProjectAssetService;
 use super::routes;
 use super::state::State;
-use crate::potree_assets_server::application::service::PotreeAssetService;
+use crate::common::domain::value_objects::ProjectId;
 
 static ASSET_PATH: LazyLock<ParameterizedRoute> =
-    LazyLock::new(|| ParameterizedRoute::new("/{*path}"));
+    LazyLock::new(|| ParameterizedRoute::new("/{project_id}/{*path}"));
 
 #[derive(serde::Deserialize)]
 pub(crate) struct AssetPathParams {
+    pub project_id: ProjectId,
     pub path: PathBuf,
 }
 
-pub fn build_router(potree_asset_service: PotreeAssetService) -> Router {
+pub fn build_router(project_asset_service: ProjectAssetService) -> Router {
     let state = State {
-        potree_asset_service,
+        project_asset_service,
     };
 
     Router::new()
-        .route(&ASSET_PATH, get(routes::potree_asset))
+        .route(&ASSET_PATH, get(routes::project_asset))
         .layer(Extension(state))
 }

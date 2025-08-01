@@ -2,10 +2,10 @@ use std::path::PathBuf;
 
 use super::super::ports::project_asset_store::ProjectAssetStoreError;
 use super::super::ports::project_datastore::ProjectDatastoreError;
+use crate::common::domain::ResourceType;
 use crate::common::domain::User;
 use crate::common::domain::value_objects::ProjectId;
 use crate::common::ports::authorization_engine::AuthorizationEngineError;
-use crate::common::ports::authorization_engine::ResourceType;
 
 #[derive(Debug, thiserror::Error)]
 pub enum ProjectAssetsServiceError {

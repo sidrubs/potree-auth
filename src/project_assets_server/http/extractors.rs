@@ -1,9 +1,9 @@
 use axum::extract::FromRequestParts;
 use http::request::Parts;
 
+use super::super::application::service::ProjectAssetService;
 use super::state::State;
 use crate::common::utils::axum::api_error::ApiError;
-use crate::potree_assets_server::application::service::PotreeAssetService;
 
 impl<S> FromRequestParts<S> for State
 where
@@ -21,7 +21,7 @@ where
     }
 }
 
-impl<S> FromRequestParts<S> for PotreeAssetService
+impl<S> FromRequestParts<S> for ProjectAssetService
 where
     S: Send + Sync,
 {
@@ -29,6 +29,6 @@ where
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let state = State::from_request_parts(parts, state).await?;
-        Ok(state.potree_asset_service)
+        Ok(state.project_asset_service)
     }
 }

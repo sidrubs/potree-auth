@@ -14,6 +14,7 @@ use crate::common::ports::authorization_engine::AuthorizationEngine;
 use crate::common::ports::authorization_engine::Resource;
 
 /// A service for interacting with project assets.
+#[derive(Debug, Clone)]
 pub struct ProjectAssetService {
     project_datastore: Arc<dyn ProjectDatastore>,
     project_asset_store: Arc<dyn ProjectAssetStore>,
@@ -68,10 +69,10 @@ mod project_asset_service_tests {
     use super::super::super::ports::project_asset_store::MockProjectAssetStore;
     use super::super::super::ports::project_datastore::MockProjectDatastore;
     use super::*;
+    use crate::common::domain::ResourceType;
     use crate::common::domain::project::Project;
     use crate::common::ports::authorization_engine::AuthorizationEngineError;
     use crate::common::ports::authorization_engine::MockAuthorizationEngine;
-    use crate::common::ports::authorization_engine::ResourceType;
 
     mod request_asset {
 

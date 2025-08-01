@@ -1,2 +1,3 @@
 pub mod api_error;
-pub mod domain_into_response;
+pub mod extractors;
+pub mod into_response;

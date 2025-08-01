@@ -1,4 +1,4 @@
 pub mod adapters;
 pub mod application;
-// pub mod http;
+pub mod http;
 mod ports;
