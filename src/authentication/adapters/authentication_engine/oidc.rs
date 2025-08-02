@@ -31,17 +31,16 @@ use openidconnect::core::CoreTokenType;
 use serde::Deserialize;
 use serde::Serialize;
 
+use super::super::super::domain::AuthorizeData;
+use super::super::super::domain::CallbackRequestParams;
+use super::super::super::domain::OidcSessionPersisted;
 use super::super::super::ports::authentication_engine::AuthenticationEngine;
-use super::super::super::ports::authentication_engine::AuthorizeData;
-use super::super::super::ports::authentication_engine::CallbackRequestParams;
-use super::super::super::ports::authentication_engine::OidcSessionPersisted;
 use super::utils::extract_user_email;
 use super::utils::extract_user_groups;
 use super::utils::extract_user_id;
 use super::utils::extract_user_name;
 use crate::authentication::ports::authentication_engine::AuthenticationEngineError;
 use crate::common::domain::User;
-use crate::error::ApplicationError;
 
 #[derive(Debug, Clone)]
 pub(crate) struct OidcAuthenticationEngine {
