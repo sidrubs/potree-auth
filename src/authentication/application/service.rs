@@ -23,7 +23,7 @@ impl AuthenticationService {
     //// Called as part of the OIDC [`/authorize`] endpoint.
     ///
     /// [`/authorize`]: https://openid.net/specs/openid-connect-core-1_0.html#AuthorizationEndpoint
-    async fn authorize(&self) -> Result<AuthorizeData, AuthenticationServiceError> {
+    pub async fn authorize(&self) -> Result<AuthorizeData, AuthenticationServiceError> {
         Ok(self.authentication_engine.authorize().await?)
     }
 
@@ -35,7 +35,7 @@ impl AuthenticationService {
     /// should have been stored as part of the `/authorize` endpoint. The
     /// `callback_params` would have come from the query params of the callback
     /// handler.
-    async fn callback(
+    pub async fn callback(
         &self,
         callback_params: CallbackRequestParams,
         persisted_data: OidcSessionPersisted,
