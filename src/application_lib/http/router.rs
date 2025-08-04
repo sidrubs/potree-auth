@@ -1,11 +1,3 @@
-//! The top level `potree-auth` layer. Composes functionality from all the
-//! various domains.
-
-mod config;
-pub mod error;
-mod factories;
-mod middleware;
-
 use std::sync::Arc;
 use std::sync::LazyLock;
 
@@ -17,6 +9,12 @@ use tower_http::normalize_path::NormalizePathLayer;
 use web_route::ParameterizedRoute;
 use web_route::WebRoute;
 
+use super::super::config::PotreeAuthConfiguration;
+use super::super::error::PotreeAuthError;
+use super::factories::init_authentication_engine;
+use super::factories::init_authorization_engine;
+use super::middleware::session::apply_session_layer;
+use super::middleware::tracing::apply_tracing_middleware;
 use crate::authentication::application::service::AuthenticationService;
 use crate::authentication::{self};
 use crate::common;
@@ -24,12 +22,6 @@ use crate::common::adapters::project_datastore::manifest_file::ManifestFileProje
 use crate::potree_assets::adapters::potree_asset_store::embedded::EmbeddedPotreeAssetStore;
 use crate::potree_assets::application::service::PotreeAssetService;
 use crate::potree_assets::{self};
-use crate::potree_auth::config::PotreeAuthConfiguration;
-use crate::potree_auth::error::PotreeAuthError;
-use crate::potree_auth::factories::init_authentication_engine;
-use crate::potree_auth::factories::init_authorization_engine;
-use crate::potree_auth::middleware::session::apply_session_layer;
-use crate::potree_auth::middleware::tracing::apply_tracing_middleware;
 use crate::project_assets::adapters::project_asset_store::serve_dir::ServeDirProjectAssets;
 use crate::project_assets::application::service::ProjectAssetService;
 use crate::project_assets::http::ASSET_PATH;
@@ -37,7 +29,7 @@ use crate::project_assets::{self};
 use crate::render::application::service::RenderingService;
 use crate::render::{self};
 
-static AUTH: LazyLock<WebRoute> = LazyLock::new(|| WebRoute::new("/auth"));
+pub(crate) static AUTH: LazyLock<WebRoute> = LazyLock::new(|| WebRoute::new("/auth"));
 static POTREE_ASSETS: LazyLock<ParameterizedRoute> =
     LazyLock::new(|| ParameterizedRoute::new("/potree-assets"));
 static PROJECT_ASSETS: LazyLock<ParameterizedRoute> =

@@ -37,6 +37,10 @@ pub enum Resource<'a> {
 }
 
 /// Defines actions that can be performed on a [`Resource`].
+#[expect(
+    dead_code,
+    reason = "`list`, `write`, `update`, and `delete` to be used in the future"
+)]
 #[derive(Debug, Clone)]
 pub enum Action {
     Read,

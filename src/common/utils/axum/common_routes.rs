@@ -1,4 +1,5 @@
-//! A set of commonly used "admin" style routes that should be present on a production server.
+//! A set of commonly used "admin" style routes that should be present on a
+//! production server.
 
 use std::sync::LazyLock;
 

@@ -1,5 +1,8 @@
 use std::sync::Arc;
 
+use super::super::config::IdpConfiguration;
+use super::super::error::PotreeAuthError;
+use super::router::AUTH;
 use crate::authentication::adapters::authentication_engine::no_op::NoOpAuthenticationEngine;
 use crate::authentication::adapters::authentication_engine::oidc::OidcAuthenticationEngine;
 use crate::authentication::http::CALLBACK;
@@ -7,9 +10,6 @@ use crate::authentication::ports::authentication_engine::AuthenticationEngine;
 use crate::common::adapters::authorization_engine::basic_authorization::SimpleAuthorizationEngine;
 use crate::common::adapters::authorization_engine::no_op::NoOpAuthorizationEngine;
 use crate::common::ports::authorization_engine::AuthorizationEngine;
-use crate::potree_auth::AUTH;
-use crate::potree_auth::config::IdpConfiguration;
-use crate::potree_auth::error::PotreeAuthError;
 
 /// Initialize an authentication engine to handle OIDC authentication.
 ///

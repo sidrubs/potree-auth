@@ -5,8 +5,8 @@ use std::path::PathBuf;
 use clap::Parser;
 use url::Url;
 
-use crate::config::ApplicationConfiguration;
-use crate::config::IdpConfiguration as ApplicationIdpConfiguration;
+use super::config::IdpConfiguration as PotreeAuthIdpConfiguration;
+use super::config::PotreeAuthConfiguration;
 
 #[derive(Debug, Clone, Parser)]
 #[command(version, about = None, long_about = None)]
@@ -56,7 +56,7 @@ pub struct IdpConfiguration {
     pub idp_application_external_url: Url,
 }
 
-impl From<Cli> for ApplicationConfiguration {
+impl From<Cli> for PotreeAuthConfiguration {
     fn from(value: Cli) -> Self {
         let Cli { data_dir, idp } = value;
 
@@ -67,7 +67,7 @@ impl From<Cli> for ApplicationConfiguration {
     }
 }
 
-impl From<IdpConfiguration> for ApplicationIdpConfiguration {
+impl From<IdpConfiguration> for PotreeAuthIdpConfiguration {
     fn from(value: IdpConfiguration) -> Self {
         let IdpConfiguration {
             idp_url,
