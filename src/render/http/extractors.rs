@@ -1,7 +1,7 @@
 use axum::extract::FromRequestParts;
 use http::request::Parts;
 
-use super::super::application::service::ProjectRenderingService;
+use super::super::application::service::RenderingService;
 use super::state::State;
 use crate::common::utils::axum::api_error::ApiError;
 
@@ -21,7 +21,7 @@ where
     }
 }
 
-impl<S> FromRequestParts<S> for ProjectRenderingService
+impl<S> FromRequestParts<S> for RenderingService
 where
     S: Send + Sync,
 {
@@ -29,6 +29,6 @@ where
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let state = State::from_request_parts(parts, state).await?;
-        Ok(state.project_rendering_service)
+        Ok(state.rendering_service)
     }
 }

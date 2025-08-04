@@ -11,18 +11,8 @@ use openidconnect::RedirectUrl;
 use routes::build_router;
 use tower_http::normalize_path::NormalizePath;
 
-use crate::config::ApplicationConfiguration;
-use crate::error::ApplicationError;
-use crate::http::routes::AUTH_CALLBACK;
-use crate::outbound::project_asset_store::serve_dir::ServeDirProjectAssets;
-use crate::services::authentication_service::AuthenticationService;
-use crate::services::authentication_service::no_op::NoOpAuthenticationService;
-use crate::services::authentication_service::oidc::OidcAuthenticationService;
-use crate::services::authorization_engine::AuthorizationEngine;
-use crate::services::authorization_engine::basic_authorization::SimpleAuthorizationEngine;
-use crate::services::authorization_engine::no_op::NoOpAuthorizationEngine;
-use crate::services::potree_asset_store::embedded::EmbeddedPotreeAssetService;
-use crate::services::project_store::manifest_file::ManifestFileProjectService;
+use super::config::PotreeAuthConfiguration;
+use super::error::PotreeAuthError;
 
 mod extractors;
 mod middleware;
@@ -30,11 +20,12 @@ mod routes;
 mod utils;
 mod views;
 
-/// Sets up the required services and builds the application routes configured
-/// as per the `config`.
+/// Builds the top-level router that would be served by the binary executable.
 pub async fn initialize_application(
-    config: &ApplicationConfiguration,
-) -> Result<IntoMakeService<NormalizePath<Router>>, ApplicationError> {
+    config: &PotreeAuthConfiguration,
+) -> Result<IntoMakeService<NormalizePath<Router>>, PotreeAuthError> {
+    // Set up authentication
+
     // Set up services.
     let project_service = Arc::new(ManifestFileProjectService::new(&config.data_dir));
     let project_asset_service = Arc::new(ServeDirProjectAssets::new(&config.data_dir));
@@ -113,7 +104,7 @@ mod router_integration_tests {
         async fn should_return_a_200() {
             // Arrange
             let test_server = TestServer::new(
-                initialize_application(&ApplicationConfiguration::dummy_with_no_idp())
+                initialize_application(&PotreeAuthConfiguration::dummy_with_no_idp())
                     .await
                     .unwrap(),
             )
@@ -134,7 +125,7 @@ mod router_integration_tests {
         async fn should_return_the_asset_correctly_if_found() {
             // Arrange
             let test_server = TestServer::new(
-                initialize_application(&ApplicationConfiguration::dummy_with_no_idp())
+                initialize_application(&PotreeAuthConfiguration::dummy_with_no_idp())
                     .await
                     .unwrap(),
             )
@@ -161,7 +152,7 @@ mod router_integration_tests {
             // Arrange
             let non_existent_path = "build/non/existent.txt";
             let test_server = TestServer::new(
-                initialize_application(&ApplicationConfiguration::dummy_with_no_idp())
+                initialize_application(&PotreeAuthConfiguration::dummy_with_no_idp())
                     .await
                     .unwrap(),
             )
@@ -206,9 +197,9 @@ mod router_integration_tests {
         #[tokio::test]
         async fn should_return_the_asset_correctly_if_found() {
             // Arrange
-            let config = ApplicationConfiguration {
+            let config = PotreeAuthConfiguration {
                 data_dir: TEST_PROJECT_PARENT.parse().unwrap(),
-                ..ApplicationConfiguration::dummy_with_no_idp()
+                ..PotreeAuthConfiguration::dummy_with_no_idp()
             };
             let test_server =
                 TestServer::new(initialize_application(&config).await.unwrap()).unwrap();
@@ -234,9 +225,9 @@ mod router_integration_tests {
         #[tokio::test]
         async fn should_return_an_asset_range_correctly() {
             // Arrange
-            let config = ApplicationConfiguration {
+            let config = PotreeAuthConfiguration {
                 data_dir: TEST_PROJECT_PARENT.parse().unwrap(),
-                ..ApplicationConfiguration::dummy_with_no_idp()
+                ..PotreeAuthConfiguration::dummy_with_no_idp()
             };
             let test_server =
                 TestServer::new(initialize_application(&config).await.unwrap()).unwrap();
@@ -266,9 +257,9 @@ mod router_integration_tests {
             // Arrange
             let non_existent_path = WebRoute::new("build/non/existent.txt");
 
-            let config = ApplicationConfiguration {
+            let config = PotreeAuthConfiguration {
                 data_dir: TEST_PROJECT_PARENT.parse().unwrap(),
-                ..ApplicationConfiguration::dummy_with_no_idp()
+                ..PotreeAuthConfiguration::dummy_with_no_idp()
             };
             let test_server =
                 TestServer::new(initialize_application(&config).await.unwrap()).unwrap();
@@ -301,9 +292,9 @@ mod router_integration_tests {
         #[ignore = "the route handler seems to be getting project 2 as the project_id so authZ would be fine, this test should be done with proper auth mocking"]
         async fn should_return_a_404_if_parent_directory_reference_in_path() {
             // Arrange
-            let config = ApplicationConfiguration {
+            let config = PotreeAuthConfiguration {
                 data_dir: TEST_PROJECT_PARENT.parse().unwrap(),
-                ..ApplicationConfiguration::dummy_with_no_idp()
+                ..PotreeAuthConfiguration::dummy_with_no_idp()
             };
             let test_server =
                 TestServer::new(initialize_application(&config).await.unwrap()).unwrap();
@@ -321,9 +312,9 @@ mod router_integration_tests {
         #[tokio::test]
         async fn should_contain_cache_control_response_header() {
             // Arrange
-            let config = ApplicationConfiguration {
+            let config = PotreeAuthConfiguration {
                 data_dir: TEST_PROJECT_PARENT.parse().unwrap(),
-                ..ApplicationConfiguration::dummy_with_no_idp()
+                ..PotreeAuthConfiguration::dummy_with_no_idp()
             };
             let test_server =
                 TestServer::new(initialize_application(&config).await.unwrap()).unwrap();
@@ -353,9 +344,9 @@ mod router_integration_tests {
         #[tokio::test]
         async fn should_return_the_correct_html() {
             // Arrange
-            let config = ApplicationConfiguration {
+            let config = PotreeAuthConfiguration {
                 data_dir: TEST_PROJECT_PARENT.parse().unwrap(),
-                ..ApplicationConfiguration::dummy_with_no_idp()
+                ..PotreeAuthConfiguration::dummy_with_no_idp()
             };
             let test_server =
                 TestServer::new(initialize_application(&config).await.unwrap()).unwrap();

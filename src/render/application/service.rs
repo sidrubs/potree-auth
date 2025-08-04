@@ -14,7 +14,7 @@ use crate::common::ports::project_datastore::ProjectDatastore;
 
 /// A service for rendering a project.
 #[derive(Debug, Clone)]
-pub struct ProjectRenderingService {
+pub struct RenderingService {
     /// Used to load project information.
     project_datastore: Arc<dyn ProjectDatastore>,
 
@@ -28,7 +28,7 @@ pub struct ProjectRenderingService {
     potree_assets_route: WebRoute,
 }
 
-impl ProjectRenderingService {
+impl RenderingService {
     pub fn new(
         project_datastore: Arc<dyn ProjectDatastore>,
         authorization_engine: Arc<dyn AuthorizationEngine>,
@@ -100,7 +100,7 @@ mod project_rendering_service_tests {
     use web_route::WebRoute;
 
     use super::super::super::application::error::RenderingServiceError;
-    use super::super::super::application::service::ProjectRenderingService;
+    use super::super::super::application::service::RenderingService;
     use crate::common::ports::authorization_engine::AuthorizationEngineError;
     use crate::common::ports::authorization_engine::MockAuthorizationEngine;
     use crate::common::ports::project_datastore::MockProjectDatastore;
@@ -121,7 +121,7 @@ mod project_rendering_service_tests {
                 .expect_assert_allowed()
                 .return_const(Err(AuthorizationEngineError::NotAuthenticated));
 
-            let project_asset_service = ProjectRenderingService::new(
+            let project_asset_service = RenderingService::new(
                 Arc::new(project_datastore),
                 Arc::new(authorization_engine),
                 ParameterizedRoute::new(Faker.fake::<WebRoute>()).join("/{project_id}/{*path}"),
@@ -154,7 +154,7 @@ mod project_rendering_service_tests {
                 resource_type: Faker.fake(),
             }));
 
-        let project_asset_service = ProjectRenderingService::new(
+        let project_asset_service = RenderingService::new(
             Arc::new(project_datastore),
             Arc::new(authorization_engine),
             ParameterizedRoute::new(Faker.fake::<WebRoute>()).join("/{project_id}/{*path}"),

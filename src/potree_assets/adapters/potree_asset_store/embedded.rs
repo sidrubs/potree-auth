@@ -10,9 +10,9 @@ use crate::common::domain::StaticAsset;
 /// Provides access to built `potree` static assets that are embedded in the
 /// Rust binary.
 #[derive(Debug, Clone)]
-pub(crate) struct EmbeddedPotreeAssetService;
+pub(crate) struct EmbeddedPotreeAssetStore;
 
-impl EmbeddedPotreeAssetService {
+impl EmbeddedPotreeAssetStore {
     #[tracing::instrument]
     fn get_asset(&self, path: &Path) -> Result<StaticAsset, PotreeAssetStoreError> {
         let embedded_asset = PotreeAssets::get(&path.to_string_lossy()).ok_or(
@@ -30,7 +30,7 @@ impl EmbeddedPotreeAssetService {
 }
 
 #[async_trait]
-impl PotreeAssetStore for EmbeddedPotreeAssetService {
+impl PotreeAssetStore for EmbeddedPotreeAssetStore {
     async fn get_asset(&self, path: &Path) -> Result<StaticAsset, PotreeAssetStoreError> {
         Self::get_asset(self, path)
     }
@@ -48,7 +48,7 @@ mod embedded_potree_asset_service_tests {
         #[test]
         fn should_return_a_valid_asset_if_it_exists() {
             // Arrange
-            let asset_service = EmbeddedPotreeAssetService;
+            let asset_service = EmbeddedPotreeAssetStore;
 
             // Act
             let static_asset = asset_service
@@ -66,7 +66,7 @@ mod embedded_potree_asset_service_tests {
         fn should_return_correct_error_if_asset_does_not_exist() {
             // Arrange
             let non_existent_path = Path::new("build/non/existent.txt");
-            let asset_service = EmbeddedPotreeAssetService;
+            let asset_service = EmbeddedPotreeAssetStore;
 
             // Act
             let res = asset_service.get_asset(non_existent_path);

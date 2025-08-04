@@ -5,7 +5,7 @@ use url::Url;
 /// The configuration required to run the application.
 #[derive(Debug, Clone)]
 #[cfg_attr(test, derive(fake::Dummy))]
-pub struct ApplicationConfiguration {
+pub struct PotreeAuthConfiguration {
     /// The parent directory to all the projects being served.
     pub data_dir: PathBuf,
 
@@ -14,7 +14,7 @@ pub struct ApplicationConfiguration {
 }
 
 #[cfg(test)]
-impl ApplicationConfiguration {
+impl PotreeAuthConfiguration {
     pub fn dummy_with_no_idp() -> Self {
         use fake::Fake;
         use fake::Faker;

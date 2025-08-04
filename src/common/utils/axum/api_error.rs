@@ -16,9 +16,6 @@ pub enum ApiError {
     #[error("unable to find resource: {resource_name}")]
     ResourceNotFound { resource_name: String },
 
-    #[error("unable to handle type conversion: {resource_name}")]
-    TypeConversion { resource_name: String },
-
     #[error("{} is not authorized to view the {:?}: {}", user.name, resource_type, resource_name)]
     NotAuthorized {
         user: User,

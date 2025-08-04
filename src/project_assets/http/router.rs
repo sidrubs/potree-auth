@@ -11,7 +11,7 @@ use super::routes;
 use super::state::State;
 use crate::common::domain::value_objects::ProjectId;
 
-static ASSET_PATH: LazyLock<ParameterizedRoute> =
+pub static ASSET_PATH: LazyLock<ParameterizedRoute> =
     LazyLock::new(|| ParameterizedRoute::new("/{project_id}/{*path}"));
 
 #[derive(serde::Deserialize)]

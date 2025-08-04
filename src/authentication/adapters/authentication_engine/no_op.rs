@@ -10,10 +10,10 @@ use crate::common::domain::User;
 /// A blank authentication service. Would be used if the application does not
 /// require authentication.
 #[derive(Debug, Clone)]
-pub(crate) struct NoOpAuthenticationService;
+pub(crate) struct NoOpAuthenticationEngine;
 
 #[async_trait]
-impl AuthenticationEngine for NoOpAuthenticationService {
+impl AuthenticationEngine for NoOpAuthenticationEngine {
     #[tracing::instrument]
     async fn authorize(&self) -> Result<AuthorizeData, AuthenticationEngineError> {
         Err(AuthenticationEngineError::Infrastructure {

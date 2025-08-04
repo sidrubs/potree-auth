@@ -1,6 +1,6 @@
-use super::super::application::service::ProjectRenderingService;
+use super::super::application::service::RenderingService;
 
 #[derive(Debug, Clone)]
 pub struct State {
-    pub project_rendering_service: ProjectRenderingService,
+    pub rendering_service: RenderingService,
 }

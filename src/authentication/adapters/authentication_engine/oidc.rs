@@ -30,6 +30,7 @@ use openidconnect::core::CoreTokenIntrospectionResponse;
 use openidconnect::core::CoreTokenType;
 use serde::Deserialize;
 use serde::Serialize;
+use url::Url;
 
 use super::super::super::domain::AuthorizeData;
 use super::super::super::domain::CallbackRequestParams;
@@ -67,12 +68,17 @@ impl OidcAuthenticationEngine {
     /// - `groups_claim`: The name of the OIDC claim containing and array of
     ///   groups that a user is part of.
     pub async fn new(
-        idp_url: IssuerUrl,
-        redirect_url: RedirectUrl,
-        client_id: ClientId,
-        client_secret: ClientSecret,
+        idp_url: Url,
+        redirect_url: Url,
+        client_id: String,
+        client_secret: String,
         groups_claim: String,
     ) -> Result<Self, AuthenticationEngineError> {
+        let idp_url = IssuerUrl::from_url(idp_url);
+        let redirect_url = RedirectUrl::from_url(redirect_url);
+        let client_id = ClientId::new(client_id);
+        let client_secret = ClientSecret::new(client_secret);
+
         // Sets up an http client to interact with the IdP
         let http_client = reqwest::ClientBuilder::new()
             // Following redirects opens the client up to SSRF vulnerabilities.

@@ -6,7 +6,7 @@ use crate::common::domain::User;
 use crate::common::utils::axum::api_error::ApiError;
 
 /// The key to which the logged in user data will be stored in a session.
-const USER_SESSION_KEY: &str = "user_session";
+pub const USER_SESSION_KEY: &str = "user_session";
 
 pub struct UserExtractor(pub Option<User>);
 
