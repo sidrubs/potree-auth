@@ -99,7 +99,7 @@ mod project_asset_service_tests {
 
             // Act
             let res = project_asset_service
-                .request_asset(&Faker.fake(), &Faker.fake(), &Path::new(""), Faker.fake())
+                .request_asset(&Faker.fake(), &Faker.fake(), Path::new(""), Faker.fake())
                 .await;
 
             // Assert
@@ -124,9 +124,9 @@ mod project_asset_service_tests {
         authorization_engine
             .expect_assert_allowed()
             .return_const(Err(AuthorizationEngineError::NotAuthorized {
-                user: dummy_user.clone(),
+                user: Box::new(dummy_user.clone()),
                 resource_name: dummy_resource_name.to_string(),
-                resource_type: ResourceType::Project,
+                resource_type: Box::new(ResourceType::Project),
             }));
         let project_asset_store = MockProjectAssetStore::new();
 
@@ -138,7 +138,7 @@ mod project_asset_service_tests {
 
         // Act
         let res = project_asset_service
-            .request_asset(&Faker.fake(), &Faker.fake(), &Path::new(""), Faker.fake())
+            .request_asset(&Faker.fake(), &Faker.fake(), Path::new(""), Faker.fake())
             .await;
 
         // Assert

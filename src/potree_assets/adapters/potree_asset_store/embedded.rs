@@ -52,7 +52,7 @@ mod embedded_potree_asset_service_tests {
 
             // Act
             let static_asset = asset_service
-                .get_asset(&Path::new("build/potree/potree.js"))
+                .get_asset(Path::new("build/potree/potree.js"))
                 .expect("asset should exist");
 
             // Assert

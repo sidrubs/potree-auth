@@ -23,9 +23,9 @@ pub enum RenderError {
 
     #[error("{} is not authorized to view the {:?}: {}", user.name, resource_type, resource_name)]
     NotAuthorized {
-        user: User,
+        user: Box<User>,
         resource_name: String,
-        resource_type: ResourceType,
+        resource_type: Box<ResourceType>,
     },
 
     #[error("user is not authenticated")]

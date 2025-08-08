@@ -19,9 +19,7 @@ pub(crate) struct PotreePathParams {
 }
 
 pub fn build_router(rendering_service: RenderingService) -> Router {
-    let state = State {
-        rendering_service: rendering_service,
-    };
+    let state = State { rendering_service };
 
     Router::new()
         .route(&POTREE, get(routes::potree_render))

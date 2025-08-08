@@ -19,6 +19,10 @@ pub struct Cli {
     /// authentication.
     #[clap(flatten)]
     pub idp: Option<IdpConfiguration>,
+
+    /// Configures how the server should behave.
+    #[clap(flatten)]
+    pub server: ServerConfiguration,
 }
 
 /// The configuration required to use an OIDC IdP for authentication.
@@ -56,9 +60,24 @@ pub struct IdpConfiguration {
     pub idp_application_external_url: Url,
 }
 
+/// Configures server specific controls.
+#[derive(Debug, Clone, clap::Args)]
+pub struct ServerConfiguration {
+    /// The interface on which the application is listening.
+    ///
+    /// Commonly `localhost`/`127.0.0.1` to serve on the local machine or
+    /// `0.0.0.0` to serve on all interfaces.
+    #[arg(long, default_value = "127.0.0.1", env = "SERVER_HOST")]
+    pub host: String,
+
+    /// The port on which the server should be listening.
+    #[arg(long, default_value_t = 3000, env = "SERVER_PORT")]
+    pub port: u16,
+}
+
 impl From<Cli> for PotreeAuthConfiguration {
     fn from(value: Cli) -> Self {
-        let Cli { data_dir, idp } = value;
+        let Cli { data_dir, idp, .. } = value;
 
         Self {
             data_dir,

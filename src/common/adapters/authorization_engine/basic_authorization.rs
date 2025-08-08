@@ -38,9 +38,9 @@ impl SimpleAuthorizationEngine {
                     Ok(())
                 } else {
                     Err(AuthorizationEngineError::NotAuthorized {
-                        user: user.clone(),
+                        user: Box::new(user.clone()),
                         resource_name: project.name.clone().into(),
-                        resource_type: resource.into(),
+                        resource_type: Box::new(resource.into()),
                     })
                 }
             }
@@ -49,9 +49,9 @@ impl SimpleAuthorizationEngine {
             | (Resource::Project(project), Action::Update)
             | (Resource::Project(project), Action::Delete) => {
                 Err(AuthorizationEngineError::NotAuthorized {
-                    user: user.clone(),
+                    user: Box::new(user.clone()),
                     resource_name: project.name.clone().into(),
-                    resource_type: resource.into(),
+                    resource_type: Box::new(resource.into()),
                 })
             }
         }

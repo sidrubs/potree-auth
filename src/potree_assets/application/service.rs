@@ -21,6 +21,6 @@ impl PotreeAssetService {
         &self,
         asset_path: &Path,
     ) -> Result<StaticAsset, PotreeAssetsServiceError> {
-        Ok(self.potree_asset_store.get_asset(&asset_path).await?)
+        Ok(self.potree_asset_store.get_asset(asset_path).await?)
     }
 }
