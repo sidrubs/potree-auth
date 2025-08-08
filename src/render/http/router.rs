@@ -1,0 +1,35 @@
+use std::sync::LazyLock;
+
+use axum::Extension;
+use axum::Router;
+use axum::routing::get;
+use web_route::ParameterizedRoute;
+use web_route::WebRoute;
+
+use super::super::application::service::RenderingService;
+use super::routes;
+use super::state::State;
+use crate::common::domain::value_objects::ProjectId;
+
+pub static POTREE: LazyLock<ParameterizedRoute> =
+    LazyLock::new(|| ParameterizedRoute::new("/potree/{project_id}"));
+
+#[derive(serde::Deserialize)]
+pub(crate) struct PotreePathParams {
+    pub project_id: ProjectId,
+}
+
+/// Builds a routes for rendering HTML pages.
+///
+/// `login_route` defines where the user should be redirected if they need to be
+/// authenticated.
+pub fn build_router(rendering_service: RenderingService, login_route: WebRoute) -> Router {
+    let state = State {
+        rendering_service,
+        login_route,
+    };
+
+    Router::new()
+        .route(&POTREE, get(routes::potree_render))
+        .layer(Extension(state))
+}

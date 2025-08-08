@@ -1,4 +1,11 @@
+use axum::ServiceExt;
+use axum::extract::Request;
+use clap::Parser;
 use dotenvy::dotenv;
+use potree_auth::application_lib::Cli;
+use potree_auth::application_lib::init_application;
+use potree_auth::application_lib::init_tracing;
+use potree_auth::application_lib::shutdown_signal;
 // Using `jemalloc` as opposed to the standard system allocator to reduce memory
 // fragmentation.
 #[cfg(not(target_env = "msvc"))]
@@ -8,22 +15,29 @@ use tikv_jemallocator::Jemalloc;
 #[global_allocator]
 static GLOBAL: Jemalloc = Jemalloc;
 
-use clap::Parser;
-use potree_auth::{cli::Cli, init_tracing, initialize_application};
-
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), anyhow::Error> {
     // Load environment variables from a `.env` file if it exists.
     let _ = dotenv();
 
     // Set up tracing subscribers
     init_tracing();
 
+    // Parse arguments from the CLI.
     let cli = Cli::parse();
 
-    let application = initialize_application(&cli.into()).await.unwrap();
+    let listener =
+        tokio::net::TcpListener::bind(format!("{}:{}", &cli.server.host, &cli.server.port)).await?;
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
-    println!("listening on {}", listener.local_addr().unwrap());
-    axum::serve(listener, application).await.unwrap();
+    let application = init_application(cli.into()).await?;
+
+    tracing::info!("listening on {}", listener.local_addr()?);
+    axum::serve(
+        listener,
+        ServiceExt::<Request>::into_make_service(application),
+    )
+    .with_graceful_shutdown(shutdown_signal())
+    .await?;
+
+    Ok(())
 }
