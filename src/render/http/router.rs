@@ -13,6 +13,8 @@ use crate::common::domain::value_objects::ProjectId;
 
 pub static POTREE: LazyLock<ParameterizedRoute> =
     LazyLock::new(|| ParameterizedRoute::new("/potree/{project_id}"));
+pub static PROJECT_DASHBOARD: LazyLock<ParameterizedRoute> =
+    LazyLock::new(|| ParameterizedRoute::new("/projects"));
 
 #[derive(serde::Deserialize)]
 pub(crate) struct PotreePathParams {
@@ -31,5 +33,6 @@ pub fn build_router(rendering_service: RenderingService, login_route: WebRoute) 
 
     Router::new()
         .route(&POTREE, get(routes::potree_render))
+        .route(&PROJECT_DASHBOARD, get(routes::project_dashboard))
         .layer(Extension(state))
 }

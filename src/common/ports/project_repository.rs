@@ -17,14 +17,16 @@ pub trait ProjectRepository: Debug + Send + Sync + 'static {
     ///
     /// - [`ProjectDatastoreError::ResourceNotFound`] should be returned if the
     /// [`Project`] can't be found.
-    /// - [`ProjectDatastoreError::Parsing`] if the project has an invalid format.
+    /// - [`ProjectDatastoreError::Parsing`] if the project has an invalid
+    ///   format.
     async fn read(&self, project_id: &ProjectId) -> Result<Project, ProjectDatastoreError>;
 
     /// List all the projects available in the datastore.
     ///
     /// # Errors
     ///
-    /// - [`ProjectDatastoreError::Parsing`] if the project has an invalid format.
+    /// - [`ProjectDatastoreError::Parsing`] if the project has an invalid
+    ///   format.
     async fn list(&self) -> Result<Vec<Project>, ProjectDatastoreError>;
 }
 
