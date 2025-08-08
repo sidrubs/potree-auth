@@ -9,7 +9,7 @@ use super::super::application::service::AuthenticationService;
 use super::routes;
 use super::state::State;
 
-static LOGIN: LazyLock<WebRoute> = LazyLock::new(|| WebRoute::new("/login"));
+pub static LOGIN: LazyLock<WebRoute> = LazyLock::new(|| WebRoute::new("/login"));
 pub static CALLBACK: LazyLock<WebRoute> = LazyLock::new(|| WebRoute::new("/callback"));
 
 /// Builds a router that performs OIDC authentication.

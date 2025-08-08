@@ -1,4 +1,5 @@
 use axum::response::IntoResponse;
+use http::StatusCode;
 
 use crate::common::domain::ResourceType;
 use crate::common::domain::User;
@@ -41,8 +42,28 @@ pub enum RenderError {
     AuthenticationFlow { message: String },
 }
 
+/// This should really be updated to redirect the user to an error page.
 impl IntoResponse for RenderError {
     fn into_response(self) -> axum::response::Response {
-        todo!()
+        // Log the error.
+        tracing::error!("{self}");
+
+        // Generate a response to send to the client.
+        match self {
+            RenderError::StateExtraction
+            | RenderError::ServerConfiguration { .. }
+            | RenderError::ServerError { .. } => {
+                (StatusCode::INTERNAL_SERVER_ERROR).into_response()
+            }
+            RenderError::ResourceNotFound { .. } => {
+                (StatusCode::NOT_FOUND, self.to_string()).into_response()
+            }
+            RenderError::NotAuthorized { .. } => {
+                (StatusCode::FORBIDDEN, self.to_string()).into_response()
+            }
+            RenderError::NotAuthenticated | RenderError::AuthenticationFlow { .. } => {
+                (StatusCode::UNAUTHORIZED).into_response()
+            }
+        }
     }
 }

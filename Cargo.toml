@@ -14,7 +14,7 @@ name = "potree-auth"
 anyhow = "1.0.98"
 askama = "0.14.0"
 async-trait = "0.1.88"
-axum = "0.8.4"
+axum = { version = "0.8.4", features = ["original-uri"] }
 bytes = "1.10.1"
 clap = { version = "4.5.42", features = ["derive", "env"] }
 dotenvy = "0.15.7"

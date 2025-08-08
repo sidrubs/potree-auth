@@ -16,6 +16,7 @@ use super::factories::init_authorization_engine;
 use super::middleware::session::apply_session_layer;
 use super::middleware::tracing::apply_tracing_middleware;
 use crate::authentication::application::service::AuthenticationService;
+use crate::authentication::http::LOGIN;
 use crate::authentication::{self};
 use crate::common;
 use crate::common::adapters::project_datastore::manifest_file::ManifestFileProjectDatastore;
@@ -57,7 +58,7 @@ pub async fn init_application(
         project_datastore,
         authorization_engine,
         PROJECT_ASSETS.join(ASSET_PATH.as_ref()),
-        WebRoute::new(PROJECT_ASSETS.as_ref()),
+        WebRoute::new(POTREE_ASSETS.as_ref()),
     );
 
     Ok(build_router(
@@ -79,7 +80,7 @@ fn build_router(
     let authentication_router = authentication::http::build_router(authentication_service);
     let potree_asset_router = potree_assets::http::build_router(potree_asset_service);
     let project_asset_router = project_assets::http::build_router(project_asset_service);
-    let rendering_router = render::http::build_router(rendering_service);
+    let rendering_router = render::http::build_router(rendering_service, AUTH.join(LOGIN.as_ref()));
     let common_routes = common::utils::axum::common_routes::build_router();
 
     // Build top-level router

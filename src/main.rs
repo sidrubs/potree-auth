@@ -5,6 +5,7 @@ use dotenvy::dotenv;
 use potree_auth::application_lib::Cli;
 use potree_auth::application_lib::init_application;
 use potree_auth::application_lib::init_tracing;
+use potree_auth::application_lib::shutdown_signal;
 // Using `jemalloc` as opposed to the standard system allocator to reduce memory
 // fragmentation.
 #[cfg(not(target_env = "msvc"))]
@@ -38,35 +39,4 @@ async fn main() -> Result<(), anyhow::Error> {
     .await?;
 
     Ok(())
-}
-
-/// Provides a future that completes when ctrl+C or sigterm is recieved.
-///
-/// Enables the axum server to shutdown gracefully. I.e. it will stop accepting
-/// new connections and finish handling the connections that are actively
-/// in-flight.
-async fn shutdown_signal() {
-    let ctrl_c = async {
-        tokio::signal::ctrl_c()
-            .await
-            .expect("Failed to install Ctrl+C handler");
-    };
-
-    #[cfg(unix)]
-    let terminate = async {
-        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
-            .expect("Failed to install SIGTERM handler")
-            .recv()
-            .await;
-    };
-
-    #[cfg(not(unix))]
-    let terminate = std::future::pending::<()>(); // No SIGTERM on non-Unix systems
-
-    tokio::select! {
-        _ = ctrl_c => {},
-        _ = terminate => {},
-    }
-
-    tracing::info!("Shutdown signal received");
 }

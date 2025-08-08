@@ -1,4 +1,5 @@
 use axum::response::IntoResponse;
+use http::StatusCode;
 
 use crate::common::domain::ResourceType;
 use crate::common::domain::User;
@@ -32,6 +33,21 @@ pub enum ApiError {
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> axum::response::Response {
-        todo!()
+        // Log the error.
+        tracing::error!("{self}");
+
+        // Generate a response to send to the client.
+        match self {
+            ApiError::StateExtraction | ApiError::ServerConfiguration { .. } => {
+                (StatusCode::INTERNAL_SERVER_ERROR).into_response()
+            }
+            ApiError::ResourceNotFound { .. } => {
+                (StatusCode::NOT_FOUND, self.to_string()).into_response()
+            }
+            ApiError::NotAuthorized { .. } => {
+                (StatusCode::FORBIDDEN, self.to_string()).into_response()
+            }
+            ApiError::NotAuthenticated => (StatusCode::UNAUTHORIZED).into_response(),
+        }
     }
 }
