@@ -4,7 +4,6 @@ use url::Url;
 
 /// The configuration required to run the application.
 #[derive(Debug, Clone)]
-#[cfg_attr(test, derive(fake::Dummy))]
 pub struct PotreeAuthConfiguration {
     /// The parent directory to all the projects being served.
     pub data_dir: PathBuf,
@@ -13,22 +12,8 @@ pub struct PotreeAuthConfiguration {
     pub idp: Option<IdpConfiguration>,
 }
 
-#[cfg(test)]
-impl PotreeAuthConfiguration {
-    pub fn dummy_with_no_idp() -> Self {
-        use fake::Fake;
-        use fake::Faker;
-
-        Self {
-            idp: None,
-            ..Faker.fake()
-        }
-    }
-}
-
 /// The configuration required to use an OIDC IdP for authentication.
 #[derive(Debug, Clone)]
-#[cfg_attr(test, derive(fake::Dummy))]
 pub struct IdpConfiguration {
     /// The URL to the IdP service.
     pub idp_url: Url,

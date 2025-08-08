@@ -1,3 +1,5 @@
 mod factories;
 mod middleware;
-pub mod router;
+mod router;
+
+pub use router::init_application;

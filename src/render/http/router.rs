@@ -21,7 +21,8 @@ pub(crate) struct PotreePathParams {
 
 /// Builds a routes for rendering HTML pages.
 ///
-/// `login_route` defines where the user should be redirected if they need to be authenticated.
+/// `login_route` defines where the user should be redirected if they need to be
+/// authenticated.
 pub fn build_router(rendering_service: RenderingService, login_route: WebRoute) -> Router {
     let state = State {
         rendering_service,

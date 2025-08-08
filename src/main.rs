@@ -23,6 +23,7 @@ async fn main() -> Result<(), anyhow::Error> {
     // Set up tracing subscribers
     init_tracing();
 
+    // Parse arguments from the CLI.
     let cli = Cli::parse();
 
     let listener =

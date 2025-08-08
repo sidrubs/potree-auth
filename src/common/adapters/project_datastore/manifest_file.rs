@@ -46,6 +46,8 @@ impl ManifestFileProjectDatastore {
             .join(String::from(project_id.clone()))
             .join(MANIFEST_FILE_NAME);
 
+        dbg!(&project_manifest_path);
+
         let manifest_bytes = tokio::fs::read(&project_manifest_path)
             .await
             .map_err(|_e| ProjectDatastoreError::ResourceNotFound {

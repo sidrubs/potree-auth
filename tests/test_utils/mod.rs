@@ -1,7 +1,7 @@
 //! Helpers for automated testing.
 
 // Constants representing the path to various dummy project directories.
-pub const TEST_PROJECT_PARENT: &str = "src/test_utils/project_dir";
+pub const TEST_PROJECT_PARENT: &str = "tests/test_utils/project_dir";
 pub const TEST_PROJECT_1_DIR: &str = "project_1";
 pub const TEST_PROJECT_1_DATA_PATH: &str = "data/some_data.txt";
 pub const TEST_PROJECT_2_DIR: &str = "project_2";

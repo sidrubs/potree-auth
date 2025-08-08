@@ -1,6 +1,10 @@
 use askama::Template;
-use axum::extract::{OriginalUri, Path};
-use axum::response::{Html, IntoResponse, Redirect, Response};
+use axum::extract::OriginalUri;
+use axum::extract::Path;
+use axum::response::Html;
+use axum::response::IntoResponse;
+use axum::response::Redirect;
+use axum::response::Response;
 
 use super::super::application::service::RenderingService;
 use super::extractors::LoginRoute;

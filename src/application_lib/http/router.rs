@@ -30,10 +30,10 @@ use crate::project_assets::{self};
 use crate::render::application::service::RenderingService;
 use crate::render::{self};
 
-pub(crate) static AUTH: LazyLock<WebRoute> = LazyLock::new(|| WebRoute::new("/auth"));
-static POTREE_ASSETS: LazyLock<ParameterizedRoute> =
+pub static AUTH: LazyLock<WebRoute> = LazyLock::new(|| WebRoute::new("/auth"));
+pub static POTREE_ASSETS: LazyLock<ParameterizedRoute> =
     LazyLock::new(|| ParameterizedRoute::new("/potree-assets"));
-static PROJECT_ASSETS: LazyLock<ParameterizedRoute> =
+pub static PROJECT_ASSETS: LazyLock<ParameterizedRoute> =
     LazyLock::new(|| ParameterizedRoute::new("/project-assets"));
 
 pub async fn init_application(
