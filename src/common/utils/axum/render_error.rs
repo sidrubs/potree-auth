@@ -40,6 +40,9 @@ pub enum RenderError {
 
     #[error("an error was experienced during authentication: {message}")]
     AuthenticationFlow { message: String },
+
+    #[error("there is an issue with the the server infrastructure: {message}")]
+    Infrastucture { message: String },
 }
 
 /// This should really be updated to redirect the user to an error page.
@@ -52,7 +55,8 @@ impl IntoResponse for RenderError {
         match self {
             RenderError::StateExtraction
             | RenderError::ServerConfiguration { .. }
-            | RenderError::ServerError { .. } => {
+            | RenderError::ServerError { .. }
+            | RenderError::Infrastucture { .. } => {
                 (StatusCode::INTERNAL_SERVER_ERROR).into_response()
             }
             RenderError::ResourceNotFound { .. } => {

@@ -20,6 +20,7 @@ impl From<RenderingServiceError> for RenderError {
             RenderingServiceError::ServerConfiguration { message } => {
                 Self::ServerConfiguration { message }
             }
+            RenderingServiceError::Infrastucture { message } => Self::Infrastucture { message },
         }
     }
 }

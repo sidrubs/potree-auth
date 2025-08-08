@@ -24,13 +24,17 @@ pub enum ProjectAssetsServiceError {
 
     #[error("the asset ({path}) could not be found")]
     AssetNotFound { path: PathBuf },
+
+    #[error("{message}")]
+    Infrastucture { message: String },
 }
 
 impl From<ProjectRepositoryError> for ProjectAssetsServiceError {
     fn from(value: ProjectRepositoryError) -> Self {
         match value {
-            ProjectRepositoryError::ResourceNotFound { id }
-            | ProjectRepositoryError::Parsing { id } => Self::ProjectNotFound { id },
+            ProjectDatastoreError::ResourceNotFound { id }
+            | ProjectDatastoreError::Parsing { id } => Self::ProjectNotFound { id },
+            ProjectDatastoreError::Infrastucture { message } => Self::Infrastucture { message },
         }
     }
 }

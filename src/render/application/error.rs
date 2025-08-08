@@ -21,13 +21,17 @@ pub enum RenderingServiceError {
 
     #[error("the server is not configured correctly: {message}")]
     ServerConfiguration { message: String },
+
+    #[error("{message}")]
+    Infrastucture { message: String },
 }
 
 impl From<ProjectRepositoryError> for RenderingServiceError {
     fn from(value: ProjectRepositoryError) -> Self {
         match value {
-            ProjectRepositoryError::ResourceNotFound { id }
-            | ProjectRepositoryError::Parsing { id } => Self::ProjectNotFound { id },
+            ProjectDatastoreError::ResourceNotFound { id }
+            | ProjectDatastoreError::Parsing { id } => Self::ProjectNotFound { id },
+            ProjectDatastoreError::Infrastucture { message } => Self::Infrastucture { message },
         }
     }
 }

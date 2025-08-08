@@ -1,10 +1,5 @@
 # Potree Auth
 
-## Todo
-
-- [ ] See [here](https://github.com/howtocodeit/hexarch/tree/3-simple-service) for how to organize
-- [ ] Domain, Application, Infrastructure, and HTTP layers 
-
 ## Application Overview
 
 The core components of the application are:
@@ -121,4 +116,3 @@ For authentication-specific settings, see the [Authentication section](#authenti
 Authentication is handled via the OIDC Authorization Code flow, supported by most modern Identity Providers (IdPs). Relevant configuration parameters are prefixed with `idp_`. If these values are not set, authentication is disabled and all users are granted access to all projects.
 
 > **Note:** Users in the `admin` group have full access to all projects, even if `admin` is not explicitly listed in the project metadata.
-
