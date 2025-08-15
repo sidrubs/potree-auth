@@ -10,13 +10,13 @@ use crate::common::domain::value_objects::ProjectId;
 use crate::common::ports::authorization_engine::Action;
 use crate::common::ports::authorization_engine::AuthorizationEngine;
 use crate::common::ports::authorization_engine::Resource;
-use crate::common::ports::project_datastore::ProjectDatastore;
+use crate::common::ports::project_repository::ProjectRepository;
 
 /// A service for rendering a project.
 #[derive(Debug, Clone)]
 pub struct RenderingService {
     /// Used to load project information.
-    project_datastore: Arc<dyn ProjectDatastore>,
+    project_repository: Arc<dyn ProjectRepository>,
 
     /// Used to determine if a user ir authorized to view a project.
     authorization_engine: Arc<dyn AuthorizationEngine>,
@@ -30,13 +30,13 @@ pub struct RenderingService {
 
 impl RenderingService {
     pub fn new(
-        project_datastore: Arc<dyn ProjectDatastore>,
+        project_datastore: Arc<dyn ProjectRepository>,
         authorization_engine: Arc<dyn AuthorizationEngine>,
         project_assets_route: ParameterizedRoute,
         potree_assets_route: WebRoute,
     ) -> Self {
         Self {
-            project_datastore,
+            project_repository: project_datastore,
             authorization_engine,
             project_assets_route,
             potree_assets_route,
@@ -54,7 +54,7 @@ impl RenderingService {
         user: &Option<User>,
         project_id: &ProjectId,
     ) -> Result<PotreeRender, RenderingServiceError> {
-        let project = self.project_datastore.read(project_id).await?;
+        let project = self.project_repository.read(project_id).await?;
 
         self.authorization_engine
             .can(user, &Action::Read, &Resource::PotreeRender(&project))?;
@@ -100,7 +100,7 @@ mod project_rendering_service_tests {
     use super::super::super::application::service::RenderingService;
     use crate::common::ports::authorization_engine::AuthorizationEngineError;
     use crate::common::ports::authorization_engine::MockAuthorizationEngine;
-    use crate::common::ports::project_datastore::MockProjectDatastore;
+    use crate::common::ports::project_repository::MockProjectRepository;
 
     mod render_potree {
 
@@ -109,7 +109,7 @@ mod project_rendering_service_tests {
         #[tokio::test]
         async fn should_return_the_correct_error_if_user_not_authenticated() {
             // Arrange
-            let mut project_datastore = MockProjectDatastore::new();
+            let mut project_datastore = MockProjectRepository::new();
             project_datastore
                 .expect_read()
                 .return_const(Ok(Faker.fake()));
@@ -138,7 +138,7 @@ mod project_rendering_service_tests {
     #[tokio::test]
     async fn should_return_the_correct_error_if_user_not_authorized() {
         // Arrange
-        let mut project_datastore = MockProjectDatastore::new();
+        let mut project_datastore = MockProjectRepository::new();
         project_datastore
             .expect_read()
             .return_const(Ok(Faker.fake()));

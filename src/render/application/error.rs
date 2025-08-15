@@ -2,7 +2,7 @@ use crate::common::domain::ResourceType;
 use crate::common::domain::User;
 use crate::common::domain::value_objects::ProjectId;
 use crate::common::ports::authorization_engine::AuthorizationEngineError;
-use crate::common::ports::project_datastore::ProjectDatastoreError;
+use crate::common::ports::project_repository::ProjectRepositoryError;
 
 #[derive(Debug, thiserror::Error)]
 pub enum RenderingServiceError {
@@ -23,11 +23,11 @@ pub enum RenderingServiceError {
     ServerConfiguration { message: String },
 }
 
-impl From<ProjectDatastoreError> for RenderingServiceError {
-    fn from(value: ProjectDatastoreError) -> Self {
+impl From<ProjectRepositoryError> for RenderingServiceError {
+    fn from(value: ProjectRepositoryError) -> Self {
         match value {
-            ProjectDatastoreError::ResourceNotFound { id }
-            | ProjectDatastoreError::Parsing { id } => Self::ProjectNotFound { id },
+            ProjectRepositoryError::ResourceNotFound { id }
+            | ProjectRepositoryError::Parsing { id } => Self::ProjectNotFound { id },
         }
     }
 }

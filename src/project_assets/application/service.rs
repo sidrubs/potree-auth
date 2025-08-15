@@ -11,19 +11,19 @@ use crate::common::domain::value_objects::ProjectId;
 use crate::common::ports::authorization_engine::Action;
 use crate::common::ports::authorization_engine::AuthorizationEngine;
 use crate::common::ports::authorization_engine::Resource;
-use crate::common::ports::project_datastore::ProjectDatastore;
+use crate::common::ports::project_repository::ProjectRepository;
 
 /// A service for interacting with project assets.
 #[derive(Debug, Clone)]
 pub struct ProjectAssetService {
-    project_datastore: Arc<dyn ProjectDatastore>,
+    project_datastore: Arc<dyn ProjectRepository>,
     project_asset_store: Arc<dyn ProjectAssetStore>,
     authorization_engine: Arc<dyn AuthorizationEngine>,
 }
 
 impl ProjectAssetService {
     pub fn new(
-        project_datastore: Arc<dyn ProjectDatastore>,
+        project_datastore: Arc<dyn ProjectRepository>,
         project_asset_store: Arc<dyn ProjectAssetStore>,
         authorization_engine: Arc<dyn AuthorizationEngine>,
     ) -> Self {
@@ -69,7 +69,7 @@ mod project_asset_service_tests {
     use crate::common::domain::project::Project;
     use crate::common::ports::authorization_engine::AuthorizationEngineError;
     use crate::common::ports::authorization_engine::MockAuthorizationEngine;
-    use crate::common::ports::project_datastore::MockProjectDatastore;
+    use crate::common::ports::project_repository::MockProjectRepository;
 
     mod request_asset {
 
@@ -78,7 +78,7 @@ mod project_asset_service_tests {
         #[tokio::test]
         async fn should_return_the_correct_error_if_user_not_authenticated() {
             // Arrange
-            let mut project_datastore = MockProjectDatastore::new();
+            let mut project_datastore = MockProjectRepository::new();
             project_datastore
                 .expect_read()
                 .return_const(Ok(Faker.fake()));
@@ -113,7 +113,7 @@ mod project_asset_service_tests {
         let dummy_user = Faker.fake::<User>();
         let dummy_resource_name = Faker.fake::<Project>().name;
 
-        let mut project_datastore = MockProjectDatastore::new();
+        let mut project_datastore = MockProjectRepository::new();
         project_datastore
             .expect_read()
             .return_const(Ok(Faker.fake()));
