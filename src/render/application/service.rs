@@ -112,7 +112,7 @@ impl RenderingService {
         &self,
         user: &Option<User>,
     ) -> Result<Vec<Project>, RenderingServiceError> {
-        let projects = self.project_datastore.list().await?;
+        let projects = self.project_repository.list().await?;
 
         // Filter out the projects that the user is not allowed to read.
         // TODO: Need to work out authentication. Shouldn't be handled by the authZ engine.
@@ -120,7 +120,7 @@ impl RenderingService {
             .into_iter()
             .filter(|p| {
                 self.authorization_engine
-                    .assert_allowed(user, &Resource::Project(&p), &Action::Read)
+                    .can(user, &Action::Read, &Resource::Project(&p))
                     .is_ok()
             })
             .collect();
@@ -178,18 +178,18 @@ mod project_rendering_service_tests {
         #[tokio::test]
         async fn should_return_the_correct_error_if_user_not_authorized() {
             // Arrange
-            let mut project_datastore = MockProjectDatastore::new();
+            let mut project_datastore = MockProjectRepository::new();
             project_datastore
                 .expect_read()
                 .return_const(Ok(Faker.fake()));
             let mut authorization_engine = MockAuthorizationEngine::new();
-            authorization_engine
-                .expect_assert_allowed()
-                .return_const(Err(AuthorizationEngineError::NotAuthorized {
+            authorization_engine.expect_can().return_const(Err(
+                AuthorizationEngineError::NotAuthorized {
                     user: Faker.fake(),
                     resource_name: Faker.fake(),
                     resource_type: Faker.fake(),
-                }));
+                },
+            ));
 
             let rendering_service = RenderingService::new(
                 Arc::new(project_datastore),
@@ -211,21 +211,6 @@ mod project_rendering_service_tests {
         }
     }
 
-    #[tokio::test]
-    async fn should_return_the_correct_error_if_user_not_authorized() {
-        // Arrange
-        let mut project_datastore = MockProjectRepository::new();
-        project_datastore
-            .expect_read()
-            .return_const(Ok(Faker.fake()));
-        let mut authorization_engine = MockAuthorizationEngine::new();
-        authorization_engine.expect_can().return_const(Err(
-            AuthorizationEngineError::NotAuthorized {
-                user: Faker.fake(),
-                resource_name: Faker.fake(),
-                resource_type: Faker.fake(),
-            },
-        ));
     mod list_allowed_projects {
         use std::sync::Mutex;
 
@@ -237,7 +222,7 @@ mod project_rendering_service_tests {
             // Arrange
             let dummy_projects = Faker.fake::<Vec<Project>>();
 
-            let mut project_datastore = MockProjectDatastore::new();
+            let mut project_datastore = MockProjectRepository::new();
             project_datastore
                 .expect_list()
                 .return_const(Ok(dummy_projects.clone()));
@@ -245,22 +230,20 @@ mod project_rendering_service_tests {
             let authorization_engine_call_count = Arc::new(Mutex::new(0));
             let authorization_engine_call_count_clone =
                 Arc::clone(&authorization_engine_call_count);
-            authorization_engine
-                .expect_assert_allowed()
-                .returning(move |_, _, _| {
-                    let mut count = authorization_engine_call_count_clone.lock().unwrap();
-                    let res = if *count % 2 == 0 {
-                        Err(AuthorizationEngineError::NotAuthorized {
-                            user: Faker.fake(),
-                            resource_name: Faker.fake(),
-                            resource_type: Faker.fake(),
-                        })
-                    } else {
-                        Ok(())
-                    };
-                    *count += 1;
-                    res
-                });
+            authorization_engine.expect_can().returning(move |_, _, _| {
+                let mut count = authorization_engine_call_count_clone.lock().unwrap();
+                let res = if *count % 2 == 0 {
+                    Err(AuthorizationEngineError::NotAuthorized {
+                        user: Faker.fake(),
+                        resource_name: Faker.fake(),
+                        resource_type: Faker.fake(),
+                    })
+                } else {
+                    Ok(())
+                };
+                *count += 1;
+                res
+            });
 
             let rendering_service = RenderingService::new(
                 Arc::new(project_datastore),

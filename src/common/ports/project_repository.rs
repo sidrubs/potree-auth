@@ -15,19 +15,19 @@ pub trait ProjectRepository: Debug + Send + Sync + 'static {
     ///
     /// # Errors
     ///
-    /// - [`ProjectDatastoreError::ResourceNotFound`] should be returned if the
+    /// - [`ProjectRepositoryError::ResourceNotFound`] should be returned if the
     /// [`Project`] can't be found.
-    /// - [`ProjectDatastoreError::Parsing`] if the project has an invalid
+    /// - [`ProjectRepositoryError::Parsing`] if the project has an invalid
     ///   format.
-    async fn read(&self, project_id: &ProjectId) -> Result<Project, ProjectDatastoreError>;
+    async fn read(&self, project_id: &ProjectId) -> Result<Project, ProjectRepositoryError>;
 
     /// List all the projects available in the datastore.
     ///
     /// # Errors
     ///
-    /// - [`ProjectDatastoreError::Parsing`] if the project has an invalid
+    /// - [`ProjectRepositoryError::Parsing`] if the project has an invalid
     ///   format.
-    async fn list(&self) -> Result<Vec<Project>, ProjectDatastoreError>;
+    async fn list(&self) -> Result<Vec<Project>, ProjectRepositoryError>;
 }
 
 #[derive(Debug, Clone, thiserror::Error)]

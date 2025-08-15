@@ -40,7 +40,7 @@ impl ManifestFileProjectRepository {
     }
 
     #[tracing::instrument]
-    async fn read(&self, project_id: ProjectId) -> Result<Project, ProjectDatastoreError> {
+    async fn read(&self, project_id: ProjectId) -> Result<Project, ProjectRepositoryError> {
         let project_manifest_path = self
             .projects_directory
             .join(String::from(project_id.clone()))
@@ -62,10 +62,10 @@ impl ManifestFileProjectRepository {
     }
 
     #[tracing::instrument]
-    async fn list(&self) -> Result<Vec<Project>, ProjectDatastoreError> {
+    async fn list(&self) -> Result<Vec<Project>, ProjectRepositoryError> {
         let mut dir_contents = tokio::fs::read_dir(&self.projects_directory)
             .await
-            .map_err(|_e| ProjectDatastoreError::Infrastucture {
+            .map_err(|_e| ProjectRepositoryError::Infrastucture {
                 message: format!(
                     "unable to read from the directory: {}",
                     self.projects_directory.to_string_lossy()
@@ -78,7 +78,7 @@ impl ManifestFileProjectRepository {
             dir_contents
                 .next_entry()
                 .await
-                .map_err(|_e| ProjectDatastoreError::Infrastucture {
+                .map_err(|_e| ProjectRepositoryError::Infrastucture {
                     message: format!(
                         "unable to read from the directory: {}",
                         self.projects_directory.to_string_lossy()
@@ -89,7 +89,7 @@ impl ManifestFileProjectRepository {
                 entry
                     .file_type()
                     .await
-                    .map_err(|_e| ProjectDatastoreError::Infrastucture {
+                    .map_err(|_e| ProjectRepositoryError::Infrastucture {
                         message: format!(
                             "unable to read from the directory: {}",
                             self.projects_directory.to_string_lossy()
@@ -110,12 +110,12 @@ impl ManifestFileProjectRepository {
 }
 
 #[async_trait]
-impl ProjectDatastore for ManifestFileProjectDatastore {
-    async fn read(&self, project_id: &ProjectId) -> Result<Project, ProjectDatastoreError> {
+impl ProjectRepository for ManifestFileProjectRepository {
+    async fn read(&self, project_id: &ProjectId) -> Result<Project, ProjectRepositoryError> {
         Self::read(self, project_id.clone()).await
     }
 
-    async fn list(&self) -> Result<Vec<Project>, ProjectDatastoreError> {
+    async fn list(&self) -> Result<Vec<Project>, ProjectRepositoryError> {
         Self::list(&self).await
     }
 }
@@ -194,7 +194,7 @@ mod manifest_file_project_service_tests {
             write_to_project_manifest(&project, &projects_dir);
             write_to_project_manifest(&diversion_project, &projects_dir);
 
-            let service = ManifestFileProjectDatastore::new(&projects_dir);
+            let service = ManifestFileProjectRepository::new(&projects_dir);
 
             // Act
             let recovered_project = service.read(project.id.clone()).await.unwrap();
@@ -213,14 +213,14 @@ mod manifest_file_project_service_tests {
 
             write_to_project_manifest(&diversion_project, &projects_dir);
 
-            let service = ManifestFileProjectDatastore::new(&projects_dir);
+            let service = ManifestFileProjectRepository::new(&projects_dir);
 
             // Act
             let res = service.read(non_existent_project.id.clone()).await;
 
             // Assert
             assert!(
-                matches!(res, Err(ProjectDatastoreError::ResourceNotFound { id }) if id == non_existent_project.id)
+                matches!(res, Err(ProjectRepositoryError::ResourceNotFound { id }) if id == non_existent_project.id)
             );
         }
 
@@ -242,13 +242,13 @@ mod manifest_file_project_service_tests {
             )
             .unwrap();
 
-            let service = ManifestFileProjectDatastore::new(&projects_dir);
+            let service = ManifestFileProjectRepository::new(&projects_dir);
 
             // Act
             let res = service.read(project_id.clone()).await;
 
             // Assert
-            assert!(matches!(res, Err(ProjectDatastoreError::Parsing { id }) if id == project_id));
+            assert!(matches!(res, Err(ProjectRepositoryError::Parsing { id }) if id == project_id));
         }
     }
 
@@ -265,7 +265,7 @@ mod manifest_file_project_service_tests {
                 .iter()
                 .for_each(|project| write_to_project_manifest(&project, &projects_dir));
 
-            let service = ManifestFileProjectDatastore::new(&projects_dir);
+            let service = ManifestFileProjectRepository::new(&projects_dir);
 
             // Act
             let mut recovered_projects = service.list().await.unwrap();
@@ -281,7 +281,7 @@ mod manifest_file_project_service_tests {
             // Arrange
             let projects_dir = tempfile::tempdir().unwrap();
 
-            let service = ManifestFileProjectDatastore::new(&projects_dir);
+            let service = ManifestFileProjectRepository::new(&projects_dir);
 
             // Act
             let recovered_projects = service.list().await.unwrap();
@@ -295,7 +295,7 @@ mod manifest_file_project_service_tests {
             // Arrange
             let projects_dir = "/does/not/exist";
 
-            let service = ManifestFileProjectDatastore::new(&projects_dir);
+            let service = ManifestFileProjectRepository::new(&projects_dir);
 
             // Act
             let res = service.list().await;
@@ -305,7 +305,7 @@ mod manifest_file_project_service_tests {
             // Assert
             assert!(matches!(
                 res,
-                Err(ProjectDatastoreError::Infrastucture { .. })
+                Err(ProjectRepositoryError::Infrastucture { .. })
             ));
         }
     }

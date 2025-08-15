@@ -32,9 +32,9 @@ pub enum ProjectAssetsServiceError {
 impl From<ProjectRepositoryError> for ProjectAssetsServiceError {
     fn from(value: ProjectRepositoryError) -> Self {
         match value {
-            ProjectDatastoreError::ResourceNotFound { id }
-            | ProjectDatastoreError::Parsing { id } => Self::ProjectNotFound { id },
-            ProjectDatastoreError::Infrastucture { message } => Self::Infrastucture { message },
+            ProjectRepositoryError::ResourceNotFound { id }
+            | ProjectRepositoryError::Parsing { id } => Self::ProjectNotFound { id },
+            ProjectRepositoryError::Infrastucture { message } => Self::Infrastucture { message },
         }
     }
 }

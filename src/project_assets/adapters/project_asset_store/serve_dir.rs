@@ -32,7 +32,7 @@ impl ServeDirProjectAssets {
         }
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(name = "`project_asset_store`: getting asset", err)]
     pub async fn get_asset(
         &self,
         path: &Path,
@@ -47,6 +47,8 @@ impl ServeDirProjectAssets {
 
         let file_path = self.base_dir.join(path);
 
+        tracing::debug!(path = ?file_path, "reading from path");
+
         // Use `ServeFile` to fetch the file based on the request headers. I feel that
         // this is a bit clunky an inefficient, but it gives me a nice consistent
         // abstraction in the project so I like it.
@@ -59,7 +61,10 @@ impl ServeDirProjectAssets {
 
         // Because this is a response which is always successful, we need to check the
         // response status code.
-        if response.status() != StatusCode::OK && response.status() != StatusCode::PARTIAL_CONTENT {
+        if response.status() != StatusCode::OK
+            && response.status() != StatusCode::PARTIAL_CONTENT
+            && response.status() != StatusCode::NOT_MODIFIED
+        {
             return Err(ProjectAssetStoreError::AssetNotFound {
                 path: path.to_owned(),
             });
