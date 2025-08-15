@@ -25,11 +25,11 @@ impl NoOpAuthorizationEngine {
 }
 
 impl AuthorizationEngine for NoOpAuthorizationEngine {
-    fn assert_allowed(
+    fn can(
         &self,
         user: &Option<User>,
-        resource: &Resource,
         action: &Action,
+        resource: &Resource,
     ) -> Result<(), AuthorizationEngineError> {
         Self::assert_allowed(self, user, resource, action)
     }

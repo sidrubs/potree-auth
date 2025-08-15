@@ -19,7 +19,7 @@ use crate::authentication::application::service::AuthenticationService;
 use crate::authentication::http::LOGIN;
 use crate::authentication::{self};
 use crate::common;
-use crate::common::adapters::project_datastore::manifest_file::ManifestFileProjectDatastore;
+use crate::common::adapters::project_repository::manifest_file::ManifestFileProjectRepository;
 use crate::potree_assets::adapters::potree_asset_store::embedded::EmbeddedPotreeAssetStore;
 use crate::potree_assets::application::service::PotreeAssetService;
 use crate::potree_assets::{self};
@@ -42,7 +42,7 @@ pub async fn init_application(
     // Initialize adaptors
     let authorization_engine = init_authorization_engine(config.idp.is_some());
     let authentication_engine = init_authentication_engine(config.idp).await?;
-    let project_datastore = Arc::new(ManifestFileProjectDatastore::new(&config.data_dir));
+    let project_datastore = Arc::new(ManifestFileProjectRepository::new(&config.data_dir));
     let potree_asset_store = Arc::new(EmbeddedPotreeAssetStore);
     let project_asset_store = Arc::new(ServeDirProjectAssets::new(&config.data_dir));
 

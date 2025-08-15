@@ -16,12 +16,16 @@ pub(crate) use user::User;
 #[cfg_attr(test, derive(fake::Dummy))]
 pub enum ResourceType {
     Project,
+    ProjectAsset,
+    PotreeRender,
 }
 
 impl fmt::Display for ResourceType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             ResourceType::Project => write!(f, "project"),
+            ResourceType::ProjectAsset => write!(f, "project asset"),
+            ResourceType::PotreeRender => write!(f, "potree render"),
         }
     }
 }

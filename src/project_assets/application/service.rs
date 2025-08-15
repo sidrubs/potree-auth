@@ -11,19 +11,19 @@ use crate::common::domain::value_objects::ProjectId;
 use crate::common::ports::authorization_engine::Action;
 use crate::common::ports::authorization_engine::AuthorizationEngine;
 use crate::common::ports::authorization_engine::Resource;
-use crate::common::ports::project_datastore::ProjectDatastore;
+use crate::common::ports::project_repository::ProjectRepository;
 
 /// A service for interacting with project assets.
 #[derive(Debug, Clone)]
 pub struct ProjectAssetService {
-    project_datastore: Arc<dyn ProjectDatastore>,
+    project_datastore: Arc<dyn ProjectRepository>,
     project_asset_store: Arc<dyn ProjectAssetStore>,
     authorization_engine: Arc<dyn AuthorizationEngine>,
 }
 
 impl ProjectAssetService {
     pub fn new(
-        project_datastore: Arc<dyn ProjectDatastore>,
+        project_datastore: Arc<dyn ProjectRepository>,
         project_asset_store: Arc<dyn ProjectAssetStore>,
         authorization_engine: Arc<dyn AuthorizationEngine>,
     ) -> Self {
@@ -37,7 +37,7 @@ impl ProjectAssetService {
     /// Read a specific project asset. Optional `request_headers` can be
     /// provided to specify various instructions as to how to read and format
     /// the resulting data.
-    pub async fn request_asset(
+    pub async fn get_asset(
         &self,
         user: &Option<User>,
         project_id: &ProjectId,
@@ -45,11 +45,8 @@ impl ProjectAssetService {
         request_headers: Option<HeaderMap>,
     ) -> Result<StaticAsset, ProjectAssetsServiceError> {
         let project = self.project_datastore.read(project_id).await?;
-        self.authorization_engine.assert_allowed(
-            user,
-            &Resource::Project(&project),
-            &Action::Read,
-        )?;
+        self.authorization_engine
+            .can(user, &Action::Read, &Resource::ProjectAsset(&project))?;
 
         // Build a path to the asset. The asset would be within its project directory.
         let asset_path = Path::new(project_id.as_str()).join(asset_path);
@@ -72,7 +69,7 @@ mod project_asset_service_tests {
     use crate::common::domain::project::Project;
     use crate::common::ports::authorization_engine::AuthorizationEngineError;
     use crate::common::ports::authorization_engine::MockAuthorizationEngine;
-    use crate::common::ports::project_datastore::MockProjectDatastore;
+    use crate::common::ports::project_repository::MockProjectRepository;
 
     mod request_asset {
 
@@ -81,13 +78,13 @@ mod project_asset_service_tests {
         #[tokio::test]
         async fn should_return_the_correct_error_if_user_not_authenticated() {
             // Arrange
-            let mut project_datastore = MockProjectDatastore::new();
+            let mut project_datastore = MockProjectRepository::new();
             project_datastore
                 .expect_read()
                 .return_const(Ok(Faker.fake()));
             let mut authorization_engine = MockAuthorizationEngine::new();
             authorization_engine
-                .expect_assert_allowed()
+                .expect_can()
                 .return_const(Err(AuthorizationEngineError::NotAuthenticated));
             let project_asset_store = MockProjectAssetStore::new();
 
@@ -99,7 +96,7 @@ mod project_asset_service_tests {
 
             // Act
             let res = project_asset_service
-                .request_asset(&Faker.fake(), &Faker.fake(), Path::new(""), Faker.fake())
+                .get_asset(&Faker.fake(), &Faker.fake(), Path::new(""), Faker.fake())
                 .await;
 
             // Assert
@@ -116,18 +113,18 @@ mod project_asset_service_tests {
         let dummy_user = Faker.fake::<User>();
         let dummy_resource_name = Faker.fake::<Project>().name;
 
-        let mut project_datastore = MockProjectDatastore::new();
+        let mut project_datastore = MockProjectRepository::new();
         project_datastore
             .expect_read()
             .return_const(Ok(Faker.fake()));
         let mut authorization_engine = MockAuthorizationEngine::new();
-        authorization_engine
-            .expect_assert_allowed()
-            .return_const(Err(AuthorizationEngineError::NotAuthorized {
+        authorization_engine.expect_can().return_const(Err(
+            AuthorizationEngineError::NotAuthorized {
                 user: Box::new(dummy_user.clone()),
                 resource_name: dummy_resource_name.to_string(),
                 resource_type: Box::new(ResourceType::Project),
-            }));
+            },
+        ));
         let project_asset_store = MockProjectAssetStore::new();
 
         let project_asset_service = ProjectAssetService::new(
@@ -138,7 +135,7 @@ mod project_asset_service_tests {
 
         // Act
         let res = project_asset_service
-            .request_asset(&Faker.fake(), &Faker.fake(), Path::new(""), Faker.fake())
+            .get_asset(&Faker.fake(), &Faker.fake(), Path::new(""), Faker.fake())
             .await;
 
         // Assert

@@ -10,13 +10,13 @@ use crate::common::domain::group::Group;
 use crate::common::domain::project::Project;
 use crate::common::domain::value_objects::ProjectId;
 use crate::common::domain::value_objects::ProjectName;
-use crate::common::ports::project_datastore::ProjectDatastore;
-use crate::common::ports::project_datastore::ProjectDatastoreError;
+use crate::common::ports::project_repository::ProjectRepository;
+use crate::common::ports::project_repository::ProjectRepositoryError;
 
 /// The name of the project manifest files.
 const MANIFEST_FILE_NAME: &str = "manifest.yml";
 
-/// A manifest file backed implementation of the [`ProjectService`] trait.
+/// A manifest file backed implementation of the [`ProjectRepository`] trait.
 ///
 /// Expects the `projects_directory` to be the parent directory to a collection
 /// of project directories, each representing a project. The name of the
@@ -25,12 +25,12 @@ const MANIFEST_FILE_NAME: &str = "manifest.yml";
 /// contain a `manifest.yml` file that can be deserialized to a
 /// [`ProjectManifest`] struct.
 #[derive(Debug, Clone)]
-pub struct ManifestFileProjectDatastore {
+pub struct ManifestFileProjectRepository {
     /// The directory containing all the projects.
     projects_directory: PathBuf,
 }
 
-impl ManifestFileProjectDatastore {
+impl ManifestFileProjectRepository {
     /// Creates a new [`ManifestFileProjectService`] instance with the specified
     /// `projects_directory`.
     pub fn new<P: AsRef<Path>>(projects_directory: P) -> Self {
@@ -40,7 +40,7 @@ impl ManifestFileProjectDatastore {
     }
 
     #[tracing::instrument]
-    async fn read(&self, project_id: &ProjectId) -> Result<Project, ProjectDatastoreError> {
+    async fn read(&self, project_id: &ProjectId) -> Result<Project, ProjectRepositoryError> {
         let project_manifest_path = self
             .projects_directory
             .join(String::from(project_id.clone()))
@@ -50,12 +50,12 @@ impl ManifestFileProjectDatastore {
 
         let manifest_bytes = tokio::fs::read(&project_manifest_path)
             .await
-            .map_err(|_e| ProjectDatastoreError::ResourceNotFound {
+            .map_err(|_e| ProjectRepositoryError::ResourceNotFound {
                 id: project_id.clone(),
             })?;
 
         let manifest = serde_yml::from_slice::<ProjectManifest>(&manifest_bytes).map_err(|_e| {
-            ProjectDatastoreError::Parsing {
+            ProjectRepositoryError::Parsing {
                 id: project_id.clone(),
             }
         })?;
@@ -65,8 +65,8 @@ impl ManifestFileProjectDatastore {
 }
 
 #[async_trait]
-impl ProjectDatastore for ManifestFileProjectDatastore {
-    async fn read(&self, project_id: &ProjectId) -> Result<Project, ProjectDatastoreError> {
+impl ProjectRepository for ManifestFileProjectRepository {
+    async fn read(&self, project_id: &ProjectId) -> Result<Project, ProjectRepositoryError> {
         Self::read(self, project_id).await
     }
 }
@@ -142,7 +142,7 @@ mod manifest_file_project_service_tests {
         write_to_project_manifest(&project, &projects_dir);
         write_to_project_manifest(&diversion_project, &projects_dir);
 
-        let service = ManifestFileProjectDatastore::new(&projects_dir);
+        let service = ManifestFileProjectRepository::new(&projects_dir);
 
         // Act
         let recovered_project = service.read(&project.id).await.unwrap();
@@ -161,14 +161,14 @@ mod manifest_file_project_service_tests {
 
         write_to_project_manifest(&diversion_project, &projects_dir);
 
-        let service = ManifestFileProjectDatastore::new(&projects_dir);
+        let service = ManifestFileProjectRepository::new(&projects_dir);
 
         // Act
         let res = service.read(&non_existent_project.id).await;
 
         // Assert
         assert!(
-            matches!(res, Err(ProjectDatastoreError::ResourceNotFound { id }) if id == non_existent_project.id)
+            matches!(res, Err(ProjectRepositoryError::ResourceNotFound { id }) if id == non_existent_project.id)
         );
     }
 
@@ -190,12 +190,12 @@ mod manifest_file_project_service_tests {
         )
         .unwrap();
 
-        let service = ManifestFileProjectDatastore::new(&projects_dir);
+        let service = ManifestFileProjectRepository::new(&projects_dir);
 
         // Act
         let res = service.read(&project_id).await;
 
         // Assert
-        assert!(matches!(res, Err(ProjectDatastoreError::Parsing { id }) if id == project_id));
+        assert!(matches!(res, Err(ProjectRepositoryError::Parsing { id }) if id == project_id));
     }
 }
