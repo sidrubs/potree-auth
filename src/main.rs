@@ -2,10 +2,10 @@ use axum::ServiceExt;
 use axum::extract::Request;
 use clap::Parser;
 use dotenvy::dotenv;
-use potree_auth::application_lib::Cli;
-use potree_auth::application_lib::init_application;
-use potree_auth::application_lib::init_tracing;
-use potree_auth::application_lib::shutdown_signal;
+use potree_auth::potree_auth::Cli;
+use potree_auth::potree_auth::init_application;
+use potree_auth::potree_auth::init_tracing;
+use potree_auth::potree_auth::shutdown_signal;
 // Using `jemalloc` as opposed to the standard system allocator to reduce memory
 // fragmentation.
 #[cfg(not(target_env = "msvc"))]

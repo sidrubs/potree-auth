@@ -10,8 +10,8 @@ use axum_test::TestServer;
 use axum_test::transport_layer::IntoTransportLayer;
 use http::StatusCode;
 use http::header;
-use potree_auth::application_lib::config::PotreeAuthConfiguration;
-use potree_auth::application_lib::init_application;
+use potree_auth::potree_auth::config::PotreeAuthConfiguration;
+use potree_auth::potree_auth::init_application;
 use web_route::ParameterizedRoute;
 use web_route::WebRoute;
 
