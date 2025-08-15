@@ -37,7 +37,7 @@ impl ProjectAssetService {
     /// Read a specific project asset. Optional `request_headers` can be
     /// provided to specify various instructions as to how to read and format
     /// the resulting data.
-    pub async fn get_asset(
+    pub async fn read_asset(
         &self,
         user: &Option<User>,
         project_id: &ProjectId,
@@ -96,7 +96,7 @@ mod project_asset_service_tests {
 
             // Act
             let res = project_asset_service
-                .get_asset(&Faker.fake(), &Faker.fake(), Path::new(""), Faker.fake())
+                .read_asset(&Faker.fake(), &Faker.fake(), Path::new(""), Faker.fake())
                 .await;
 
             // Assert
@@ -121,6 +121,7 @@ mod project_asset_service_tests {
         authorization_engine.expect_can().return_const(Err(
             AuthorizationEngineError::NotAuthorized {
                 user: Box::new(dummy_user.clone()),
+                action: Box::new(Action::Read),
                 resource_name: dummy_resource_name.to_string(),
                 resource_type: Box::new(ResourceType::Project),
             },
@@ -135,7 +136,7 @@ mod project_asset_service_tests {
 
         // Act
         let res = project_asset_service
-            .get_asset(&Faker.fake(), &Faker.fake(), Path::new(""), Faker.fake())
+            .read_asset(&Faker.fake(), &Faker.fake(), Path::new(""), Faker.fake())
             .await;
 
         // Assert

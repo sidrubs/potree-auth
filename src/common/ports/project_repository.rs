@@ -15,9 +15,19 @@ pub trait ProjectRepository: Debug + Send + Sync + 'static {
     ///
     /// # Errors
     ///
-    /// An [`ProjectRepositoryError::ResourceNotFound`] should be returned if the
+    /// - [`ProjectRepositoryError::ResourceNotFound`] should be returned if the
     /// [`Project`] can't be found.
+    /// - [`ProjectRepositoryError::Parsing`] if the project has an invalid
+    ///   format.
     async fn read(&self, project_id: &ProjectId) -> Result<Project, ProjectRepositoryError>;
+
+    /// List all the projects available in the datastore.
+    ///
+    /// # Errors
+    ///
+    /// - [`ProjectRepositoryError::Parsing`] if the project has an invalid
+    ///   format.
+    async fn list(&self) -> Result<Vec<Project>, ProjectRepositoryError>;
 }
 
 #[derive(Debug, Clone, thiserror::Error)]
@@ -27,4 +37,7 @@ pub enum ProjectRepositoryError {
 
     #[error("unable to parse the `Project` ({id}) ")]
     Parsing { id: ProjectId },
+
+    #[error("unable to interact with the datastore backend: {message}")]
+    Infrastucture { message: String },
 }

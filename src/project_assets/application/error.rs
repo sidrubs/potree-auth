@@ -4,6 +4,7 @@ use super::super::ports::project_asset_store::ProjectAssetStoreError;
 use crate::common::domain::ResourceType;
 use crate::common::domain::User;
 use crate::common::domain::value_objects::ProjectId;
+use crate::common::ports::authorization_engine::Action;
 use crate::common::ports::authorization_engine::AuthorizationEngineError;
 use crate::common::ports::project_repository::ProjectRepositoryError;
 
@@ -12,9 +13,10 @@ pub enum ProjectAssetsServiceError {
     #[error("project ({id}) not found")]
     ProjectNotFound { id: ProjectId },
 
-    #[error("{} is not authorized to view the {:?}: {}", user.name, resource_type, resource_name)]
+    #[error("{} is not authorized to {} the {:?}: {}", user.name, action, resource_type, resource_name)]
     NotAuthorized {
         user: Box<User>,
+        action: Box<Action>,
         resource_name: String,
         resource_type: Box<ResourceType>,
     },
@@ -24,6 +26,9 @@ pub enum ProjectAssetsServiceError {
 
     #[error("the asset ({path}) could not be found")]
     AssetNotFound { path: PathBuf },
+
+    #[error("{message}")]
+    Infrastucture { message: String },
 }
 
 impl From<ProjectRepositoryError> for ProjectAssetsServiceError {
@@ -31,6 +36,7 @@ impl From<ProjectRepositoryError> for ProjectAssetsServiceError {
         match value {
             ProjectRepositoryError::ResourceNotFound { id }
             | ProjectRepositoryError::Parsing { id } => Self::ProjectNotFound { id },
+            ProjectRepositoryError::Infrastucture { message } => Self::Infrastucture { message },
         }
     }
 }
@@ -49,10 +55,12 @@ impl From<AuthorizationEngineError> for ProjectAssetsServiceError {
         match value {
             AuthorizationEngineError::NotAuthorized {
                 user,
+                action,
                 resource_name,
                 resource_type,
             } => Self::NotAuthorized {
                 user,
+                action,
                 resource_name,
                 resource_type,
             },

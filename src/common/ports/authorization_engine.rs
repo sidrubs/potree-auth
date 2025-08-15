@@ -31,7 +31,7 @@ pub trait AuthorizationEngine: Debug + Send + Sync + 'static {
 }
 
 /// Defines a resource that can be accessed.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Resource<'a> {
     /// A specific project (instance-level).
     Project(&'a Project),
@@ -44,11 +44,14 @@ pub enum Resource<'a> {
 
     /// Potree rendering for a specific project (instance-level).
     PotreeRender(&'a Project),
+
+    /// The dashboard that lists all of a user's projects (type-level).
+    ProjectDashboard,
 }
 
 /// Defines actions that can be performed on a [`Resource`].
 #[expect(dead_code, reason = "other actions to be used in the future")]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Action {
     Read,
     List,
@@ -57,21 +60,35 @@ pub enum Action {
     Delete,
 }
 
+impl std::fmt::Display for Action {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            Action::Read => write!(f, "read"),
+            Action::List => write!(f, "list"),
+            Action::Write => write!(f, "write"),
+            Action::Update => write!(f, "update"),
+            Action::Delete => write!(f, "delete"),
+        }
+    }
+}
+
 impl From<&Resource<'_>> for ResourceType {
     fn from(value: &Resource) -> Self {
         match value {
             Resource::Project(_) | Resource::ProjectType => Self::Project,
             Resource::ProjectAsset(_) => Self::ProjectAsset,
             Resource::PotreeRender(_) => Self::PotreeRender,
+            Resource::ProjectDashboard => Self::ProjectDashboard,
         }
     }
 }
 
 #[derive(Debug, Clone, thiserror::Error)]
 pub enum AuthorizationEngineError {
-    #[error("{} is not authorized to view the {:?}: {}", user.name, resource_type, resource_name)]
+    #[error("{} is not authorized to {} the {:?}: {}", user.name, action, resource_type, resource_name)]
     NotAuthorized {
         user: Box<User>,
+        action: Box<Action>,
         resource_name: String,
         resource_type: Box<ResourceType>,
     },

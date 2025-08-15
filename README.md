@@ -1,10 +1,5 @@
 # Potree Auth
 
-## Todo
-
-- [ ] See [here](https://github.com/howtocodeit/hexarch/tree/3-simple-service) for how to organize
-- [ ] Domain, Application, Infrastructure, and HTTP layers 
-
 ## Application Overview
 
 The core components of the application are:
@@ -13,6 +8,7 @@ The core components of the application are:
 2. Authenticated project asset server
 3. Potree asset server
 4. Pre-configured potree rendering template
+5. Project dashboard
 
 ### Project
 
@@ -47,6 +43,11 @@ Served at `/potree/{project_id}`.
 
 > To use custom Potree HTML, create it in an `index.html` file and add it to the _project directory_. Access it via `/project-assets/{project_id}/index.html`.
 
+### Project dashboard
+
+Displays all the projects that a user has authorization to read.
+
+Served at `/projects`.
 
 ## Installation
 
@@ -121,4 +122,3 @@ For authentication-specific settings, see the [Authentication section](#authenti
 Authentication is handled via the OIDC Authorization Code flow, supported by most modern Identity Providers (IdPs). Relevant configuration parameters are prefixed with `idp_`. If these values are not set, authentication is disabled and all users are granted access to all projects.
 
 > **Note:** Users in the `admin` group have full access to all projects, even if `admin` is not explicitly listed in the project metadata.
-

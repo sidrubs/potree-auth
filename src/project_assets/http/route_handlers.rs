@@ -15,6 +15,6 @@ pub(crate) async fn project_asset(
     headers: HeaderMap,
 ) -> Result<StaticAsset, ApiError> {
     Ok(project_assets
-        .get_asset(&user, &project_id, &path, Some(headers))
+        .read_asset(&user, &project_id, &path, Some(headers))
         .await?)
 }

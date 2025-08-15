@@ -6,11 +6,14 @@ use web_route::WebRoute;
 use super::super::domain::potree_render::PotreeRender;
 use super::error::RenderingServiceError;
 use crate::common::domain::User;
+use crate::common::domain::project::Project;
 use crate::common::domain::value_objects::ProjectId;
 use crate::common::ports::authorization_engine::Action;
 use crate::common::ports::authorization_engine::AuthorizationEngine;
 use crate::common::ports::authorization_engine::Resource;
 use crate::common::ports::project_repository::ProjectRepository;
+use crate::render::domain::not_found_render::NotFound;
+use crate::render::domain::project_dashboard_render::ProjectDashboard;
 
 /// A service for rendering a project.
 #[derive(Debug, Clone)]
@@ -66,6 +69,28 @@ impl RenderingService {
         })
     }
 
+    /// Provides a dashboard showing all of the `user`'s projects.
+    pub async fn project_dashboard(
+        &self,
+        user: &Option<User>,
+        default_project_render_route: &ParameterizedRoute,
+    ) -> Result<ProjectDashboard, RenderingServiceError> {
+        self.authorization_engine
+            .can(user, &Action::Read, &Resource::ProjectDashboard)?;
+
+        let projects = self.list_allowed_projects(user).await?;
+
+        Ok(ProjectDashboard::from_domain_projects(
+            projects,
+            default_project_render_route,
+        )?)
+    }
+
+    /// Provides a 404 page.
+    pub async fn not_found(&self) -> Result<NotFound, RenderingServiceError> {
+        Ok(NotFound)
+    }
+
     /// Determine the route to the potree config file for a specific project
     /// (`project_id`).
     fn potree_config_route(
@@ -85,6 +110,29 @@ impl RenderingService {
 
         Ok(self.project_assets_route.to_web_route(&params)?)
     }
+
+    /// List all of the projects a `user` is allowed to read.
+    async fn list_allowed_projects(
+        &self,
+        user: &Option<User>,
+    ) -> Result<Vec<Project>, RenderingServiceError> {
+        self.authorization_engine
+            .can(user, &Action::List, &Resource::ProjectType)?;
+
+        let projects = self.project_repository.list().await?;
+
+        // Filter out the projects that the user is not allowed to read.
+        let allowed_projects = projects
+            .into_iter()
+            .filter(|p| {
+                self.authorization_engine
+                    .can(user, &Action::Read, &Resource::Project(p))
+                    .is_ok()
+            })
+            .collect();
+
+        Ok(allowed_projects)
+    }
 }
 
 #[cfg(test)]
@@ -98,6 +146,7 @@ mod project_rendering_service_tests {
 
     use super::super::super::application::error::RenderingServiceError;
     use super::super::super::application::service::RenderingService;
+    use crate::common::ports::authorization_engine::Action;
     use crate::common::ports::authorization_engine::AuthorizationEngineError;
     use crate::common::ports::authorization_engine::MockAuthorizationEngine;
     use crate::common::ports::project_repository::MockProjectRepository;
@@ -118,7 +167,7 @@ mod project_rendering_service_tests {
                 .expect_can()
                 .return_const(Err(AuthorizationEngineError::NotAuthenticated));
 
-            let project_asset_service = RenderingService::new(
+            let rendering_service = RenderingService::new(
                 Arc::new(project_datastore),
                 Arc::new(authorization_engine),
                 ParameterizedRoute::new(Faker.fake::<WebRoute>()).join("/{project_id}/{*path}"),
@@ -126,47 +175,139 @@ mod project_rendering_service_tests {
             );
 
             // Act
-            let res = project_asset_service
+            let res = rendering_service
                 .render_potree(&Faker.fake(), &Faker.fake())
                 .await;
 
             // Assert
             assert!(matches!(res, Err(RenderingServiceError::NotAuthenticated)));
         }
+
+        #[tokio::test]
+        async fn should_return_the_correct_error_if_user_not_authorized() {
+            // Arrange
+            let mut project_datastore = MockProjectRepository::new();
+            project_datastore
+                .expect_read()
+                .return_const(Ok(Faker.fake()));
+            let mut authorization_engine = MockAuthorizationEngine::new();
+            authorization_engine.expect_can().return_const(Err(
+                AuthorizationEngineError::NotAuthorized {
+                    user: Faker.fake(),
+                    action: Box::new(Action::Read),
+                    resource_name: Faker.fake(),
+                    resource_type: Faker.fake(),
+                },
+            ));
+
+            let rendering_service = RenderingService::new(
+                Arc::new(project_datastore),
+                Arc::new(authorization_engine),
+                ParameterizedRoute::new(Faker.fake::<WebRoute>()).join("/{project_id}/{*path}"),
+                Faker.fake(),
+            );
+
+            // Act
+            let res = rendering_service
+                .render_potree(&Faker.fake(), &Faker.fake())
+                .await;
+
+            // Assert
+            assert!(matches!(
+                res,
+                Err(RenderingServiceError::NotAuthorized { .. })
+            ));
+        }
     }
 
-    #[tokio::test]
-    async fn should_return_the_correct_error_if_user_not_authorized() {
-        // Arrange
-        let mut project_datastore = MockProjectRepository::new();
-        project_datastore
-            .expect_read()
-            .return_const(Ok(Faker.fake()));
-        let mut authorization_engine = MockAuthorizationEngine::new();
-        authorization_engine.expect_can().return_const(Err(
-            AuthorizationEngineError::NotAuthorized {
-                user: Faker.fake(),
-                resource_name: Faker.fake(),
-                resource_type: Faker.fake(),
-            },
-        ));
+    mod list_allowed_projects {
+        use std::sync::Mutex;
 
-        let project_asset_service = RenderingService::new(
-            Arc::new(project_datastore),
-            Arc::new(authorization_engine),
-            ParameterizedRoute::new(Faker.fake::<WebRoute>()).join("/{project_id}/{*path}"),
-            Faker.fake(),
-        );
+        use super::*;
+        use crate::common::domain::project::Project;
 
-        // Act
-        let res = project_asset_service
-            .render_potree(&Faker.fake(), &Faker.fake())
-            .await;
+        #[tokio::test]
+        async fn should_return_the_projects_that_the_user_is_allowed_to_read() {
+            // Arrange
+            let dummy_projects = Faker.fake::<Vec<Project>>();
 
-        // Assert
-        assert!(matches!(
-            res,
-            Err(RenderingServiceError::NotAuthorized { .. })
-        ));
+            let mut project_datastore = MockProjectRepository::new();
+            project_datastore
+                .expect_list()
+                .return_const(Ok(dummy_projects.clone()));
+            let mut authorization_engine = MockAuthorizationEngine::new();
+            // The first call to the authZ engine is checking that the user is allowed to
+            // list projects.
+            authorization_engine
+                .expect_can()
+                .once()
+                .return_const(Ok(()));
+            // Subsequent calls determines if the user is allow to read a specific project.
+            let authorization_engine_call_count = Arc::new(Mutex::new(0));
+            let authorization_engine_call_count_clone =
+                Arc::clone(&authorization_engine_call_count);
+            authorization_engine.expect_can().returning(move |_, _, _| {
+                let mut count = authorization_engine_call_count_clone.lock().unwrap();
+                let res = if *count % 2 == 0 {
+                    Err(AuthorizationEngineError::NotAuthorized {
+                        user: Faker.fake(),
+                        action: Box::new(Action::List),
+                        resource_name: Faker.fake(),
+                        resource_type: Faker.fake(),
+                    })
+                } else {
+                    Ok(())
+                };
+                *count += 1;
+                res
+            });
+
+            let rendering_service = RenderingService::new(
+                Arc::new(project_datastore),
+                Arc::new(authorization_engine),
+                ParameterizedRoute::new(Faker.fake::<WebRoute>()).join("/{project_id}/{*path}"),
+                Faker.fake(),
+            );
+
+            // Act
+            let allowed_projects = rendering_service
+                .list_allowed_projects(&Faker.fake())
+                .await
+                .unwrap();
+
+            // Assert
+            assert_eq!(allowed_projects.len(), dummy_projects.len() / 2);
+        }
+
+        #[tokio::test]
+        async fn should_return_the_correct_error_if_user_not_allowed_to_list_projects() {
+            // Arrange
+            let project_datastore = MockProjectRepository::new();
+            let mut authorization_engine = MockAuthorizationEngine::new();
+            authorization_engine.expect_can().once().return_const(Err(
+                AuthorizationEngineError::NotAuthorized {
+                    user: Faker.fake(),
+                    action: Box::new(Action::List),
+                    resource_name: Faker.fake(),
+                    resource_type: Box::new(crate::common::domain::ResourceType::Project),
+                },
+            ));
+
+            let rendering_service = RenderingService::new(
+                Arc::new(project_datastore),
+                Arc::new(authorization_engine),
+                ParameterizedRoute::new(Faker.fake::<WebRoute>()).join("/{project_id}/{*path}"),
+                Faker.fake(),
+            );
+
+            // Act
+            let res = rendering_service.list_allowed_projects(&Faker.fake()).await;
+
+            // Assert
+            assert!(matches!(
+                res,
+                Err(RenderingServiceError::NotAuthorized { .. })
+            ));
+        }
     }
 }

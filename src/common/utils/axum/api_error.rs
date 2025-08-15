@@ -3,6 +3,7 @@ use http::StatusCode;
 
 use crate::common::domain::ResourceType;
 use crate::common::domain::User;
+use crate::common::ports::authorization_engine::Action;
 
 /// Errors that can be experienced by an API `axum` route handler.
 ///
@@ -17,9 +18,10 @@ pub enum ApiError {
     #[error("unable to find resource: {resource_name}")]
     ResourceNotFound { resource_name: String },
 
-    #[error("{} is not authorized to view the {:?}: {}", user.name, resource_type, resource_name)]
+    #[error("{} is not authorized to {} the {:?}: {}", user.name, action, resource_type, resource_name)]
     NotAuthorized {
         user: Box<User>,
+        action: Box<Action>,
         resource_name: String,
         resource_type: Box<ResourceType>,
     },
@@ -29,6 +31,9 @@ pub enum ApiError {
 
     #[error("the server is not configured correctly: {message}")]
     ServerConfiguration { message: String },
+
+    #[error("there is an issue with the the server infrastructure: {message}")]
+    Infrastucture { message: String },
 }
 
 impl IntoResponse for ApiError {
@@ -38,9 +43,9 @@ impl IntoResponse for ApiError {
 
         // Generate a response to send to the client.
         match self {
-            ApiError::StateExtraction | ApiError::ServerConfiguration { .. } => {
-                (StatusCode::INTERNAL_SERVER_ERROR).into_response()
-            }
+            ApiError::StateExtraction
+            | ApiError::ServerConfiguration { .. }
+            | ApiError::Infrastucture { .. } => (StatusCode::INTERNAL_SERVER_ERROR).into_response(),
             ApiError::ResourceNotFound { .. } => {
                 (StatusCode::NOT_FOUND, self.to_string()).into_response()
             }

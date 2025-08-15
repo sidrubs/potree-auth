@@ -18,6 +18,7 @@ pub enum ResourceType {
     Project,
     ProjectAsset,
     PotreeRender,
+    ProjectDashboard,
 }
 
 impl fmt::Display for ResourceType {
@@ -26,6 +27,7 @@ impl fmt::Display for ResourceType {
             ResourceType::Project => write!(f, "project"),
             ResourceType::ProjectAsset => write!(f, "project asset"),
             ResourceType::PotreeRender => write!(f, "potree render"),
+            ResourceType::ProjectDashboard => write!(f, "project dashboard"),
         }
     }
 }

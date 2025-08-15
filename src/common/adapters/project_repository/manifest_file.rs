@@ -40,13 +40,11 @@ impl ManifestFileProjectRepository {
     }
 
     #[tracing::instrument]
-    async fn read(&self, project_id: &ProjectId) -> Result<Project, ProjectRepositoryError> {
+    async fn read(&self, project_id: ProjectId) -> Result<Project, ProjectRepositoryError> {
         let project_manifest_path = self
             .projects_directory
             .join(String::from(project_id.clone()))
             .join(MANIFEST_FILE_NAME);
-
-        dbg!(&project_manifest_path);
 
         let manifest_bytes = tokio::fs::read(&project_manifest_path)
             .await
@@ -60,14 +58,72 @@ impl ManifestFileProjectRepository {
             }
         })?;
 
-        Ok(manifest.into_project(project_id))
+        Ok(manifest.into_project(&project_id))
+    }
+
+    #[tracing::instrument]
+    async fn list(&self) -> Result<Vec<Project>, ProjectRepositoryError> {
+        let mut dir_contents = tokio::fs::read_dir(&self.projects_directory)
+            .await
+            .map_err(|_e| ProjectRepositoryError::Infrastucture {
+                message: format!(
+                    "unable to read from the directory: {}",
+                    self.projects_directory.to_string_lossy()
+                ),
+            })?;
+
+        // Find all top-level directories, they represent the project ids.
+        let mut project_ids = Vec::new();
+        while let Some(entry) =
+            dir_contents
+                .next_entry()
+                .await
+                .map_err(|_e| ProjectRepositoryError::Infrastucture {
+                    message: format!(
+                        "unable to read from the directory: {}",
+                        self.projects_directory.to_string_lossy()
+                    ),
+                })?
+        {
+            let file_type =
+                entry
+                    .file_type()
+                    .await
+                    .map_err(|_e| ProjectRepositoryError::Infrastucture {
+                        message: format!(
+                            "unable to read from the directory: {}",
+                            self.projects_directory.to_string_lossy()
+                        ),
+                    })?;
+            if file_type.is_dir() {
+                project_ids.push(entry.file_name());
+            }
+        }
+
+        // Asynchronously read the projects for each project id.
+        let loaded_projects = futures::future::join_all(project_ids.iter().map(|id| {
+            let id = ProjectId::new(id.to_string_lossy().to_string());
+            self.read(id)
+        }))
+        .await;
+
+        // Filter out the the projects that did not load successfully (e.g. invalid
+        // manifest file).
+        loaded_projects
+            .into_iter()
+            .filter(|res| res.is_ok())
+            .collect::<Result<Vec<_>, _>>()
     }
 }
 
 #[async_trait]
 impl ProjectRepository for ManifestFileProjectRepository {
     async fn read(&self, project_id: &ProjectId) -> Result<Project, ProjectRepositoryError> {
-        Self::read(self, project_id).await
+        Self::read(self, project_id.clone()).await
+    }
+
+    async fn list(&self) -> Result<Vec<Project>, ProjectRepositoryError> {
+        Self::list(self).await
     }
 }
 
@@ -131,71 +187,140 @@ mod manifest_file_project_service_tests {
         .unwrap();
     }
 
-    #[tokio::test]
-    async fn should_read_the_correct_project() {
-        // Arrange
-        let project = Faker.fake::<Project>();
-        let diversion_project = Faker.fake::<Project>();
-
-        let projects_dir = tempfile::tempdir().unwrap();
-
-        write_to_project_manifest(&project, &projects_dir);
-        write_to_project_manifest(&diversion_project, &projects_dir);
-
-        let service = ManifestFileProjectRepository::new(&projects_dir);
-
-        // Act
-        let recovered_project = service.read(&project.id).await.unwrap();
-
-        // Assert
-        assert_eq!(recovered_project, project);
-    }
-
-    #[tokio::test]
-    async fn should_return_an_error_if_unable_to_find_project() {
-        // Arrange
-        let non_existent_project = Faker.fake::<Project>();
-        let diversion_project = Faker.fake::<Project>();
-
-        let projects_dir = tempfile::tempdir().unwrap();
-
-        write_to_project_manifest(&diversion_project, &projects_dir);
-
-        let service = ManifestFileProjectRepository::new(&projects_dir);
-
-        // Act
-        let res = service.read(&non_existent_project.id).await;
-
-        // Assert
-        assert!(
-            matches!(res, Err(ProjectRepositoryError::ResourceNotFound { id }) if id == non_existent_project.id)
-        );
-    }
-
-    #[tokio::test]
-    async fn should_return_an_error_if_unable_to_deserialize_project() {
-        // Arrange
-        let projects_dir = tempfile::tempdir().unwrap();
-        let project_id = Faker.fake::<ProjectId>();
-
-        let project_dir = PathBuf::new().join(&projects_dir).join(project_id.as_str());
+    /// Creates an empty dir `dir_name` in the `projects_dir`.
+    fn create_empty_project_dir<P: AsRef<Path>>(dir_name: &str, projects_dir: P) {
+        let project_dir = PathBuf::new().join(&projects_dir).join(dir_name);
 
         std::fs::create_dir(&project_dir).unwrap();
+    }
 
-        let invalid_manifest_file = Faker.fake::<String>();
+    mod read {
+        use super::*;
 
-        std::fs::write(
-            project_dir.join(TEST_MANIFEST_FILE_NAME),
-            serde_yml::to_string(&invalid_manifest_file).unwrap(),
-        )
-        .unwrap();
+        #[tokio::test]
+        async fn should_read_the_correct_project() {
+            // Arrange
+            let project = Faker.fake::<Project>();
+            let diversion_project = Faker.fake::<Project>();
 
-        let service = ManifestFileProjectRepository::new(&projects_dir);
+            let projects_dir = tempfile::tempdir().unwrap();
 
-        // Act
-        let res = service.read(&project_id).await;
+            write_to_project_manifest(&project, &projects_dir);
+            write_to_project_manifest(&diversion_project, &projects_dir);
 
-        // Assert
-        assert!(matches!(res, Err(ProjectRepositoryError::Parsing { id }) if id == project_id));
+            let service = ManifestFileProjectRepository::new(&projects_dir);
+
+            // Act
+            let recovered_project = service.read(project.id.clone()).await.unwrap();
+
+            // Assert
+            assert_eq!(recovered_project, project);
+        }
+
+        #[tokio::test]
+        async fn should_return_an_error_if_unable_to_find_project() {
+            // Arrange
+            let non_existent_project = Faker.fake::<Project>();
+            let diversion_project = Faker.fake::<Project>();
+
+            let projects_dir = tempfile::tempdir().unwrap();
+
+            write_to_project_manifest(&diversion_project, &projects_dir);
+
+            let service = ManifestFileProjectRepository::new(&projects_dir);
+
+            // Act
+            let res = service.read(non_existent_project.id.clone()).await;
+
+            // Assert
+            assert!(
+                matches!(res, Err(ProjectRepositoryError::ResourceNotFound { id }) if id == non_existent_project.id)
+            );
+        }
+
+        #[tokio::test]
+        async fn should_return_an_error_if_unable_to_deserialize_project() {
+            // Arrange
+            let projects_dir = tempfile::tempdir().unwrap();
+            let project_id = Faker.fake::<ProjectId>();
+
+            let project_dir = PathBuf::new().join(&projects_dir).join(project_id.as_str());
+
+            std::fs::create_dir(&project_dir).unwrap();
+
+            let invalid_manifest_file = Faker.fake::<String>();
+
+            std::fs::write(
+                project_dir.join(TEST_MANIFEST_FILE_NAME),
+                serde_yml::to_string(&invalid_manifest_file).unwrap(),
+            )
+            .unwrap();
+
+            let service = ManifestFileProjectRepository::new(&projects_dir);
+
+            // Act
+            let res = service.read(project_id.clone()).await;
+
+            // Assert
+            assert!(matches!(res, Err(ProjectRepositoryError::Parsing { id }) if id == project_id));
+        }
+    }
+
+    mod list {
+        use super::*;
+
+        #[tokio::test]
+        async fn should_list_all_available_valid_projects() {
+            // Arrange
+            let mut projects = fake::vec![Project; 1..40];
+            let projects_dir = tempfile::tempdir().unwrap();
+
+            projects
+                .iter()
+                .for_each(|project| write_to_project_manifest(project, &projects_dir));
+
+            create_empty_project_dir("invalid-project-missing-manifest", &projects_dir); // invalid project should not create an error on listing projects.
+
+            let service = ManifestFileProjectRepository::new(&projects_dir);
+
+            // Act
+            let mut recovered_projects = service.list().await.unwrap();
+
+            // Assert
+            projects.sort_by_key(|p| p.id.clone());
+            recovered_projects.sort_by_key(|p| p.id.clone());
+            assert_eq!(recovered_projects, projects);
+        }
+
+        #[tokio::test]
+        async fn should_return_an_empty_vec_if_no_projects_in_dir() {
+            // Arrange
+            let projects_dir = tempfile::tempdir().unwrap();
+
+            let service = ManifestFileProjectRepository::new(&projects_dir);
+
+            // Act
+            let recovered_projects = service.list().await.unwrap();
+
+            // Assert
+            assert!(recovered_projects.is_empty());
+        }
+
+        #[tokio::test]
+        async fn should_return_correct_err_if_non_existent_project_dir() {
+            // Arrange
+            let projects_dir = "/does/not/exist";
+
+            let service = ManifestFileProjectRepository::new(projects_dir);
+
+            // Act
+            let res = service.list().await;
+
+            // Assert
+            assert!(matches!(
+                res,
+                Err(ProjectRepositoryError::Infrastucture { .. })
+            ));
+        }
     }
 }

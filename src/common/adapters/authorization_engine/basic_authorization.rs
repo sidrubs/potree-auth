@@ -42,6 +42,7 @@ impl SimpleAuthorizationEngine {
                 } else {
                     Err(AuthorizationEngineError::NotAuthorized {
                         user: Box::new(user.clone()),
+                        action: Box::new(action.clone()),
                         resource_name: project.name.clone().into(),
                         resource_type: Box::new(resource.into()),
                     })
@@ -50,6 +51,9 @@ impl SimpleAuthorizationEngine {
 
             // ProjectType list is allowed
             (Resource::ProjectType, Action::List) => Ok(()),
+
+            // Allowed to read project dashboard
+            (Resource::ProjectDashboard, Action::Read) => Ok(()),
 
             // Other actions for Project, ProjectAsset, PotreeRender
             (Resource::Project(project), Action::List)
@@ -66,6 +70,7 @@ impl SimpleAuthorizationEngine {
             | (Resource::PotreeRender(project), Action::Delete) => {
                 Err(AuthorizationEngineError::NotAuthorized {
                     user: Box::new(user.clone()),
+                    action: Box::new(action.clone()),
                     resource_name: project.name.clone().into(),
                     resource_type: Box::new(resource.into()),
                 })
@@ -78,7 +83,20 @@ impl SimpleAuthorizationEngine {
             | (Resource::ProjectType, Action::Delete) => {
                 Err(AuthorizationEngineError::NotAuthorized {
                     user: Box::new(user.clone()),
+                    action: Box::new(action.clone()),
                     resource_name: "project list".to_owned(),
+                    resource_type: Box::new(resource.into()),
+                })
+            }
+
+            (Resource::ProjectDashboard, Action::List)
+            | (Resource::ProjectDashboard, Action::Write)
+            | (Resource::ProjectDashboard, Action::Update)
+            | (Resource::ProjectDashboard, Action::Delete) => {
+                Err(AuthorizationEngineError::NotAuthorized {
+                    user: Box::new(user.clone()),
+                    action: Box::new(action.clone()),
+                    resource_name: "project dashboard".to_owned(),
                     resource_type: Box::new(resource.into()),
                 })
             }
@@ -423,6 +441,62 @@ mod authorization_service_tests {
 
                 // Act
                 let res = authorization_service.assert_allowed(&user, &resource, &Action::List);
+
+                // Assert
+                assert!(matches!(
+                    res,
+                    Err(AuthorizationEngineError::NotAuthenticated)
+                ))
+            }
+        }
+
+        mod project_dashboard_read {
+            use super::*;
+
+            #[test]
+            fn should_return_ok_if_the_user_is_an_admin() {
+                // Arrange
+                let authorization_service = SimpleAuthorizationEngine;
+
+                let user = User::dummy_admin();
+                let resource = Resource::ProjectDashboard;
+
+                // Act
+                let res =
+                    authorization_service.assert_allowed(&Some(user), &resource, &Action::Read);
+
+                // Assert
+                assert!(res.is_ok())
+            }
+
+            #[test]
+            fn should_return_ok_for_an_authenticated_user() {
+                // Arrange
+                let authorization_service = SimpleAuthorizationEngine;
+
+                let user = Faker.fake::<User>();
+
+                let resource = Resource::ProjectDashboard;
+
+                // Act
+                let res =
+                    authorization_service.assert_allowed(&Some(user), &resource, &Action::Read);
+
+                // Assert
+                assert!(res.is_ok())
+            }
+
+            #[test]
+            fn should_return_err_if_the_user_is_not_authenticated() {
+                // Arrange
+                let authorization_service = SimpleAuthorizationEngine;
+
+                let user = None;
+
+                let resource = Resource::ProjectDashboard;
+
+                // Act
+                let res = authorization_service.assert_allowed(&user, &resource, &Action::Read);
 
                 // Assert
                 assert!(matches!(

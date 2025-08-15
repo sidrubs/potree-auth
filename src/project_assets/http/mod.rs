@@ -1,7 +1,7 @@
 mod error;
 mod extractors;
+mod route_handlers;
 mod router;
-mod routes;
 mod state;
 
 pub use router::ASSET_PATH;

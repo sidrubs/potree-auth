@@ -9,10 +9,12 @@ impl From<RenderingServiceError> for RenderError {
             },
             RenderingServiceError::NotAuthorized {
                 user,
+                action,
                 resource_name,
                 resource_type,
             } => Self::NotAuthorized {
                 user,
+                action,
                 resource_name,
                 resource_type,
             },
@@ -20,6 +22,7 @@ impl From<RenderingServiceError> for RenderError {
             RenderingServiceError::ServerConfiguration { message } => {
                 Self::ServerConfiguration { message }
             }
+            RenderingServiceError::Infrastucture { message } => Self::Infrastucture { message },
         }
     }
 }

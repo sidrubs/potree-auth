@@ -9,10 +9,12 @@ impl From<ProjectAssetsServiceError> for ApiError {
             },
             ProjectAssetsServiceError::NotAuthorized {
                 user,
+                action,
                 resource_name,
                 resource_type,
             } => Self::NotAuthorized {
                 user,
+                action,
                 resource_name,
                 resource_type,
             },
@@ -20,6 +22,7 @@ impl From<ProjectAssetsServiceError> for ApiError {
             ProjectAssetsServiceError::AssetNotFound { path } => Self::ResourceNotFound {
                 resource_name: path.to_string_lossy().to_string(),
             },
+            ProjectAssetsServiceError::Infrastucture { message } => Self::Infrastucture { message },
         }
     }
 }

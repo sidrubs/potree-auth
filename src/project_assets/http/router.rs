@@ -7,7 +7,7 @@ use axum::routing::get;
 use web_route::ParameterizedRoute;
 
 use super::super::application::service::ProjectAssetService;
-use super::routes;
+use super::route_handlers;
 use super::state::State;
 use crate::common::domain::value_objects::ProjectId;
 
@@ -26,6 +26,6 @@ pub fn build_router(project_asset_service: ProjectAssetService) -> Router {
     };
 
     Router::new()
-        .route(&ASSET_PATH, get(routes::project_asset))
+        .route(&ASSET_PATH, get(route_handlers::project_asset))
         .layer(Extension(state))
 }

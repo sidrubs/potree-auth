@@ -1,6 +1,7 @@
 /// Creates a newtype with following code automatically generated:
 ///
-/// - Derives `Clone`, `Debug`, `PartialEq`, and `Display`.
+/// - Derives `Clone`, `Debug`, `PartialEq`, `Eq`, `PartialOrd`, `Ord`, and
+///   `Display`.
 /// - Implements `new`, `Deref`, and `From`.
 /// - Allows one to implement additional traits and features as needed.
 ///
@@ -89,7 +90,7 @@ macro_rules! new_type {
         }
     ) => {
         $(#[$attr])*
-        #[derive(Clone, Debug, PartialEq)]
+        #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
         pub struct $name(
             $(#[$type_attr])*
             $type

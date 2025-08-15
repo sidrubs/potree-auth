@@ -7,12 +7,16 @@ use web_route::ParameterizedRoute;
 use web_route::WebRoute;
 
 use super::super::application::service::RenderingService;
-use super::routes;
+use super::route_handlers;
 use super::state::State;
 use crate::common::domain::value_objects::ProjectId;
 
 pub static POTREE: LazyLock<ParameterizedRoute> =
     LazyLock::new(|| ParameterizedRoute::new("/potree/{project_id}"));
+pub static PROJECT_DASHBOARD: LazyLock<ParameterizedRoute> =
+    LazyLock::new(|| ParameterizedRoute::new("/projects"));
+pub static NOT_FOUND: LazyLock<ParameterizedRoute> =
+    LazyLock::new(|| ParameterizedRoute::new("/404"));
 
 #[derive(serde::Deserialize)]
 pub(crate) struct PotreePathParams {
@@ -30,6 +34,9 @@ pub fn build_router(rendering_service: RenderingService, login_route: WebRoute) 
     };
 
     Router::new()
-        .route(&POTREE, get(routes::potree_render))
+        .route(&POTREE, get(route_handlers::potree_render))
+        .route(&PROJECT_DASHBOARD, get(route_handlers::project_dashboard))
+        .route(&NOT_FOUND, get(route_handlers::not_found))
+        .fallback(get(route_handlers::not_found))
         .layer(Extension(state))
 }
