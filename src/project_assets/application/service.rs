@@ -45,11 +45,8 @@ impl ProjectAssetService {
         request_headers: Option<HeaderMap>,
     ) -> Result<StaticAsset, ProjectAssetsServiceError> {
         let project = self.project_datastore.read(project_id).await?;
-        self.authorization_engine.assert_allowed(
-            user,
-            &Resource::Project(&project),
-            &Action::Read,
-        )?;
+        self.authorization_engine
+            .can(user, &Action::Read, &Resource::Project(&project))?;
 
         // Build a path to the asset. The asset would be within its project directory.
         let asset_path = Path::new(project_id.as_str()).join(asset_path);
@@ -87,7 +84,7 @@ mod project_asset_service_tests {
                 .return_const(Ok(Faker.fake()));
             let mut authorization_engine = MockAuthorizationEngine::new();
             authorization_engine
-                .expect_assert_allowed()
+                .expect_can()
                 .return_const(Err(AuthorizationEngineError::NotAuthenticated));
             let project_asset_store = MockProjectAssetStore::new();
 
@@ -121,13 +118,13 @@ mod project_asset_service_tests {
             .expect_read()
             .return_const(Ok(Faker.fake()));
         let mut authorization_engine = MockAuthorizationEngine::new();
-        authorization_engine
-            .expect_assert_allowed()
-            .return_const(Err(AuthorizationEngineError::NotAuthorized {
+        authorization_engine.expect_can().return_const(Err(
+            AuthorizationEngineError::NotAuthorized {
                 user: Box::new(dummy_user.clone()),
                 resource_name: dummy_resource_name.to_string(),
                 resource_type: Box::new(ResourceType::Project),
-            }));
+            },
+        ));
         let project_asset_store = MockProjectAssetStore::new();
 
         let project_asset_service = ProjectAssetService::new(

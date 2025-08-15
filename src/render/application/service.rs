@@ -56,11 +56,8 @@ impl RenderingService {
     ) -> Result<PotreeRender, RenderingServiceError> {
         let project = self.project_datastore.read(project_id).await?;
 
-        self.authorization_engine.assert_allowed(
-            user,
-            &Resource::Project(&project),
-            &Action::Read,
-        )?;
+        self.authorization_engine
+            .can(user, &Action::Read, &Resource::Project(&project))?;
 
         Ok(PotreeRender {
             project_title: project.name,
@@ -118,7 +115,7 @@ mod project_rendering_service_tests {
                 .return_const(Ok(Faker.fake()));
             let mut authorization_engine = MockAuthorizationEngine::new();
             authorization_engine
-                .expect_assert_allowed()
+                .expect_can()
                 .return_const(Err(AuthorizationEngineError::NotAuthenticated));
 
             let project_asset_service = RenderingService::new(
@@ -146,13 +143,13 @@ mod project_rendering_service_tests {
             .expect_read()
             .return_const(Ok(Faker.fake()));
         let mut authorization_engine = MockAuthorizationEngine::new();
-        authorization_engine
-            .expect_assert_allowed()
-            .return_const(Err(AuthorizationEngineError::NotAuthorized {
+        authorization_engine.expect_can().return_const(Err(
+            AuthorizationEngineError::NotAuthorized {
                 user: Faker.fake(),
                 resource_name: Faker.fake(),
                 resource_type: Faker.fake(),
-            }));
+            },
+        ));
 
         let project_asset_service = RenderingService::new(
             Arc::new(project_datastore),
