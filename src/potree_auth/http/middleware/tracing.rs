@@ -6,7 +6,7 @@ use tower_http::trace::TraceLayer;
 use tracing::Level;
 
 /// Adds tracing middleware to the `router`
-pub(crate) fn apply_tracing_middleware(router: Router) -> Router {
+pub fn apply_tracing_middleware(router: Router) -> Router {
     let trace_layer = TraceLayer::new_for_http()
         .on_request(DefaultOnRequest::new().level(Level::INFO))
         .on_response(

@@ -261,3 +261,24 @@ mod projects_dashboard {
         assert!(response.text().contains("Project 2"));
     }
 }
+
+mod secure_headers {
+    use super::*;
+
+    #[tokio::test]
+    async fn should_have_secure_headers_middleware_active() {
+        // Arrange
+        let test_server = TestServer::new(initialize_application().await).unwrap();
+
+        // Act
+        let response = test_server.get(&HEALTH_CHECK).await;
+
+        // Assert
+        //
+        // Note: This is not an exhaustive list, just checking that the security headers
+        // middleware is active.
+        response.assert_contains_header(http::header::CONTENT_SECURITY_POLICY);
+        response.assert_contains_header(http::header::STRICT_TRANSPORT_SECURITY);
+        response.assert_contains_header("permissions-policy");
+    }
+}

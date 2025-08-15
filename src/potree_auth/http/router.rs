@@ -25,6 +25,7 @@ use crate::common::adapters::project_repository::manifest_file::ManifestFileProj
 use crate::potree_assets::adapters::potree_asset_store::embedded::EmbeddedPotreeAssetStore;
 use crate::potree_assets::application::service::PotreeAssetService;
 use crate::potree_assets::{self};
+use crate::potree_auth::http::middleware::security_headers::apply_secure_headers_middleware;
 use crate::project_assets::adapters::project_asset_store::serve_dir::ServeDirProjectAssets;
 use crate::project_assets::application::service::ProjectAssetService;
 use crate::project_assets::http::ASSET_PATH;
@@ -99,6 +100,7 @@ fn build_router(
 
     // Apply middleware
     let router = apply_session_layer(router, Duration::days(1));
+    let router = apply_secure_headers_middleware(router);
     let router = apply_tracing_middleware(router);
 
     NormalizePathLayer::trim_trailing_slash().layer(router)
