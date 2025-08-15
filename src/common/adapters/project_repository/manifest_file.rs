@@ -107,7 +107,8 @@ impl ManifestFileProjectRepository {
         }))
         .await;
 
-        // Filter out the the projects that did not load successfully (e.g. invalid manifest file).
+        // Filter out the the projects that did not load successfully (e.g. invalid
+        // manifest file).
         loaded_projects
             .into_iter()
             .filter(|res| res.is_ok())

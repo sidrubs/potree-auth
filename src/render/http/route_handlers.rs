@@ -11,6 +11,7 @@ use super::router::PotreePathParams;
 use crate::common::utils::axum::extractors::user::UserExtractor;
 use crate::common::utils::axum::render_error::RenderError;
 use crate::render::application::error::RenderingServiceError;
+use crate::render::http::router::POTREE;
 use crate::render::http::utils::redirect_to_404;
 use crate::render::http::utils::redirect_to_login;
 
@@ -56,7 +57,7 @@ pub async fn project_dashboard(
     LoginRoute(login_route): LoginRoute,
     OriginalUri(page_uri): OriginalUri,
 ) -> Result<Response, RenderError> {
-    let res = rendering_service.project_dashboard(&user).await;
+    let res = rendering_service.project_dashboard(&user, &POTREE).await;
 
     // Redirect the user agent to the login route if they are not authenticated.
     if let Err(RenderingServiceError::NotAuthenticated) = res {
@@ -64,7 +65,8 @@ pub async fn project_dashboard(
         return Ok(redirect_to_login(&login_route, page_uri.path()).into_response());
     }
 
-    // Redirect user to 404 page if the user is not authorized to view the project dashboard.
+    // Redirect user to 404 page if the user is not authorized to view the project
+    // dashboard.
     if let Err(RenderingServiceError::NotAuthorized { .. }) = res {
         tracing::error!(user = ?user, "user not authorized to view project dashboard");
         return Ok(redirect_to_404().into_response());

@@ -64,3 +64,15 @@ impl From<web_route::error::WebRouteError> for RenderingServiceError {
         }
     }
 }
+
+impl From<super::super::domain::error::RenderDomainError> for RenderingServiceError {
+    fn from(value: super::super::domain::error::RenderDomainError) -> Self {
+        match value {
+            crate::render::domain::error::RenderDomainError::InvalidRoutePopulation { .. } => {
+                Self::ServerConfiguration {
+                    message: value.to_string(),
+                }
+            }
+        }
+    }
+}

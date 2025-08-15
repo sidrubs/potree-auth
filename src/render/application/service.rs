@@ -12,7 +12,6 @@ use crate::common::ports::authorization_engine::Action;
 use crate::common::ports::authorization_engine::AuthorizationEngine;
 use crate::common::ports::authorization_engine::Resource;
 use crate::common::ports::project_repository::ProjectRepository;
-
 use crate::render::domain::not_found_render::NotFound;
 use crate::render::domain::project_dashboard_render::ProjectDashboard;
 
@@ -74,13 +73,17 @@ impl RenderingService {
     pub async fn project_dashboard(
         &self,
         user: &Option<User>,
+        default_project_render_route: &ParameterizedRoute,
     ) -> Result<ProjectDashboard, RenderingServiceError> {
         self.authorization_engine
             .can(user, &Action::Read, &Resource::ProjectDashboard)?;
 
         let projects = self.list_allowed_projects(user).await?;
 
-        Ok(ProjectDashboard { projects })
+        Ok(ProjectDashboard::from_domain_projects(
+            projects,
+            default_project_render_route,
+        )?)
     }
 
     /// Provides a 404 page.
@@ -233,7 +236,8 @@ mod project_rendering_service_tests {
                 .expect_list()
                 .return_const(Ok(dummy_projects.clone()));
             let mut authorization_engine = MockAuthorizationEngine::new();
-            // The first call to the authZ engine is checking that the user is allowed to list projects.
+            // The first call to the authZ engine is checking that the user is allowed to
+            // list projects.
             authorization_engine
                 .expect_can()
                 .once()

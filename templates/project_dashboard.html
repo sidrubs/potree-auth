@@ -7,7 +7,11 @@
     <body>
         <ul>
             {% for project in projects %}
-            <li>{{ project.name }}</li>
+            <li>
+                <a href="{{ project.render_route }}" target="_blank"
+                    >{{ project.name }}</a
+                >
+            </li>
             {% endfor %}
         </ul>
     </body>
