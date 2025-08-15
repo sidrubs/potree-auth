@@ -37,7 +37,7 @@ impl ProjectAssetService {
     /// Read a specific project asset. Optional `request_headers` can be
     /// provided to specify various instructions as to how to read and format
     /// the resulting data.
-    pub async fn request_asset(
+    pub async fn get_asset(
         &self,
         user: &Option<User>,
         project_id: &ProjectId,
@@ -46,7 +46,7 @@ impl ProjectAssetService {
     ) -> Result<StaticAsset, ProjectAssetsServiceError> {
         let project = self.project_datastore.read(project_id).await?;
         self.authorization_engine
-            .can(user, &Action::Read, &Resource::Project(&project))?;
+            .can(user, &Action::Read, &Resource::ProjectAsset(&project))?;
 
         // Build a path to the asset. The asset would be within its project directory.
         let asset_path = Path::new(project_id.as_str()).join(asset_path);
@@ -96,7 +96,7 @@ mod project_asset_service_tests {
 
             // Act
             let res = project_asset_service
-                .request_asset(&Faker.fake(), &Faker.fake(), Path::new(""), Faker.fake())
+                .get_asset(&Faker.fake(), &Faker.fake(), Path::new(""), Faker.fake())
                 .await;
 
             // Assert
@@ -135,7 +135,7 @@ mod project_asset_service_tests {
 
         // Act
         let res = project_asset_service
-            .request_asset(&Faker.fake(), &Faker.fake(), Path::new(""), Faker.fake())
+            .get_asset(&Faker.fake(), &Faker.fake(), Path::new(""), Faker.fake())
             .await;
 
         // Assert

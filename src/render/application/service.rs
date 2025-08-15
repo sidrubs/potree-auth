@@ -57,7 +57,7 @@ impl RenderingService {
         let project = self.project_datastore.read(project_id).await?;
 
         self.authorization_engine
-            .can(user, &Action::Read, &Resource::Project(&project))?;
+            .can(user, &Action::Read, &Resource::PotreeRender(&project))?;
 
         Ok(PotreeRender {
             project_title: project.name,
