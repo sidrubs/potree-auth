@@ -2,6 +2,8 @@ use std::sync::Arc;
 use std::sync::LazyLock;
 
 use axum::Router;
+use axum::response::Redirect;
+use axum::routing::get;
 use time::Duration;
 use tower::Layer;
 use tower_http::normalize_path::NormalizePath;
@@ -28,6 +30,7 @@ use crate::project_assets::application::service::ProjectAssetService;
 use crate::project_assets::http::ASSET_PATH;
 use crate::project_assets::{self};
 use crate::render::application::service::RenderingService;
+use crate::render::http::PROJECT_DASHBOARD;
 use crate::render::{self};
 
 pub static AUTH: LazyLock<WebRoute> = LazyLock::new(|| WebRoute::new("/auth"));
@@ -90,6 +93,9 @@ fn build_router(
         .nest(&PROJECT_ASSETS, project_asset_router)
         .merge(rendering_router)
         .merge(common_routes);
+
+    // Apply quality of life redirects
+    let router = router.route("/", get(|| async { Redirect::to(&PROJECT_DASHBOARD) }));
 
     // Apply middleware
     let router = apply_session_layer(router, Duration::days(1));
