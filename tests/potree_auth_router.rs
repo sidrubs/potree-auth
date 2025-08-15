@@ -23,14 +23,14 @@ use crate::test_utils::TEST_PROJECT_2_DATA_PATH;
 use crate::test_utils::TEST_PROJECT_2_DIR;
 use crate::test_utils::TEST_PROJECT_PARENT;
 
-static HEALTH_CHECK: LazyLock<ParameterizedRoute> =
-    LazyLock::new(|| ParameterizedRoute::new("/_health"));
+static HEALTH_CHECK: LazyLock<WebRoute> = LazyLock::new(|| WebRoute::new("/_health"));
 static POTREE_ASSETS: LazyLock<ParameterizedRoute> =
     LazyLock::new(|| ParameterizedRoute::new("/potree-assets/{*path}"));
 static PROJECT_ASSETS: LazyLock<ParameterizedRoute> =
     LazyLock::new(|| ParameterizedRoute::new("/project-assets/{project_id}/{*path}"));
 static POTREE_RENDER: LazyLock<ParameterizedRoute> =
     LazyLock::new(|| ParameterizedRoute::new("/potree/{project_id}"));
+static PROJECTS_DASHBOARD: LazyLock<WebRoute> = LazyLock::new(|| WebRoute::new("/projects"));
 
 fn test_configuration_no_idp() -> PotreeAuthConfiguration {
     PotreeAuthConfiguration {
@@ -220,5 +220,44 @@ mod potree_render {
         response.assert_status(StatusCode::OK);
         assert_eq!(response.content_type(), mime::TEXT_HTML_UTF_8.to_string());
         assert!(response.text().contains(TEST_PROJECT_1_DIR))
+    }
+
+    #[tokio::test]
+    async fn should_redirect_to_404_if_not_exist() {
+        // Arrange
+        let test_server = TestServer::new(initialize_application().await).unwrap();
+
+        // Act
+        let response = test_server
+            .get(
+                &POTREE_RENDER
+                    .to_web_route(&serde_json::json!({"project_id": "not-exist"}))
+                    .unwrap(),
+            )
+            .await;
+
+        // Assert
+        response.assert_status(StatusCode::SEE_OTHER);
+    }
+}
+
+mod projects_dashboard {
+    use super::*;
+
+    #[tokio::test]
+    async fn should_return_the_correct_html() {
+        // Arrange
+        let test_server = TestServer::new(initialize_application().await).unwrap();
+
+        // Act
+        let response = test_server.get(&PROJECTS_DASHBOARD).await;
+
+        // Assert
+        response.assert_status(StatusCode::OK);
+        assert_eq!(response.content_type(), mime::TEXT_HTML_UTF_8.to_string());
+
+        // Check that the projects are listed
+        assert!(response.text().contains("Project 1"));
+        assert!(response.text().contains("Project 2"));
     }
 }
