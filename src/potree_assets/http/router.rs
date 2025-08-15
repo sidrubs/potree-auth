@@ -7,7 +7,7 @@ use axum::routing::get;
 use web_route::ParameterizedRoute;
 
 use super::super::application::service::PotreeAssetService;
-use super::routes;
+use super::route_handlers;
 use super::state::State;
 
 static ASSET_PATH: LazyLock<ParameterizedRoute> =
@@ -24,6 +24,6 @@ pub fn build_router(potree_asset_service: PotreeAssetService) -> Router {
     };
 
     Router::new()
-        .route(&ASSET_PATH, get(routes::potree_asset))
+        .route(&ASSET_PATH, get(route_handlers::potree_asset))
         .layer(Extension(state))
 }

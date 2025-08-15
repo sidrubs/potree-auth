@@ -6,7 +6,7 @@ use axum::routing::get;
 use web_route::WebRoute;
 
 use super::super::application::service::AuthenticationService;
-use super::routes;
+use super::route_handlers;
 use super::state::State;
 
 pub static LOGIN: LazyLock<WebRoute> = LazyLock::new(|| WebRoute::new("/login"));
@@ -22,7 +22,7 @@ pub fn build_router(authentication_service: AuthenticationService) -> Router {
     };
 
     Router::new()
-        .route(&LOGIN, get(routes::login))
-        .route(&CALLBACK, get(routes::callback))
+        .route(&LOGIN, get(route_handlers::login))
+        .route(&CALLBACK, get(route_handlers::callback))
         .layer(Extension(state))
 }

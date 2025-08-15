@@ -7,7 +7,7 @@ use web_route::ParameterizedRoute;
 use web_route::WebRoute;
 
 use super::super::application::service::RenderingService;
-use super::routes;
+use super::route_handlers;
 use super::state::State;
 use crate::common::domain::value_objects::ProjectId;
 
@@ -32,7 +32,7 @@ pub fn build_router(rendering_service: RenderingService, login_route: WebRoute) 
     };
 
     Router::new()
-        .route(&POTREE, get(routes::potree_render))
-        .route(&PROJECT_DASHBOARD, get(routes::project_dashboard))
+        .route(&POTREE, get(route_handlers::potree_render))
+        .route(&PROJECT_DASHBOARD, get(route_handlers::project_dashboard))
         .layer(Extension(state))
 }
