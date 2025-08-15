@@ -3,7 +3,6 @@ use axum::extract::OriginalUri;
 use axum::extract::Path;
 use axum::response::Html;
 use axum::response::IntoResponse;
-use axum::response::Redirect;
 use axum::response::Response;
 
 use super::super::application::service::RenderingService;
@@ -12,6 +11,7 @@ use super::router::PotreePathParams;
 use crate::common::utils::axum::extractors::user::UserExtractor;
 use crate::common::utils::axum::render_error::RenderError;
 use crate::render::application::error::RenderingServiceError;
+use crate::render::http::utils::redirect_to_login;
 
 /// Renders a `potree` project.
 pub(crate) async fn potree_render(
@@ -27,9 +27,7 @@ pub(crate) async fn potree_render(
 
     // Redirect the user agent to the login route if they are not authenticated.
     if let Err(RenderingServiceError::NotAuthenticated) = res {
-        return Ok(
-            Redirect::to(&format!("{}?next_path={}", login_route, page_uri.path())).into_response(),
-        );
+        return Ok(redirect_to_login(&login_route, page_uri.path()).into_response());
     }
 
     let potree_template = res?;
@@ -48,10 +46,7 @@ pub(crate) async fn project_dashboard(
 
     // Redirect the user agent to the login route if they are not authenticated.
     if let Err(RenderingServiceError::NotAuthenticated) = res {
-        // TODO: Break out this redirect logic to keep it DRY
-        return Ok(
-            Redirect::to(&format!("{}?next_path={}", login_route, page_uri.path())).into_response(),
-        );
+        return Ok(redirect_to_login(&login_route, page_uri.path()).into_response());
     }
 
     let project_dashboard = res?;

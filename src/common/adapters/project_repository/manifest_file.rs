@@ -101,11 +101,17 @@ impl ManifestFileProjectRepository {
         }
 
         // Asynchronously read the projects for each project id.
-        futures::future::try_join_all(project_ids.iter().map(|id| {
+        let loaded_projects = futures::future::join_all(project_ids.iter().map(|id| {
             let id = ProjectId::new(id.to_string_lossy().to_string());
             self.read(id)
         }))
-        .await
+        .await;
+
+        // Filter out the the projects that did not load successfully (e.g. invalid manifest file).
+        loaded_projects
+            .into_iter()
+            .filter(|res| res.is_ok())
+            .collect::<Result<Vec<_>, _>>()
     }
 }
 
@@ -178,6 +184,13 @@ mod manifest_file_project_service_tests {
             serde_yml::to_string(&manifest_file).unwrap(),
         )
         .unwrap();
+    }
+
+    /// Creates an empty dir `dir_name` in the `projects_dir`.
+    fn create_empty_project_dir<P: AsRef<Path>>(dir_name: &str, projects_dir: P) {
+        let project_dir = PathBuf::new().join(&projects_dir).join(dir_name);
+
+        std::fs::create_dir(&project_dir).unwrap();
     }
 
     mod read {
@@ -256,7 +269,7 @@ mod manifest_file_project_service_tests {
         use super::*;
 
         #[tokio::test]
-        async fn should_list_all_available_projects() {
+        async fn should_list_all_available_valid_projects() {
             // Arrange
             let mut projects = fake::vec![Project; 1..40];
             let projects_dir = tempfile::tempdir().unwrap();
@@ -264,6 +277,8 @@ mod manifest_file_project_service_tests {
             projects
                 .iter()
                 .for_each(|project| write_to_project_manifest(&project, &projects_dir));
+
+            create_empty_project_dir("invalid-project-missing-manifest", &projects_dir); // invalid project should not create an error on listing projects.
 
             let service = ManifestFileProjectRepository::new(&projects_dir);
 
@@ -299,8 +314,6 @@ mod manifest_file_project_service_tests {
 
             // Act
             let res = service.list().await;
-
-            dbg!(&res);
 
             // Assert
             assert!(matches!(

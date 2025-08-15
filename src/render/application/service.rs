@@ -69,11 +69,7 @@ impl RenderingService {
         })
     }
 
-    /// PUT IN DOCSTRING
-    ///
-    /// # Todo
-    ///
-    /// - Project interactions should really be its own service. Doesn't need `http` for now.
+    /// Provides a dashboard showing all of the `user`'s projects.
     pub async fn project_dashboard(
         &self,
         user: &Option<User>,
@@ -107,10 +103,6 @@ impl RenderingService {
     }
 
     /// List all of the projects a `user` is allowed to read.
-    ///
-    /// # Todo
-    ///
-    /// - Unit tests for the filtering out of not allowed projects.
     async fn list_allowed_projects(
         &self,
         user: &Option<User>,
