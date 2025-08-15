@@ -78,6 +78,9 @@ impl RenderingService {
         &self,
         user: &Option<User>,
     ) -> Result<ProjectDashboard, RenderingServiceError> {
+        self.authorization_engine
+            .can(user, &Action::Read, &Resource::ProjectDashboard)?;
+
         let projects = self.list_allowed_projects(user).await?;
 
         Ok(ProjectDashboard { projects })
@@ -112,10 +115,12 @@ impl RenderingService {
         &self,
         user: &Option<User>,
     ) -> Result<Vec<Project>, RenderingServiceError> {
+        self.authorization_engine
+            .can(user, &Action::List, &Resource::ProjectType)?;
+
         let projects = self.project_repository.list().await?;
 
         // Filter out the projects that the user is not allowed to read.
-        // TODO: Need to work out authentication. Shouldn't be handled by the authZ engine.
         let allowed_projects = projects
             .into_iter()
             .filter(|p| {
@@ -140,11 +145,13 @@ mod project_rendering_service_tests {
 
     use super::super::super::application::error::RenderingServiceError;
     use super::super::super::application::service::RenderingService;
+    use crate::common::ports::authorization_engine::Action;
     use crate::common::ports::authorization_engine::AuthorizationEngineError;
     use crate::common::ports::authorization_engine::MockAuthorizationEngine;
     use crate::common::ports::project_repository::MockProjectRepository;
 
     mod render_potree {
+
         use super::*;
 
         #[tokio::test]
@@ -186,6 +193,7 @@ mod project_rendering_service_tests {
             authorization_engine.expect_can().return_const(Err(
                 AuthorizationEngineError::NotAuthorized {
                     user: Faker.fake(),
+                    action: Box::new(Action::Read),
                     resource_name: Faker.fake(),
                     resource_type: Faker.fake(),
                 },
@@ -227,6 +235,12 @@ mod project_rendering_service_tests {
                 .expect_list()
                 .return_const(Ok(dummy_projects.clone()));
             let mut authorization_engine = MockAuthorizationEngine::new();
+            // The first call to the authZ engine is checking that the user is allowed to list projects.
+            authorization_engine
+                .expect_can()
+                .once()
+                .return_const(Ok(()));
+            // Subsequent calls determines if the user is allow to read a specific project.
             let authorization_engine_call_count = Arc::new(Mutex::new(0));
             let authorization_engine_call_count_clone =
                 Arc::clone(&authorization_engine_call_count);
@@ -235,6 +249,7 @@ mod project_rendering_service_tests {
                 let res = if *count % 2 == 0 {
                     Err(AuthorizationEngineError::NotAuthorized {
                         user: Faker.fake(),
+                        action: Box::new(Action::List),
                         resource_name: Faker.fake(),
                         resource_type: Faker.fake(),
                     })
@@ -260,6 +275,37 @@ mod project_rendering_service_tests {
 
             // Assert
             assert_eq!(allowed_projects.len(), dummy_projects.len() / 2);
+        }
+
+        #[tokio::test]
+        async fn should_return_the_correct_error_if_user_not_allowed_to_list_projects() {
+            // Arrange
+            let project_datastore = MockProjectRepository::new();
+            let mut authorization_engine = MockAuthorizationEngine::new();
+            authorization_engine.expect_can().once().return_const(Err(
+                AuthorizationEngineError::NotAuthorized {
+                    user: Faker.fake(),
+                    action: Box::new(Action::List),
+                    resource_name: Faker.fake(),
+                    resource_type: Box::new(crate::common::domain::ResourceType::Project),
+                },
+            ));
+
+            let rendering_service = RenderingService::new(
+                Arc::new(project_datastore),
+                Arc::new(authorization_engine),
+                ParameterizedRoute::new(Faker.fake::<WebRoute>()).join("/{project_id}/{*path}"),
+                Faker.fake(),
+            );
+
+            // Act
+            let res = rendering_service.list_allowed_projects(&Faker.fake()).await;
+
+            // Assert
+            assert!(matches!(
+                res,
+                Err(RenderingServiceError::NotAuthorized { .. })
+            ));
         }
     }
 }

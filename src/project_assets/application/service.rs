@@ -121,6 +121,7 @@ mod project_asset_service_tests {
         authorization_engine.expect_can().return_const(Err(
             AuthorizationEngineError::NotAuthorized {
                 user: Box::new(dummy_user.clone()),
+                action: Box::new(Action::Read),
                 resource_name: dummy_resource_name.to_string(),
                 resource_type: Box::new(ResourceType::Project),
             },

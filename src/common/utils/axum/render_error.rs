@@ -3,6 +3,7 @@ use http::StatusCode;
 
 use crate::common::domain::ResourceType;
 use crate::common::domain::User;
+use crate::common::ports::authorization_engine::Action;
 
 /// Errors that can be experienced by a rendering (e.g. HTML) `axum` route
 /// handler.
@@ -22,9 +23,10 @@ pub enum RenderError {
     #[error("unable to find resource: {resource_name}")]
     ResourceNotFound { resource_name: String },
 
-    #[error("{} is not authorized to view the {:?}: {}", user.name, resource_type, resource_name)]
+    #[error("{} is not authorized to {} the {:?}: {}", user.name, action, resource_type, resource_name)]
     NotAuthorized {
         user: Box<User>,
+        action: Box<Action>,
         resource_name: String,
         resource_type: Box<ResourceType>,
     },
