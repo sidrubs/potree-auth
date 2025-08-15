@@ -122,7 +122,7 @@ impl ProjectRepository for ManifestFileProjectRepository {
     }
 
     async fn list(&self) -> Result<Vec<Project>, ProjectRepositoryError> {
-        Self::list(&self).await
+        Self::list(self).await
     }
 }
 
@@ -276,7 +276,7 @@ mod manifest_file_project_service_tests {
 
             projects
                 .iter()
-                .for_each(|project| write_to_project_manifest(&project, &projects_dir));
+                .for_each(|project| write_to_project_manifest(project, &projects_dir));
 
             create_empty_project_dir("invalid-project-missing-manifest", &projects_dir); // invalid project should not create an error on listing projects.
 
@@ -310,7 +310,7 @@ mod manifest_file_project_service_tests {
             // Arrange
             let projects_dir = "/does/not/exist";
 
-            let service = ManifestFileProjectRepository::new(&projects_dir);
+            let service = ManifestFileProjectRepository::new(projects_dir);
 
             // Act
             let res = service.list().await;

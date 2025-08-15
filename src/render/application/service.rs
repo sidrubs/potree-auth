@@ -13,6 +13,7 @@ use crate::common::ports::authorization_engine::AuthorizationEngine;
 use crate::common::ports::authorization_engine::Resource;
 use crate::common::ports::project_repository::ProjectRepository;
 
+use crate::render::domain::not_found_render::NotFound;
 use crate::render::domain::project_dashboard_render::ProjectDashboard;
 
 /// A service for rendering a project.
@@ -82,6 +83,11 @@ impl RenderingService {
         Ok(ProjectDashboard { projects })
     }
 
+    /// Provides a 404 page.
+    pub async fn not_found(&self) -> Result<NotFound, RenderingServiceError> {
+        Ok(NotFound)
+    }
+
     /// Determine the route to the potree config file for a specific project
     /// (`project_id`).
     fn potree_config_route(
@@ -117,7 +123,7 @@ impl RenderingService {
             .into_iter()
             .filter(|p| {
                 self.authorization_engine
-                    .can(user, &Action::Read, &Resource::Project(&p))
+                    .can(user, &Action::Read, &Resource::Project(p))
                     .is_ok()
             })
             .collect();
