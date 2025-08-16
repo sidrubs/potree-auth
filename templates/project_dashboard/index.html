@@ -1,0 +1,33 @@
+{% extends "../base/layout.html" %}
+
+{% block title %}Project Dashboard{% endblock %}
+
+{% block head %}
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/franken-ui@2.1.0-next.18/dist/css/core.min.css"
+    />
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/franken-ui@2.1.0-next.18/dist/css/utilities.min.css"
+    />
+{% endblock %}
+
+{% block content %}
+    <h1 class="uk-h1 mt-4">Project Dashboard</h1>
+    <ul class="uk-list mt-4">
+        {% for project in projects %}
+        <li>
+            <a
+                class="uk-link-text"
+                href="{{ project.render_route }}"
+                target="_blank"
+                >{{ project.name }}</a
+            >
+        </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+
+
+

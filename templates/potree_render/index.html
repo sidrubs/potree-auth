@@ -1,21 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "../base/layout.html" %}
 
-<head>
-    <meta charset="utf-8">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>{{ project_title }}</title>
+{% block title %}{{ project_title }}{% endblock %}
 
+{% block head %}
     <link rel="stylesheet" type="text/css" href="{{ potree_static_assets_path }}/build/potree/potree.css">
     <link rel="stylesheet" type="text/css" href="{{ potree_static_assets_path }}/libs/jquery-ui/jquery-ui.min.css">
     <link rel="stylesheet" type="text/css" href="{{ potree_static_assets_path }}/libs/openlayers3/ol.css">
     <link rel="stylesheet" type="text/css" href="{{ potree_static_assets_path }}/libs/spectrum/spectrum.css">
     <link rel="stylesheet" type="text/css" href="{{ potree_static_assets_path }}/libs/jstree/themes/mixed/style.css">
-</head>
+{% endblock %}
 
-<body>
+{% block content %}
     <script src="{{ potree_static_assets_path }}/libs/jquery/jquery-3.1.1.min.js"></script>
     <script src="{{ potree_static_assets_path }}/libs/spectrum/spectrum.js"></script>
     <script src="{{ potree_static_assets_path }}/libs/jquery-ui/jquery-ui.min.js"></script>
@@ -59,6 +54,4 @@
         viewer.loadProject("{{ potree_config_path }}");
 
     </script>
-</body>
-
-</html>
+{% endblock %}

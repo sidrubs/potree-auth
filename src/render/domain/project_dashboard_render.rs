@@ -9,7 +9,7 @@ use crate::render::domain::error::RenderDomainError;
 ///
 /// Displays all of the projects for a user.
 #[derive(Debug, Template)]
-#[template(path = "project_dashboard.html")]
+#[template(path = "project_dashboard/index.html")]
 pub struct ProjectDashboard {
     /// The projects that the user is allowed to read.
     pub projects: Vec<Project>,

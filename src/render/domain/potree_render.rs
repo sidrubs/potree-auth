@@ -9,7 +9,7 @@ use crate::common::domain::value_objects::ProjectName;
 /// This assumes that there is a `potree` config file fully defining the
 /// project.
 #[derive(Debug, Template)]
-#[template(path = "potree_render.html")]
+#[template(path = "potree_render/index.html")]
 pub struct PotreeRender {
     /// The title of the project to render.
     pub project_title: ProjectName,
