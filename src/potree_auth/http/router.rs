@@ -12,7 +12,7 @@ use web_route::ParameterizedRoute;
 use web_route::WebRoute;
 
 use super::super::config::PotreeAuthConfiguration;
-use super::super::error::PotreeAuthError;
+use super::error::PotreeAuthHttpError;
 use super::factories::init_authentication_engine;
 use super::factories::init_authorization_engine;
 use super::middleware::session::apply_session_layer;
@@ -42,7 +42,7 @@ pub static PROJECT_ASSETS: LazyLock<ParameterizedRoute> =
 
 pub async fn init_application(
     config: PotreeAuthConfiguration,
-) -> Result<NormalizePath<Router>, PotreeAuthError> {
+) -> Result<NormalizePath<Router>, PotreeAuthHttpError> {
     // Initialize adaptors
     let authorization_engine = init_authorization_engine(config.idp.is_some());
     let authentication_engine = init_authentication_engine(config.idp).await?;
@@ -65,12 +65,12 @@ pub async fn init_application(
         WebRoute::new(POTREE_ASSETS.as_ref()),
     );
 
-    Ok(build_router(
+    build_router(
         authentication_service,
         potree_asset_service,
         project_asset_service,
         rendering_service,
-    ))
+    )
 }
 
 /// Sets up the http router with its various services.
@@ -79,12 +79,13 @@ fn build_router(
     potree_asset_service: PotreeAssetService,
     project_asset_service: ProjectAssetService,
     rendering_service: RenderingService,
-) -> NormalizePath<Router> {
+) -> Result<NormalizePath<Router>, PotreeAuthHttpError> {
     // Initialize child routers
     let authentication_router = authentication::http::build_router(authentication_service);
     let potree_asset_router = potree_assets::http::build_router(potree_asset_service);
     let project_asset_router = project_assets::http::build_router(project_asset_service);
-    let rendering_router = render::http::build_router(rendering_service, AUTH.join(LOGIN.as_ref()));
+    let rendering_router =
+        render::http::build_router(rendering_service, AUTH.join(LOGIN.as_ref()))?;
     let common_routes = common::utils::axum::common_routes::build_router();
 
     // Build top-level router
@@ -100,8 +101,8 @@ fn build_router(
 
     // Apply middleware
     let router = apply_session_layer(router, Duration::days(1));
-    let router = apply_secure_headers_middleware(router);
+    let router = apply_secure_headers_middleware(router)?;
     let router = apply_tracing_middleware(router);
 
-    NormalizePathLayer::trim_trailing_slash().layer(router)
+    Ok(NormalizePathLayer::trim_trailing_slash().layer(router))
 }

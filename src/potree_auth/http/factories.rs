@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use super::super::config::IdpConfiguration;
-use super::super::error::PotreeAuthError;
+use super::error::PotreeAuthHttpError;
 use super::router::AUTH;
 use crate::authentication::adapters::authentication_engine::no_op::NoOpAuthenticationEngine;
 use crate::authentication::adapters::authentication_engine::oidc::OidcAuthenticationEngine;
@@ -16,13 +16,13 @@ use crate::common::ports::authorization_engine::AuthorizationEngine;
 /// If no `idp_config` is provided, a no-op authentication engine is returned.
 pub async fn init_authentication_engine(
     idp_config: Option<IdpConfiguration>,
-) -> Result<Arc<dyn AuthenticationEngine>, PotreeAuthError> {
+) -> Result<Arc<dyn AuthenticationEngine>, PotreeAuthHttpError> {
     Ok(if let Some(idp_config) = idp_config {
         let redirect_url = idp_config
             .external_url
             .join(&AUTH.join(CALLBACK.as_ref()))
-            .map_err(|e| PotreeAuthError::AdaptorIntialization {
-                adaptor_name: "OidcAuthenticationEngine".to_owned(),
+            .map_err(|e| PotreeAuthHttpError::AdapterIntialization {
+                adapter_name: "OidcAuthenticationEngine".to_owned(),
                 message: format!("unable to build redirect url: {e}"),
             })?;
 
@@ -34,8 +34,8 @@ pub async fn init_authentication_engine(
             idp_config.groups_claim,
         )
         .await
-        .map_err(|e| PotreeAuthError::AdaptorIntialization {
-            adaptor_name: "OidcAuthenticationEngine".to_owned(),
+        .map_err(|e| PotreeAuthHttpError::AdapterIntialization {
+            adapter_name: "OidcAuthenticationEngine".to_owned(),
             message: e.to_string(),
         })?;
 
