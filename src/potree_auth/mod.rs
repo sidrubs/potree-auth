@@ -5,7 +5,6 @@
 
 mod cli;
 pub mod config;
-pub mod error;
 mod http;
 mod observability;
 mod shutdown_signal;
