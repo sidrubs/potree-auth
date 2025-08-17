@@ -1,0 +1,13 @@
+<div class="uk-card uk-card-body flex flex-col">
+    <h3 class="uk-card-title">{{ project.name }}</h3>
+
+    {% if let Some(description) = project.description %}
+    <p class="uk-text-meta mt-4">{{ description }}</p>
+    {% endif %}
+
+    <div class="uk-card-footer flex justify-end mt-auto">
+        <a href="{{ project.render_route }}" target="_blank">
+            <button class="uk-btn uk-btn-primary">View</button>
+        </a>
+    </div>
+</div>

@@ -8,6 +8,7 @@ use serde::Serialize;
 
 use crate::common::domain::group::Group;
 use crate::common::domain::project::Project;
+use crate::common::domain::value_objects::ProjectDescription;
 use crate::common::domain::value_objects::ProjectId;
 use crate::common::domain::value_objects::ProjectName;
 use crate::common::ports::project_repository::ProjectRepository;
@@ -132,6 +133,7 @@ impl ProjectRepository for ManifestFileProjectRepository {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 struct ProjectManifest {
     pub name: ProjectName,
+    pub description: Option<ProjectDescription>,
 
     /// The groups that the project is a member of.
     pub groups: HashSet<Group>,
@@ -141,11 +143,16 @@ impl ProjectManifest {
     /// Converts a [`ProjectManifest`] into a [`Project`]. The `project_id`
     /// represent the unique identifying slug of the project.
     pub fn into_project(self, project_id: &ProjectId) -> Project {
-        let Self { groups, name } = self;
+        let Self {
+            name,
+            description,
+            groups,
+        } = self;
 
         Project {
             id: project_id.clone(),
             name,
+            description,
             groups,
         }
     }
@@ -154,9 +161,18 @@ impl ProjectManifest {
 #[cfg(test)]
 impl ProjectManifest {
     pub fn from_project(project: &Project) -> Self {
-        let Project { name, groups, .. } = project.clone();
+        let Project {
+            name,
+            description,
+            groups,
+            ..
+        } = project.clone();
 
-        Self { name, groups }
+        Self {
+            name,
+            description,
+            groups,
+        }
     }
 }
 

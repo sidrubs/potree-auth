@@ -2,6 +2,7 @@ use askama::Template;
 use web_route::ParameterizedRoute;
 use web_route::WebRoute;
 
+use crate::common::domain::value_objects::ProjectDescription;
 use crate::common::domain::value_objects::ProjectName;
 use crate::render::domain::error::RenderDomainError;
 
@@ -9,7 +10,7 @@ use crate::render::domain::error::RenderDomainError;
 ///
 /// Displays all of the projects for a user.
 #[derive(Debug, Template)]
-#[template(path = "project_dashboard.html")]
+#[template(path = "project_dashboard/index.html")]
 pub struct ProjectDashboard {
     /// The projects that the user is allowed to read.
     pub projects: Vec<Project>,
@@ -40,6 +41,9 @@ pub struct Project {
     /// A human readable name for the project.
     pub name: ProjectName,
 
+    /// Optional additional context about the project.
+    pub description: Option<ProjectDescription>,
+
     /// The route to which the user should be redirected to render the project.
     pub render_route: WebRoute,
 }
@@ -64,6 +68,7 @@ impl Project {
 
         Ok(Self {
             name: project.name,
+            description: project.description,
             render_route,
         })
     }

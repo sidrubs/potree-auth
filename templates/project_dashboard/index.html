@@ -1,0 +1,28 @@
+{% extends "../base/layout.html" %}
+
+{% block title %}Project Dashboard{% endblock %}
+
+{% block head %}
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/franken-ui@2.1.0-next.18/dist/css/core.min.css"
+    />
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/franken-ui@2.1.0-next.18/dist/css/utilities.min.css"
+    />
+{% endblock %}
+
+{% block content %}
+    <div class="container max-w-7xl mx-auto px-4">
+        <h1 class="uk-h1 mt-4">Project Dashboard</h1>
+        <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {% for project in projects %}
+                {% include "project_card.html" %}
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+
+
