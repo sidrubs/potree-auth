@@ -14,12 +14,14 @@
 {% endblock %}
 
 {% block content %}
-    <h1 class="uk-h1 mt-4">Project Dashboard</h1>
-    <ul class="uk-list mt-4">
-        {% for project in projects %}
-            {% include "project_card.html" %}
-        {% endfor %}
-    </ul>
+    <div class="container max-w-7xl mx-auto px-4">
+        <h1 class="uk-h1 mt-4">Project Dashboard</h1>
+        <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {% for project in projects %}
+                {% include "project_card.html" %}
+            {% endfor %}
+        </div>
+    </div>
 {% endblock %}
 
 

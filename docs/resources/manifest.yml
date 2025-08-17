@@ -1,5 +1,8 @@
 # A human readable name for the project (this is not the `project_id`).
 name: Example Project
 
+# # Optional additional context about the project.
+# description: This is an example from the potree repo.
+
 # The groups that have access to view the project.
 groups: []
