@@ -17,14 +17,7 @@
     <h1 class="uk-h1 mt-4">Project Dashboard</h1>
     <ul class="uk-list mt-4">
         {% for project in projects %}
-        <li>
-            <a
-                class="uk-link-text"
-                href="{{ project.render_route }}"
-                target="_blank"
-                >{{ project.name }}</a
-            >
-        </li>
+            {% include "project_card.html" %}
         {% endfor %}
     </ul>
 {% endblock %}
