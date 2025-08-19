@@ -110,7 +110,7 @@ impl RenderingService {
         // integration/e2e test.
         let params = serde_json::json!({
             "project_id": project_id,
-            "path": "potree.json5",
+            "path": "potree-new.json5",
         });
 
         Ok(self.project_assets_route.to_web_route(&params)?)
