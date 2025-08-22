@@ -8,10 +8,10 @@ use super::error::ProjectAssetsServiceError;
 use crate::authorization::domain::action::Action;
 use crate::authorization::ports::authorization_engine::AuthorizationEngine;
 use crate::common::domain::StaticAsset;
-use crate::common::domain::User;
 use crate::project::domain::ProjectId;
 use crate::project::ports::project_repository::ProjectRepository;
 use crate::project_asset::domain::authorization::ProjectAssetResource;
+use crate::user::domain::User;
 
 /// A service for interacting with project assets.
 #[derive(Debug, Clone)]

@@ -5,7 +5,7 @@ use super::super::application::service::ProjectAssetService;
 use super::router::AssetPathParams;
 use crate::common::domain::StaticAsset;
 use crate::common::utils::axum::api_error::ApiError;
-use crate::common::utils::axum::extractors::user::UserExtractor;
+use crate::user::http::extractors::UserExtractor;
 
 /// Serves a static `project` asset.
 pub(crate) async fn project_asset(

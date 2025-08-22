@@ -6,3 +6,4 @@ pub mod potree_auth;
 pub mod project;
 pub mod project_asset;
 pub(crate) mod render;
+pub mod user;

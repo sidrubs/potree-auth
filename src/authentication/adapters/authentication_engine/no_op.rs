@@ -5,7 +5,7 @@ use super::super::super::domain::CallbackRequestParams;
 use super::super::super::domain::OidcSessionPersisted;
 use super::super::super::ports::authentication_engine::AuthenticationEngine;
 use crate::authentication::ports::authentication_engine::AuthenticationEngineError;
-use crate::common::domain::User;
+use crate::user::domain::User;
 
 /// A blank authentication service. Would be used if the application does not
 /// require authentication.

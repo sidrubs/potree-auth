@@ -7,8 +7,8 @@ use super::super::application::service::AuthenticationService;
 use super::super::domain::AuthorizeData;
 use super::super::domain::CallbackRequestParams;
 use super::super::domain::OidcSessionPersisted;
-use crate::common::utils::axum::extractors::user::USER_SESSION_KEY;
 use crate::common::utils::axum::render_error::RenderError;
+use crate::user::http::extractors::USER_SESSION_KEY;
 
 /// The key to which login data will be stored in a session.
 pub const LOGIN_SESSION_KEY: &str = "login_session";

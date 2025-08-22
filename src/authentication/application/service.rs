@@ -5,7 +5,7 @@ use super::super::domain::CallbackRequestParams;
 use super::super::domain::OidcSessionPersisted;
 use super::super::ports::authentication_engine::AuthenticationEngine;
 use super::error::AuthenticationServiceError;
-use crate::common::domain::User;
+use crate::user::domain::User;
 
 /// A service for handling user authentication with OIDC.
 #[derive(Debug, Clone)]

@@ -2,7 +2,7 @@ use axum::extract::FromRequestParts;
 use http::request::Parts;
 use tower_sessions::Session;
 
-use crate::common::domain::User;
+use super::super::domain::User;
 use crate::common::utils::axum::api_error::ApiError;
 
 /// The key to which the logged in user data will be stored in a session.

@@ -41,7 +41,7 @@ use super::utils::extract_user_groups;
 use super::utils::extract_user_id;
 use super::utils::extract_user_name;
 use crate::authentication::ports::authentication_engine::AuthenticationEngineError;
-use crate::common::domain::User;
+use crate::user::domain::User;
 
 #[derive(Debug, Clone)]
 pub(crate) struct OidcAuthenticationEngine {

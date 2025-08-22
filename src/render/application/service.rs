@@ -11,11 +11,11 @@ use super::super::domain::project_dashboard_render::ProjectDashboard;
 use super::error::RenderingServiceError;
 use crate::authorization::domain::action::Action;
 use crate::authorization::ports::authorization_engine::AuthorizationEngine;
-use crate::common::domain::User;
 use crate::project::domain::Project;
 use crate::project::domain::ProjectId;
 use crate::project::domain::authorization::ProjectTypeResource;
 use crate::project::ports::project_repository::ProjectRepository;
+use crate::user::domain::User;
 
 /// A service for rendering a project.
 #[derive(Debug, Clone)]

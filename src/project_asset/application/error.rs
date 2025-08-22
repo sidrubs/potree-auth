@@ -5,9 +5,9 @@ use crate::authorization::domain::action::Action;
 use crate::authorization::domain::error::AuthorizationEngineError;
 use crate::authorization::domain::resource::ResourceIdentifier;
 use crate::authorization::domain::resource::ResourceType;
-use crate::common::domain::User;
 use crate::project::domain::ProjectId;
 use crate::project::ports::project_repository::ProjectRepositoryError;
+use crate::user::domain::User;
 
 #[derive(Debug, thiserror::Error)]
 pub enum ProjectAssetsServiceError {

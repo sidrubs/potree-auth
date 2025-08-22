@@ -4,7 +4,7 @@ use super::super::domain::action::Action;
 use super::super::domain::error::AuthorizationEngineError;
 use crate::authorization::domain::resource::Resource;
 use crate::authorization::domain::resource::ResourceInstance;
-use crate::common::domain::user::User;
+use crate::user::domain::User;
 
 /// Defines the functionality that needs to be implemented for the application
 /// to perform authentication.
