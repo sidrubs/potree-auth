@@ -1,12 +1,12 @@
-use super::resource::Resource;
-use super::resource::ResourceType;
-
-/// Defines actions that can be performed on a [`Resource`].
+/// Defines actions that can be performed on a resource.
+///
+/// Used for authorization purposes.
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(test, derive(fake::Dummy))]
 pub enum Action {
     Read,
     List,
-    Write,
+    Create,
     Update,
     Delete,
 }
@@ -16,20 +16,9 @@ impl std::fmt::Display for Action {
         match self {
             Action::Read => write!(f, "read"),
             Action::List => write!(f, "list"),
-            Action::Write => write!(f, "write"),
+            Action::Create => write!(f, "create"),
             Action::Update => write!(f, "update"),
             Action::Delete => write!(f, "delete"),
-        }
-    }
-}
-
-impl From<&Resource<'_>> for ResourceType {
-    fn from(value: &Resource) -> Self {
-        match value {
-            Resource::Project(_) | Resource::ProjectType => Self::Project,
-            Resource::ProjectAsset(_) => Self::ProjectAsset,
-            Resource::PotreeRender(_) => Self::PotreeRender,
-            Resource::ProjectDashboard => Self::ProjectDashboard,
         }
     }
 }

@@ -224,9 +224,8 @@ mod project_rendering_service_tests {
         use std::sync::Mutex;
 
         use super::*;
-        use crate::{
-            authorization::domain::resource::ResourceType, common::domain::project::Project,
-        };
+        use crate::authorization::domain::resource::ResourceType;
+        use crate::common::domain::project::Project;
 
         #[tokio::test]
         async fn should_return_the_projects_that_the_user_is_allowed_to_read() {

@@ -1,43 +1,70 @@
-use core::fmt;
+use std::fmt::Debug;
 
-use crate::common::domain::project::Project;
+use crate::common::domain::Group;
+use crate::common::domain::utils::new_type::new_type;
 
-/// Defines a resource that can be accessed.
-#[derive(Debug, Clone, PartialEq)]
-pub enum Resource<'a> {
-    /// A specific project (instance-level).
-    Project(&'a Project),
-
-    /// Projects in general (type-level). Usually for `list` actions.
-    ProjectType,
-
-    /// An asset associated with a specific project (instance-level).
-    ProjectAsset(&'a Project),
-
-    /// Potree rendering for a specific project (instance-level).
-    PotreeRender(&'a Project),
-
-    /// The dashboard that lists all of a user's projects (type-level).
-    ProjectDashboard,
+/// Defines a resource type that can be authorized against.
+pub trait Resource: Debug {
+    /// The groups that the resource belongs to. Currently, if a user is part of
+    /// the same group they are allowed do action the resource.
+    fn resource_type(&self) -> ResourceType;
 }
 
-/// The various types of domain objects.
-#[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(test, derive(fake::Dummy))]
-pub enum ResourceType {
-    Project,
-    ProjectAsset,
-    PotreeRender,
-    ProjectDashboard,
+/// Defines the functionality required for fine grained access to a particular
+/// resource (instance-level authZ).
+pub trait ResourceInstance: Resource {
+    /// Identifies the specific resource instance.
+    fn resource_identifier(&self) -> ResourceIdentifier;
+
+    /// The groups that the resource belongs to. Currently, if a user is part of
+    /// the same group they are allowed do action the resource.
+    fn groups(&self) -> Vec<Group>;
 }
 
-impl fmt::Display for ResourceType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            ResourceType::Project => write!(f, "project"),
-            ResourceType::ProjectAsset => write!(f, "project asset"),
-            ResourceType::PotreeRender => write!(f, "potree render"),
-            ResourceType::ProjectDashboard => write!(f, "project dashboard"),
+new_type![
+    /// The identifier of a resource type (type-level).
+    #[cfg_attr(test, derive(fake::Dummy))]
+    ResourceType(String)
+];
+
+new_type![
+    /// The identifier of a specific resource instance (instance-level).
+    #[cfg_attr(test, derive(fake::Dummy))]
+    ResourceIdentifier(String)
+];
+
+/// A super basic struct implementing the [`Resource`] and [`ResourceInstance`]
+/// traits for testing purposes.
+///
+/// I was struggling to get mockall to deal with the supertrait mocking.
+#[cfg(test)]
+pub mod mocked_resource {
+    use super::Group;
+    use super::Resource;
+    use super::ResourceIdentifier;
+    use super::ResourceInstance;
+    use super::ResourceType;
+
+    #[derive(Debug, fake::Dummy)]
+    pub struct MockedResource {
+        pub resource_type: ResourceType,
+        pub resource_identifier: ResourceIdentifier,
+        pub groups: Vec<Group>,
+    }
+
+    impl Resource for MockedResource {
+        fn resource_type(&self) -> ResourceType {
+            self.resource_type.clone()
+        }
+    }
+
+    impl ResourceInstance for MockedResource {
+        fn resource_identifier(&self) -> ResourceIdentifier {
+            self.resource_identifier.clone()
+        }
+
+        fn groups(&self) -> Vec<Group> {
+            self.groups.clone()
         }
     }
 }

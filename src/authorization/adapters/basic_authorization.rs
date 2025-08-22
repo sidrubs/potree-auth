@@ -6,6 +6,7 @@
 use super::super::domain::action::Action;
 use super::super::domain::error::AuthorizationEngineError;
 use super::super::domain::resource::Resource;
+use super::super::domain::resource::ResourceInstance;
 use super::super::ports::authorization_engine::AuthorizationEngine;
 use crate::common::domain::user::User;
 
@@ -14,27 +15,59 @@ use crate::common::domain::user::User;
 pub(crate) struct SimpleAuthorizationEngine;
 
 impl SimpleAuthorizationEngine {
-    #[tracing::instrument]
-    pub fn assert_allowed(
+    #[tracing::instrument(
+        name = "`simple_authorization_engine`: evaluating on resource type",
+        err
+    )]
+    pub fn can_on_type(
         &self,
         user: &Option<User>,
-        resource: &Resource,
         action: &Action,
+        resource: &dyn Resource,
     ) -> Result<(), AuthorizationEngineError> {
         // If there is no user then the user is not authenticated.
         let Some(user) = user else {
             return Err(AuthorizationEngineError::NotAuthenticated);
         };
 
-        // Determine if the user is authorized to access the resource.
-        match (resource, action) {
-            // Read access for Project, ProjectAsset, PotreeRender
-            (Resource::Project(project), Action::Read)
-            | (Resource::ProjectAsset(project), Action::Read)
-            | (Resource::PotreeRender(project), Action::Read) => {
+        // An admin should always be allowed to action.
+        if user.is_admin() {
+            return Ok(());
+        };
+
+        match (action, resource.resource_type().as_str()) {
+            (&Action::List, "project") => Ok(()),
+            (&Action::Read, "project_dashboard") => Ok(()),
+            _ => Err(AuthorizationEngineError::NotAuthorized {
+                user: Box::new(user.clone()),
+                action: action.clone(),
+                resource_identifier: None,
+                resource_type: resource.resource_type(),
+            }),
+        }
+    }
+
+    #[tracing::instrument(
+        name = "`simple_authorization_engine`: evaluating on resource instance",
+        err
+    )]
+    pub fn can_on_instance(
+        &self,
+        user: &Option<User>,
+        action: &Action,
+        resource: &dyn ResourceInstance,
+    ) -> Result<(), AuthorizationEngineError> {
+        // If there is no user then the user is not authenticated.
+        let Some(user) = user else {
+            return Err(AuthorizationEngineError::NotAuthenticated);
+        };
+
+        // Allows a user to _read_ any resource of which they share a group.
+        match action {
+            &Action::Read => {
                 if user.is_admin()
-                    || project
-                        .groups
+                    || resource
+                        .groups()
                         .iter()
                         .any(|group| user.groups.contains(group))
                 {
@@ -42,76 +75,39 @@ impl SimpleAuthorizationEngine {
                 } else {
                     Err(AuthorizationEngineError::NotAuthorized {
                         user: Box::new(user.clone()),
-                        action: Box::new(action.clone()),
-                        resource_name: project.name.clone().into(),
-                        resource_type: Box::new(resource.into()),
+                        action: action.clone(),
+                        resource_identifier: Some(resource.resource_identifier()),
+                        resource_type: resource.resource_type(),
                     })
                 }
             }
-
-            // ProjectType list is allowed
-            (Resource::ProjectType, Action::List) => Ok(()),
-
-            // Allowed to read project dashboard
-            (Resource::ProjectDashboard, Action::Read) => Ok(()),
-
-            // Other actions for Project, ProjectAsset, PotreeRender
-            (Resource::Project(project), Action::List)
-            | (Resource::Project(project), Action::Write)
-            | (Resource::Project(project), Action::Update)
-            | (Resource::Project(project), Action::Delete)
-            | (Resource::ProjectAsset(project), Action::List)
-            | (Resource::ProjectAsset(project), Action::Write)
-            | (Resource::ProjectAsset(project), Action::Update)
-            | (Resource::ProjectAsset(project), Action::Delete)
-            | (Resource::PotreeRender(project), Action::List)
-            | (Resource::PotreeRender(project), Action::Write)
-            | (Resource::PotreeRender(project), Action::Update)
-            | (Resource::PotreeRender(project), Action::Delete) => {
-                Err(AuthorizationEngineError::NotAuthorized {
-                    user: Box::new(user.clone()),
-                    action: Box::new(action.clone()),
-                    resource_name: project.name.clone().into(),
-                    resource_type: Box::new(resource.into()),
-                })
-            }
-
-            // ProjectType with any action except List
-            (Resource::ProjectType, Action::Read)
-            | (Resource::ProjectType, Action::Write)
-            | (Resource::ProjectType, Action::Update)
-            | (Resource::ProjectType, Action::Delete) => {
-                Err(AuthorizationEngineError::NotAuthorized {
-                    user: Box::new(user.clone()),
-                    action: Box::new(action.clone()),
-                    resource_name: "project list".to_owned(),
-                    resource_type: Box::new(resource.into()),
-                })
-            }
-
-            (Resource::ProjectDashboard, Action::List)
-            | (Resource::ProjectDashboard, Action::Write)
-            | (Resource::ProjectDashboard, Action::Update)
-            | (Resource::ProjectDashboard, Action::Delete) => {
-                Err(AuthorizationEngineError::NotAuthorized {
-                    user: Box::new(user.clone()),
-                    action: Box::new(action.clone()),
-                    resource_name: "project dashboard".to_owned(),
-                    resource_type: Box::new(resource.into()),
-                })
-            }
+            _ => Err(AuthorizationEngineError::NotAuthorized {
+                user: Box::new(user.clone()),
+                action: action.clone(),
+                resource_identifier: Some(resource.resource_identifier()),
+                resource_type: resource.resource_type(),
+            }),
         }
     }
 }
 
 impl AuthorizationEngine for SimpleAuthorizationEngine {
-    fn can(
+    fn can_on_type(
         &self,
         user: &Option<User>,
         action: &Action,
-        resource: &Resource,
+        resource: &dyn Resource,
     ) -> Result<(), AuthorizationEngineError> {
-        Self::assert_allowed(self, user, resource, action)
+        Self::can_on_type(self, user, action, resource)
+    }
+
+    fn can_on_instance(
+        &self,
+        user: &Option<User>,
+        action: &Action,
+        resource: &dyn ResourceInstance,
+    ) -> Result<(), AuthorizationEngineError> {
+        Self::can_on_instance(self, user, action, resource)
     }
 }
 
@@ -120,390 +116,242 @@ mod authorization_service_tests {
     use fake::Fake;
     use fake::Faker;
 
+    use super::super::super::domain::resource::mocked_resource::MockedResource;
     use super::*;
     use crate::common::domain::group::Group;
-    use crate::common::domain::project::Project;
 
-    mod can {
+    mod can_on_type {
+
+        use crate::authorization::domain::resource::ResourceType;
+
         use super::*;
 
-        mod project_read {
+        #[test]
+        fn should_return_ok_if_the_user_is_an_admin() {
+            // Arrange
+            let authorization_service = SimpleAuthorizationEngine;
 
-            use super::*;
+            let user = User::dummy_admin();
+            let resource = Faker.fake::<MockedResource>();
 
-            #[test]
-            fn should_return_ok_if_the_user_is_an_admin() {
-                // Arrange
-                let authorization_service = SimpleAuthorizationEngine;
+            // Act
+            let res = authorization_service.can_on_type(&Some(user), &Action::Read, &resource);
 
-                let user = User::dummy_admin();
-                let project = Faker.fake::<Project>();
-
-                let resource = Resource::Project(&project);
-
-                // Act
-                let res =
-                    authorization_service.assert_allowed(&Some(user), &resource, &Action::Read);
-
-                // Assert
-                assert!(res.is_ok())
-            }
-
-            #[test]
-            fn should_return_ok_if_the_user_shares_a_group_with_the_project() {
-                // Arrange
-                let authorization_service = SimpleAuthorizationEngine;
-
-                let shared_group = Faker.fake::<Group>();
-                let user = User {
-                    groups: [Faker.fake(), shared_group.clone()].into(),
-                    ..Faker.fake()
-                };
-                let project = Project {
-                    groups: [Faker.fake(), shared_group.clone()].into(),
-                    ..Faker.fake()
-                };
-
-                let resource = Resource::Project(&project);
-
-                // Act
-                let res =
-                    authorization_service.assert_allowed(&Some(user), &resource, &Action::Read);
-
-                // Assert
-                assert!(res.is_ok())
-            }
-
-            #[test]
-            fn should_return_err_if_the_user_does_not_share_a_group_with_the_project() {
-                // Arrange
-                let authorization_service = SimpleAuthorizationEngine;
-
-                let user = Faker.fake::<User>();
-                let project = Faker.fake::<Project>();
-
-                let resource = Resource::Project(&project);
-
-                // Act
-                let res =
-                    authorization_service.assert_allowed(&Some(user), &resource, &Action::Read);
-
-                // Assert
-                assert!(matches!(
-                    res,
-                    Err(AuthorizationEngineError::NotAuthorized { .. })
-                ))
-            }
-
-            #[test]
-            fn should_return_err_if_the_user_is_not_authenticated() {
-                // Arrange
-                let authorization_service = SimpleAuthorizationEngine;
-
-                let user = None;
-                let project = Faker.fake::<Project>();
-
-                let resource = Resource::Project(&project);
-
-                // Act
-                let res = authorization_service.assert_allowed(&user, &resource, &Action::Read);
-
-                // Assert
-                assert!(matches!(
-                    res,
-                    Err(AuthorizationEngineError::NotAuthenticated)
-                ))
-            }
+            // Assert
+            assert!(res.is_ok())
         }
 
-        mod project_asset_read {
+        #[test]
+        fn should_return_ok_if_listing_projects() {
+            // Arrange
+            let authorization_service = SimpleAuthorizationEngine;
 
-            use super::*;
+            let user = Faker.fake::<User>();
+            let resource = MockedResource {
+                resource_type: ResourceType::new("project".to_owned()),
+                ..Faker.fake()
+            };
+            let action = Action::List;
 
-            #[test]
-            fn should_return_ok_if_the_user_is_an_admin() {
-                // Arrange
-                let authorization_service = SimpleAuthorizationEngine;
+            // Act
+            let res = authorization_service.can_on_type(&Some(user), &action, &resource);
 
-                let user = User::dummy_admin();
-                let project = Faker.fake::<Project>();
-
-                let resource = Resource::ProjectAsset(&project);
-
-                // Act
-                let res =
-                    authorization_service.assert_allowed(&Some(user), &resource, &Action::Read);
-
-                // Assert
-                assert!(res.is_ok())
-            }
-
-            #[test]
-            fn should_return_ok_if_the_user_shares_a_group_with_the_project() {
-                // Arrange
-                let authorization_service = SimpleAuthorizationEngine;
-
-                let shared_group = Faker.fake::<Group>();
-                let user = User {
-                    groups: [Faker.fake(), shared_group.clone()].into(),
-                    ..Faker.fake()
-                };
-                let project = Project {
-                    groups: [Faker.fake(), shared_group.clone()].into(),
-                    ..Faker.fake()
-                };
-
-                let resource = Resource::ProjectAsset(&project);
-
-                // Act
-                let res =
-                    authorization_service.assert_allowed(&Some(user), &resource, &Action::Read);
-
-                // Assert
-                assert!(res.is_ok())
-            }
-
-            #[test]
-            fn should_return_err_if_the_user_does_not_share_a_group_with_the_project() {
-                // Arrange
-                let authorization_service = SimpleAuthorizationEngine;
-
-                let user = Faker.fake::<User>();
-                let project = Faker.fake::<Project>();
-
-                let resource = Resource::ProjectAsset(&project);
-
-                // Act
-                let res =
-                    authorization_service.assert_allowed(&Some(user), &resource, &Action::Read);
-
-                // Assert
-                assert!(matches!(
-                    res,
-                    Err(AuthorizationEngineError::NotAuthorized { .. })
-                ))
-            }
-
-            #[test]
-            fn should_return_err_if_the_user_is_not_authenticated() {
-                // Arrange
-                let authorization_service = SimpleAuthorizationEngine;
-
-                let user = None;
-                let project = Faker.fake::<Project>();
-
-                let resource = Resource::ProjectAsset(&project);
-
-                // Act
-                let res = authorization_service.assert_allowed(&user, &resource, &Action::Read);
-
-                // Assert
-                assert!(matches!(
-                    res,
-                    Err(AuthorizationEngineError::NotAuthenticated)
-                ))
-            }
+            // Assert
+            assert!(res.is_ok())
         }
 
-        mod potree_render_read {
+        #[test_case::test_matrix(
+            [&Action::Create, &Action::Read, &Action::Update, &Action::Delete]
+            )]
+        fn should_return_err_if_not_listing_projects(action: &Action) {
+            // Arrange
+            let authorization_service = SimpleAuthorizationEngine;
 
-            use super::*;
+            let user = Faker.fake::<User>();
+            let resource = MockedResource {
+                resource_type: ResourceType::new("project".to_owned()),
+                ..Faker.fake()
+            };
 
-            #[test]
-            fn should_return_ok_if_the_user_is_an_admin() {
-                // Arrange
-                let authorization_service = SimpleAuthorizationEngine;
+            // Act
+            let res = authorization_service.can_on_type(&Some(user), action, &resource);
 
-                let user = User::dummy_admin();
-                let project = Faker.fake::<Project>();
-
-                let resource = Resource::PotreeRender(&project);
-
-                // Act
-                let res =
-                    authorization_service.assert_allowed(&Some(user), &resource, &Action::Read);
-
-                // Assert
-                assert!(res.is_ok())
-            }
-
-            #[test]
-            fn should_return_ok_if_the_user_shares_a_group_with_the_project() {
-                // Arrange
-                let authorization_service = SimpleAuthorizationEngine;
-
-                let shared_group = Faker.fake::<Group>();
-                let user = User {
-                    groups: [Faker.fake(), shared_group.clone()].into(),
-                    ..Faker.fake()
-                };
-                let project = Project {
-                    groups: [Faker.fake(), shared_group.clone()].into(),
-                    ..Faker.fake()
-                };
-
-                let resource = Resource::PotreeRender(&project);
-
-                // Act
-                let res =
-                    authorization_service.assert_allowed(&Some(user), &resource, &Action::Read);
-
-                // Assert
-                assert!(res.is_ok())
-            }
-
-            #[test]
-            fn should_return_err_if_the_user_does_not_share_a_group_with_the_project() {
-                // Arrange
-                let authorization_service = SimpleAuthorizationEngine;
-
-                let user = Faker.fake::<User>();
-                let project = Faker.fake::<Project>();
-
-                let resource = Resource::PotreeRender(&project);
-
-                // Act
-                let res =
-                    authorization_service.assert_allowed(&Some(user), &resource, &Action::Read);
-
-                // Assert
-                assert!(matches!(
-                    res,
-                    Err(AuthorizationEngineError::NotAuthorized { .. })
-                ))
-            }
-
-            #[test]
-            fn should_return_err_if_the_user_is_not_authenticated() {
-                // Arrange
-                let authorization_service = SimpleAuthorizationEngine;
-
-                let user = None;
-                let project = Faker.fake::<Project>();
-
-                let resource = Resource::PotreeRender(&project);
-
-                // Act
-                let res = authorization_service.assert_allowed(&user, &resource, &Action::Read);
-
-                // Assert
-                assert!(matches!(
-                    res,
-                    Err(AuthorizationEngineError::NotAuthenticated)
-                ))
-            }
+            // Assert
+            assert!(matches!(
+                res,
+                Err(AuthorizationEngineError::NotAuthorized { .. })
+            ))
         }
 
-        mod project_type_list {
-            use super::*;
+        #[test]
+        fn should_return_ok_if_reading_a_project_dashboard() {
+            // Arrange
+            let authorization_service = SimpleAuthorizationEngine;
 
-            #[test]
-            fn should_return_ok_if_the_user_is_an_admin() {
-                // Arrange
-                let authorization_service = SimpleAuthorizationEngine;
+            let user = Faker.fake::<User>();
+            let resource = MockedResource {
+                resource_type: ResourceType::new("project_dashboard".to_owned()),
+                ..Faker.fake()
+            };
+            let action = Action::Read;
 
-                let user = User::dummy_admin();
-                let resource = Resource::ProjectType;
+            // Act
+            let res = authorization_service.can_on_type(&Some(user), &action, &resource);
 
-                // Act
-                let res =
-                    authorization_service.assert_allowed(&Some(user), &resource, &Action::List);
-
-                // Assert
-                assert!(res.is_ok())
-            }
-
-            #[test]
-            fn should_return_ok_for_an_authenticated_user() {
-                // Arrange
-                let authorization_service = SimpleAuthorizationEngine;
-
-                let user = Faker.fake::<User>();
-
-                let resource = Resource::ProjectType;
-
-                // Act
-                let res =
-                    authorization_service.assert_allowed(&Some(user), &resource, &Action::List);
-
-                // Assert
-                assert!(res.is_ok())
-            }
-
-            #[test]
-            fn should_return_err_if_the_user_is_not_authenticated() {
-                // Arrange
-                let authorization_service = SimpleAuthorizationEngine;
-
-                let user = None;
-
-                let resource = Resource::ProjectType;
-
-                // Act
-                let res = authorization_service.assert_allowed(&user, &resource, &Action::List);
-
-                // Assert
-                assert!(matches!(
-                    res,
-                    Err(AuthorizationEngineError::NotAuthenticated)
-                ))
-            }
+            // Assert
+            assert!(res.is_ok())
         }
 
-        mod project_dashboard_read {
-            use super::*;
+        #[test_case::test_matrix(
+            [&Action::Create, &Action::List, &Action::Update, &Action::Delete]
+            )]
+        fn should_return_err_if_not_reading_a_project_dashboard(action: &Action) {
+            // Arrange
+            let authorization_service = SimpleAuthorizationEngine;
 
-            #[test]
-            fn should_return_ok_if_the_user_is_an_admin() {
-                // Arrange
-                let authorization_service = SimpleAuthorizationEngine;
+            let user = Faker.fake::<User>();
+            let resource = MockedResource {
+                resource_type: ResourceType::new("project_dashboard".to_owned()),
+                ..Faker.fake()
+            };
 
-                let user = User::dummy_admin();
-                let resource = Resource::ProjectDashboard;
+            // Act
+            let res = authorization_service.can_on_type(&Some(user), action, &resource);
 
-                // Act
-                let res =
-                    authorization_service.assert_allowed(&Some(user), &resource, &Action::Read);
+            // Assert
+            assert!(matches!(
+                res,
+                Err(AuthorizationEngineError::NotAuthorized { .. })
+            ))
+        }
 
-                // Assert
-                assert!(res.is_ok())
-            }
+        #[test]
+        fn should_return_err_for_other_combinations() {
+            // Arrange
+            let authorization_service = SimpleAuthorizationEngine;
 
-            #[test]
-            fn should_return_ok_for_an_authenticated_user() {
-                // Arrange
-                let authorization_service = SimpleAuthorizationEngine;
+            let user = Faker.fake::<User>();
+            let resource = Faker.fake::<MockedResource>();
+            let action = Faker.fake::<Action>();
 
-                let user = Faker.fake::<User>();
+            // Act
+            let res = authorization_service.can_on_type(&Some(user), &action, &resource);
 
-                let resource = Resource::ProjectDashboard;
+            // Assert
+            assert!(matches!(
+                res,
+                Err(AuthorizationEngineError::NotAuthorized { .. })
+            ))
+        }
+    }
 
-                // Act
-                let res =
-                    authorization_service.assert_allowed(&Some(user), &resource, &Action::Read);
+    mod can_on_instance {
 
-                // Assert
-                assert!(res.is_ok())
-            }
+        use super::*;
 
-            #[test]
-            fn should_return_err_if_the_user_is_not_authenticated() {
-                // Arrange
-                let authorization_service = SimpleAuthorizationEngine;
+        #[test]
+        fn should_return_ok_if_the_user_is_an_admin() {
+            // Arrange
+            let authorization_service = SimpleAuthorizationEngine;
 
-                let user = None;
+            let user = User::dummy_admin();
+            let resource = Faker.fake::<MockedResource>();
 
-                let resource = Resource::ProjectDashboard;
+            // Act
+            let res = authorization_service.can_on_instance(&Some(user), &Action::Read, &resource);
 
-                // Act
-                let res = authorization_service.assert_allowed(&user, &resource, &Action::Read);
+            // Assert
+            assert!(res.is_ok())
+        }
 
-                // Assert
-                assert!(matches!(
-                    res,
-                    Err(AuthorizationEngineError::NotAuthenticated)
-                ))
-            }
+        #[test]
+        fn should_return_ok_if_the_user_shares_a_group_with_the_resource() {
+            // Arrange
+            let authorization_service = SimpleAuthorizationEngine;
+
+            let shared_group = Faker.fake::<Group>();
+            let user = User {
+                groups: [Faker.fake(), shared_group.clone()].into(),
+                ..Faker.fake()
+            };
+            let resource = MockedResource {
+                groups: vec![shared_group],
+                ..Faker.fake()
+            };
+
+            // Act
+            let res = authorization_service.can_on_instance(&Some(user), &Action::Read, &resource);
+
+            // Assert
+            assert!(res.is_ok())
+        }
+
+        #[test]
+        fn should_return_err_if_the_user_does_not_share_a_group_with_the_resource() {
+            // Arrange
+            let authorization_service = SimpleAuthorizationEngine;
+
+            let user = Faker.fake::<User>();
+            let resource = MockedResource {
+                groups: vec![],
+                ..Faker.fake()
+            };
+
+            // Act
+            let res = authorization_service.can_on_instance(&Some(user), &Action::Read, &resource);
+
+            // Assert
+            assert!(matches!(
+                res,
+                Err(AuthorizationEngineError::NotAuthorized { .. })
+            ))
+        }
+
+        #[test]
+        fn should_return_err_if_the_user_is_not_authenticated() {
+            // Arrange
+            let authorization_service = SimpleAuthorizationEngine;
+
+            // Act
+            let res = authorization_service.can_on_instance(
+                &None,
+                &Action::Read,
+                &Faker.fake::<MockedResource>(),
+            );
+
+            // Assert
+            assert!(matches!(
+                res,
+                Err(AuthorizationEngineError::NotAuthenticated)
+            ))
+        }
+
+        #[test_case::test_case(&Action::List; "list")]
+        #[test_case::test_case(&Action::Create; "create")]
+        #[test_case::test_case(&Action::Update; "update")]
+        #[test_case::test_case(&Action::Delete; "delete")]
+        fn should_return_err_if_anything_other_than_read(action: &Action) {
+            // Arrange
+            let authorization_service = SimpleAuthorizationEngine;
+
+            let shared_group = Faker.fake::<Group>();
+            let user = User {
+                groups: [Faker.fake(), shared_group.clone()].into(),
+                ..Faker.fake()
+            };
+            let resource = MockedResource {
+                groups: vec![shared_group],
+                ..Faker.fake()
+            };
+
+            // Act
+            let res = authorization_service.can_on_instance(&Some(user), action, &resource);
+
+            // Assert
+            assert!(matches!(
+                res,
+                Err(AuthorizationEngineError::NotAuthorized { .. })
+            ))
         }
     }
 }

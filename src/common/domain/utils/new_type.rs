@@ -103,7 +103,7 @@ macro_rules! new_type {
                 $name(s)
             }
         }
-        impl Deref for $name {
+        impl std::ops::Deref for $name {
             type Target = $type;
             fn deref(&self) -> &$type {
                 &self.0
