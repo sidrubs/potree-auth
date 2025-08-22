@@ -8,7 +8,7 @@ use super::super::domain::error::AuthorizationEngineError;
 use super::super::domain::resource::Resource;
 use super::super::domain::resource::ResourceInstance;
 use super::super::ports::authorization_engine::AuthorizationEngine;
-use crate::common::domain::user::User;
+use crate::user::domain::User;
 
 #[derive(Debug, Clone)]
 pub(crate) struct NoOpAuthorizationEngine;

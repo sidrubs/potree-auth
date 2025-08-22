@@ -5,7 +5,7 @@ use tower_helmet::IntoHeader;
 use tower_helmet::header::ContentSecurityPolicy;
 use tower_http::set_header::SetResponseHeaderLayer;
 
-use crate::common::utils::axum::render_error::RenderError;
+use crate::common::utils::http::render_error::RenderError;
 
 /// Adds a more lenient CSP for potree rendering pages as it has inline JS.
 pub fn set_potree_csp() -> Result<SetResponseHeaderLayer<HeaderValue>, RenderError> {

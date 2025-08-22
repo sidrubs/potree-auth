@@ -1,29 +1,27 @@
-use std::collections::HashSet;
-
 use openidconnect::IdTokenClaims;
 use openidconnect::core::CoreGenderClaim;
 
 use super::oidc::PotreeAuthClaims;
 use crate::authentication::ports::authentication_engine::AuthenticationEngineError;
 use crate::common::domain::Group;
-use crate::common::domain::value_objects::EmailAddress;
-use crate::common::domain::value_objects::UserId;
-use crate::common::domain::value_objects::UserName;
+use crate::user::domain::EmailAddress;
+use crate::user::domain::UserId;
+use crate::user::domain::UserName;
 
 pub(crate) fn extract_user_groups(
     id_token_claims: &IdTokenClaims<PotreeAuthClaims, CoreGenderClaim>,
     groups_claim: &str,
-) -> HashSet<Group> {
+) -> Vec<Group> {
     if let Some(serde_json::Value::Array(arr)) =
         &id_token_claims.additional_claims().0.get(groups_claim)
     {
         arr.iter()
             .filter_map(|v| v.as_str().map(Group::new))
-            .collect::<HashSet<_>>()
+            .collect::<Vec<_>>()
     } else {
         tracing::debug!("no groups claim ({}) found, setting to []", groups_claim);
 
-        HashSet::new()
+        Vec::new()
     }
 }
 

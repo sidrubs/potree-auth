@@ -5,7 +5,7 @@ use async_trait::async_trait;
 use super::super::domain::AuthorizeData;
 use super::super::domain::CallbackRequestParams;
 use super::super::domain::OidcSessionPersisted;
-use crate::common::domain::user::User;
+use crate::user::domain::User;
 
 /// Defines the functionality that needs to be implemented for the application
 /// to perform OIDC authentication.

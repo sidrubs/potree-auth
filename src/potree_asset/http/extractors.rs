@@ -1,34 +1,34 @@
 use axum::extract::FromRequestParts;
 use http::request::Parts;
 
-use super::super::application::service::AuthenticationService;
+use super::super::application::service::PotreeAssetService;
 use super::state::State;
-use crate::common::utils::http::render_error::RenderError;
+use crate::common::utils::http::api_error::ApiError;
 
 impl<S> FromRequestParts<S> for State
 where
     S: Send + Sync,
 {
-    type Rejection = RenderError;
+    type Rejection = ApiError;
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
         let state = parts
             .extensions
             .get::<State>()
-            .ok_or(RenderError::StateExtraction)?;
+            .ok_or(ApiError::StateExtraction)?;
 
         Ok(state.clone())
     }
 }
 
-impl<S> FromRequestParts<S> for AuthenticationService
+impl<S> FromRequestParts<S> for PotreeAssetService
 where
     S: Send + Sync,
 {
-    type Rejection = RenderError;
+    type Rejection = ApiError;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let state = State::from_request_parts(parts, state).await?;
-        Ok(state.authentication_service)
+        Ok(state.potree_asset_service)
     }
 }

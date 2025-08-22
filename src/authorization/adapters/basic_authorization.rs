@@ -8,7 +8,7 @@ use super::super::domain::error::AuthorizationEngineError;
 use super::super::domain::resource::Resource;
 use super::super::domain::resource::ResourceInstance;
 use super::super::ports::authorization_engine::AuthorizationEngine;
-use crate::common::domain::user::User;
+use crate::user::domain::User;
 
 /// Handles authorization business logic for the application.
 #[derive(Debug, Clone)]
@@ -122,9 +122,8 @@ mod authorization_service_tests {
 
     mod can_on_type {
 
-        use crate::authorization::domain::resource::ResourceType;
-
         use super::*;
+        use crate::authorization::domain::resource::ResourceType;
 
         #[test]
         fn should_return_ok_if_the_user_is_an_admin() {

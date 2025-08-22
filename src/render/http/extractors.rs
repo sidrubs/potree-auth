@@ -4,7 +4,7 @@ use web_route::WebRoute;
 
 use super::super::application::service::RenderingService;
 use super::state::State;
-use crate::common::utils::axum::render_error::RenderError;
+use crate::common::utils::http::render_error::RenderError;
 
 impl<S> FromRequestParts<S> for State
 where

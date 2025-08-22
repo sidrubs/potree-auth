@@ -1,10 +1,6 @@
-pub(crate) mod group;
-pub mod project;
-pub(crate) mod static_asset;
-pub(crate) mod user;
-pub(crate) mod utils;
-pub(crate) mod value_objects;
+pub mod group;
+pub mod static_asset;
+pub mod utils;
 
-pub(crate) use group::Group;
-pub(crate) use static_asset::StaticAsset;
-pub(crate) use user::User;
+pub use group::Group;
+pub use static_asset::StaticAsset;

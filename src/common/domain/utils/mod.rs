@@ -1,1 +1,1 @@
-pub(crate) mod new_type;
+pub mod new_type;

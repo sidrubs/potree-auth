@@ -11,11 +11,11 @@ use super::super::domain::project_dashboard_render::ProjectDashboard;
 use super::error::RenderingServiceError;
 use crate::authorization::domain::action::Action;
 use crate::authorization::ports::authorization_engine::AuthorizationEngine;
-use crate::common::domain::User;
-use crate::common::domain::project::Project;
-use crate::common::domain::project::ProjectTypeResource;
-use crate::common::domain::value_objects::ProjectId;
-use crate::common::ports::project_repository::ProjectRepository;
+use crate::project::domain::Project;
+use crate::project::domain::ProjectId;
+use crate::project::domain::authorization::ProjectTypeResource;
+use crate::project::ports::project_repository::ProjectRepository;
+use crate::user::domain::User;
 
 /// A service for rendering a project.
 #[derive(Debug, Clone)]
@@ -154,7 +154,7 @@ mod project_rendering_service_tests {
     use crate::authorization::domain::action::Action;
     use crate::authorization::domain::error::AuthorizationEngineError;
     use crate::authorization::ports::authorization_engine::MockAuthorizationEngine;
-    use crate::common::ports::project_repository::MockProjectRepository;
+    use crate::project::ports::project_repository::MockProjectRepository;
 
     mod render_potree {
 
@@ -229,7 +229,7 @@ mod project_rendering_service_tests {
         use std::sync::Mutex;
 
         use super::*;
-        use crate::common::domain::project::Project;
+        use crate::project::domain::Project;
 
         #[tokio::test]
         async fn should_return_the_projects_that_the_user_is_allowed_to_read() {

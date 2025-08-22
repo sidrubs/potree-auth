@@ -8,12 +8,12 @@ use axum::response::Response;
 use super::super::application::service::RenderingService;
 use super::extractors::LoginRoute;
 use super::router::PotreePathParams;
-use crate::common::utils::axum::extractors::user::UserExtractor;
-use crate::common::utils::axum::render_error::RenderError;
+use crate::common::utils::http::render_error::RenderError;
 use crate::render::application::error::RenderingServiceError;
 use crate::render::http::router::POTREE;
 use crate::render::http::utils::redirect_to_404;
 use crate::render::http::utils::redirect_to_login;
+use crate::user::http::extractors::UserExtractor;
 
 /// Renders a `potree` project.
 #[tracing::instrument(name = "`rendering route handlers`: rendering potree project", err)]
