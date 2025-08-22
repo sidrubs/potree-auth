@@ -26,7 +26,9 @@ RUN make build-release
 ####################################################################################################
 ## Final image
 ####################################################################################################
-FROM debian:bookworm-slim
+
+# Version pinned so that it can be maintained by renovate bot.
+FROM debian:12.11-slim
 
 # Import user from builder.
 COPY --from=builder --chmod=444 /etc/passwd /etc/passwd
