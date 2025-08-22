@@ -3,17 +3,19 @@ use std::sync::Arc;
 use web_route::ParameterizedRoute;
 use web_route::WebRoute;
 
+use super::super::domain::authorization::PotreeRenderResource;
+use super::super::domain::authorization::ProjectDashboardResource;
+use super::super::domain::not_found_render::NotFound;
 use super::super::domain::potree_render::PotreeRender;
+use super::super::domain::project_dashboard_render::ProjectDashboard;
 use super::error::RenderingServiceError;
+use crate::authorization::domain::action::Action;
+use crate::authorization::ports::authorization_engine::AuthorizationEngine;
 use crate::common::domain::User;
 use crate::common::domain::project::Project;
+use crate::common::domain::project::ProjectTypeResource;
 use crate::common::domain::value_objects::ProjectId;
-use crate::common::ports::authorization_engine::Action;
-use crate::common::ports::authorization_engine::AuthorizationEngine;
-use crate::common::ports::authorization_engine::Resource;
 use crate::common::ports::project_repository::ProjectRepository;
-use crate::render::domain::not_found_render::NotFound;
-use crate::render::domain::project_dashboard_render::ProjectDashboard;
 
 /// A service for rendering a project.
 #[derive(Debug, Clone)]
@@ -59,8 +61,11 @@ impl RenderingService {
     ) -> Result<PotreeRender, RenderingServiceError> {
         let project = self.project_repository.read(project_id).await?;
 
+        let potree_render_resource = PotreeRenderResource {
+            associated_project: &project,
+        };
         self.authorization_engine
-            .can(user, &Action::Read, &Resource::PotreeRender(&project))?;
+            .can_on_instance(user, &Action::Read, &potree_render_resource)?;
 
         Ok(PotreeRender {
             project_title: project.name,
@@ -76,7 +81,7 @@ impl RenderingService {
         default_project_render_route: &ParameterizedRoute,
     ) -> Result<ProjectDashboard, RenderingServiceError> {
         self.authorization_engine
-            .can(user, &Action::Read, &Resource::ProjectDashboard)?;
+            .can_on_type(user, &Action::Read, &ProjectDashboardResource)?;
 
         let projects = self.list_allowed_projects(user).await?;
 
@@ -117,7 +122,7 @@ impl RenderingService {
         user: &Option<User>,
     ) -> Result<Vec<Project>, RenderingServiceError> {
         self.authorization_engine
-            .can(user, &Action::List, &Resource::ProjectType)?;
+            .can_on_type(user, &Action::List, &ProjectTypeResource)?;
 
         let projects = self.project_repository.list().await?;
 
@@ -126,7 +131,7 @@ impl RenderingService {
             .into_iter()
             .filter(|p| {
                 self.authorization_engine
-                    .can(user, &Action::Read, &Resource::Project(p))
+                    .can_on_instance(user, &Action::Read, p)
                     .is_ok()
             })
             .collect();
@@ -146,9 +151,9 @@ mod project_rendering_service_tests {
 
     use super::super::super::application::error::RenderingServiceError;
     use super::super::super::application::service::RenderingService;
-    use crate::common::ports::authorization_engine::Action;
-    use crate::common::ports::authorization_engine::AuthorizationEngineError;
-    use crate::common::ports::authorization_engine::MockAuthorizationEngine;
+    use crate::authorization::domain::action::Action;
+    use crate::authorization::domain::error::AuthorizationEngineError;
+    use crate::authorization::ports::authorization_engine::MockAuthorizationEngine;
     use crate::common::ports::project_repository::MockProjectRepository;
 
     mod render_potree {
@@ -164,7 +169,7 @@ mod project_rendering_service_tests {
                 .return_const(Ok(Faker.fake()));
             let mut authorization_engine = MockAuthorizationEngine::new();
             authorization_engine
-                .expect_can()
+                .expect_can_on_instance()
                 .return_const(Err(AuthorizationEngineError::NotAuthenticated));
 
             let rendering_service = RenderingService::new(
@@ -191,14 +196,14 @@ mod project_rendering_service_tests {
                 .expect_read()
                 .return_const(Ok(Faker.fake()));
             let mut authorization_engine = MockAuthorizationEngine::new();
-            authorization_engine.expect_can().return_const(Err(
-                AuthorizationEngineError::NotAuthorized {
+            authorization_engine
+                .expect_can_on_instance()
+                .return_const(Err(AuthorizationEngineError::NotAuthorized {
                     user: Faker.fake(),
-                    action: Box::new(Action::Read),
-                    resource_name: Faker.fake(),
+                    action: Action::Read,
+                    resource_identifier: Faker.fake(),
                     resource_type: Faker.fake(),
-                },
-            ));
+                }));
 
             let rendering_service = RenderingService::new(
                 Arc::new(project_datastore),
@@ -239,28 +244,30 @@ mod project_rendering_service_tests {
             // The first call to the authZ engine is checking that the user is allowed to
             // list projects.
             authorization_engine
-                .expect_can()
+                .expect_can_on_type()
                 .once()
                 .return_const(Ok(()));
             // Subsequent calls determines if the user is allow to read a specific project.
             let authorization_engine_call_count = Arc::new(Mutex::new(0));
             let authorization_engine_call_count_clone =
                 Arc::clone(&authorization_engine_call_count);
-            authorization_engine.expect_can().returning(move |_, _, _| {
-                let mut count = authorization_engine_call_count_clone.lock().unwrap();
-                let res = if *count % 2 == 0 {
-                    Err(AuthorizationEngineError::NotAuthorized {
-                        user: Faker.fake(),
-                        action: Box::new(Action::List),
-                        resource_name: Faker.fake(),
-                        resource_type: Faker.fake(),
-                    })
-                } else {
-                    Ok(())
-                };
-                *count += 1;
-                res
-            });
+            authorization_engine
+                .expect_can_on_instance()
+                .returning(move |_, _, _| {
+                    let mut count = authorization_engine_call_count_clone.lock().unwrap();
+                    let res = if *count % 2 == 0 {
+                        Err(AuthorizationEngineError::NotAuthorized {
+                            user: Faker.fake(),
+                            action: Action::List,
+                            resource_identifier: Some(Faker.fake()),
+                            resource_type: Faker.fake(),
+                        })
+                    } else {
+                        Ok(())
+                    };
+                    *count += 1;
+                    res
+                });
 
             let rendering_service = RenderingService::new(
                 Arc::new(project_datastore),
@@ -284,14 +291,15 @@ mod project_rendering_service_tests {
             // Arrange
             let project_datastore = MockProjectRepository::new();
             let mut authorization_engine = MockAuthorizationEngine::new();
-            authorization_engine.expect_can().once().return_const(Err(
-                AuthorizationEngineError::NotAuthorized {
+            authorization_engine
+                .expect_can_on_type()
+                .once()
+                .return_const(Err(AuthorizationEngineError::NotAuthorized {
                     user: Faker.fake(),
-                    action: Box::new(Action::List),
-                    resource_name: Faker.fake(),
-                    resource_type: Box::new(crate::common::domain::ResourceType::Project),
-                },
-            ));
+                    action: Action::List,
+                    resource_identifier: None,
+                    resource_type: Faker.fake(),
+                }));
 
             let rendering_service = RenderingService::new(
                 Arc::new(project_datastore),

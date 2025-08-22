@@ -1,11 +1,11 @@
 use std::path::PathBuf;
 
 use super::super::ports::project_asset_store::ProjectAssetStoreError;
-use crate::common::domain::ResourceType;
+use crate::authorization::domain::action::Action;
+use crate::authorization::domain::error::AuthorizationEngineError;
+use crate::authorization::domain::resource::{ResourceIdentifier, ResourceType};
 use crate::common::domain::User;
 use crate::common::domain::value_objects::ProjectId;
-use crate::common::ports::authorization_engine::Action;
-use crate::common::ports::authorization_engine::AuthorizationEngineError;
 use crate::common::ports::project_repository::ProjectRepositoryError;
 
 #[derive(Debug, thiserror::Error)]
@@ -13,12 +13,12 @@ pub enum ProjectAssetsServiceError {
     #[error("project ({id}) not found")]
     ProjectNotFound { id: ProjectId },
 
-    #[error("{} is not authorized to {} the {:?}: {}", user.name, action, resource_type, resource_name)]
+    #[error("{} is not authorized to {} the {:?}: {:?}", user.name, action, resource_type, resource_identifier)]
     NotAuthorized {
         user: Box<User>,
-        action: Box<Action>,
-        resource_name: String,
-        resource_type: Box<ResourceType>,
+        action: Action,
+        resource_identifier: Option<ResourceIdentifier>,
+        resource_type: ResourceType,
     },
 
     #[error("user is not authenticated")]
@@ -56,12 +56,12 @@ impl From<AuthorizationEngineError> for ProjectAssetsServiceError {
             AuthorizationEngineError::NotAuthorized {
                 user,
                 action,
-                resource_name,
+                resource_identifier,
                 resource_type,
             } => Self::NotAuthorized {
                 user,
                 action,
-                resource_name,
+                resource_identifier,
                 resource_type,
             },
             AuthorizationEngineError::NotAuthenticated => Self::NotAuthenticated,
