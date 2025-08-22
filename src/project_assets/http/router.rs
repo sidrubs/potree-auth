@@ -10,6 +10,7 @@ use super::super::application::service::ProjectAssetService;
 use super::route_handlers;
 use super::state::State;
 use crate::common::domain::value_objects::ProjectId;
+use crate::project_assets::http::middleware::set_cache_control::set_cache_control;
 
 pub static ASSET_PATH: LazyLock<ParameterizedRoute> =
     LazyLock::new(|| ParameterizedRoute::new("/{project_id}/{*path}"));
@@ -26,6 +27,9 @@ pub fn build_router(project_asset_service: ProjectAssetService) -> Router {
     };
 
     Router::new()
-        .route(&ASSET_PATH, get(route_handlers::project_asset))
+        .route(
+            &ASSET_PATH,
+            get(route_handlers::project_asset).layer(set_cache_control()),
+        )
         .layer(Extension(state))
 }
