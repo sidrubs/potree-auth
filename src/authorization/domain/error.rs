@@ -1,8 +1,7 @@
-use crate::user::domain::User;
-
 use super::action::Action;
 use super::resource::ResourceIdentifier;
 use super::resource::ResourceType;
+use crate::user::domain::User;
 
 #[derive(Debug, Clone, thiserror::Error)]
 pub enum AuthorizationEngineError {

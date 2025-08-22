@@ -4,7 +4,7 @@ use http::HeaderMap;
 use super::super::application::service::ProjectAssetService;
 use super::router::AssetPathParams;
 use crate::common::domain::StaticAsset;
-use crate::common::utils::axum::api_error::ApiError;
+use crate::common::utils::http::api_error::ApiError;
 use crate::user::http::extractors::UserExtractor;
 
 /// Serves a static `project` asset.

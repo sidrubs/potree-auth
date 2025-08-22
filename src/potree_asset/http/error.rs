@@ -1,5 +1,5 @@
 use super::super::application::error::PotreeAssetsServiceError;
-use crate::common::utils::axum::api_error::ApiError;
+use crate::common::utils::http::api_error::ApiError;
 
 impl From<PotreeAssetsServiceError> for ApiError {
     fn from(value: PotreeAssetsServiceError) -> Self {

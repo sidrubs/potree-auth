@@ -3,7 +3,7 @@ use http::request::Parts;
 use tower_sessions::Session;
 
 use super::super::domain::User;
-use crate::common::utils::axum::api_error::ApiError;
+use crate::common::utils::http::api_error::ApiError;
 
 /// The key to which the logged in user data will be stored in a session.
 pub const USER_SESSION_KEY: &str = "user_session";

@@ -3,7 +3,7 @@ use http::request::Parts;
 
 use super::super::application::service::AuthenticationService;
 use super::state::State;
-use crate::common::utils::axum::render_error::RenderError;
+use crate::common::utils::http::render_error::RenderError;
 
 impl<S> FromRequestParts<S> for State
 where

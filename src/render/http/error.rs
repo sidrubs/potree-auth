@@ -1,5 +1,5 @@
 use super::super::application::error::RenderingServiceError;
-use crate::common::utils::axum::render_error::RenderError;
+use crate::common::utils::http::render_error::RenderError;
 
 impl From<RenderingServiceError> for RenderError {
     fn from(value: RenderingServiceError) -> Self {

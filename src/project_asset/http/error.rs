@@ -1,5 +1,5 @@
 use super::super::application::error::ProjectAssetsServiceError;
-use crate::common::utils::axum::api_error::ApiError;
+use crate::common::utils::http::api_error::ApiError;
 
 impl From<ProjectAssetsServiceError> for ApiError {
     fn from(value: ProjectAssetsServiceError) -> Self {

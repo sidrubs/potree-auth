@@ -8,7 +8,7 @@ use axum::response::Response;
 use super::super::application::service::RenderingService;
 use super::extractors::LoginRoute;
 use super::router::PotreePathParams;
-use crate::common::utils::axum::render_error::RenderError;
+use crate::common::utils::http::render_error::RenderError;
 use crate::render::application::error::RenderingServiceError;
 use crate::render::http::router::POTREE;
 use crate::render::http::utils::redirect_to_404;

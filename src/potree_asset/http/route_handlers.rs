@@ -3,7 +3,7 @@ use axum::extract::Path;
 use super::super::application::service::PotreeAssetService;
 use super::router::AssetPathParams;
 use crate::common::domain::StaticAsset;
-use crate::common::utils::axum::api_error::ApiError;
+use crate::common::utils::http::api_error::ApiError;
 
 /// Serves a built, static `potree` asset,
 pub(crate) async fn potree_asset(

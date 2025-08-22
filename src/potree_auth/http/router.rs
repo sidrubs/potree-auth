@@ -85,7 +85,7 @@ fn build_router(
     let project_asset_router = project_asset::http::build_router(project_asset_service);
     let rendering_router =
         render::http::build_router(rendering_service, AUTH.join(LOGIN.as_ref()))?;
-    let common_routes = common::utils::axum::common_routes::build_router();
+    let common_routes = common::utils::http::common_routes::build_router();
 
     // Build top-level router
     let router = Router::new()

@@ -4,7 +4,9 @@ use openidconnect::core::CoreGenderClaim;
 use super::oidc::PotreeAuthClaims;
 use crate::authentication::ports::authentication_engine::AuthenticationEngineError;
 use crate::common::domain::Group;
-use crate::user::domain::{EmailAddress, UserId, UserName};
+use crate::user::domain::EmailAddress;
+use crate::user::domain::UserId;
+use crate::user::domain::UserName;
 
 pub(crate) fn extract_user_groups(
     id_token_claims: &IdTokenClaims<PotreeAuthClaims, CoreGenderClaim>,

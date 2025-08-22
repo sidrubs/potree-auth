@@ -9,7 +9,7 @@ use web_route::WebRoute;
 use super::super::application::service::RenderingService;
 use super::route_handlers;
 use super::state::State;
-use crate::common::utils::axum::render_error::RenderError;
+use crate::common::utils::http::render_error::RenderError;
 use crate::project::domain::ProjectId;
 use crate::render::http::middleware::potree_csp::set_potree_csp;
 

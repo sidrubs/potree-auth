@@ -1,4 +1,4 @@
-use crate::common::utils::axum::render_error::RenderError;
+use crate::common::utils::http::render_error::RenderError;
 
 #[derive(Debug, Clone, thiserror::Error)]
 pub enum PotreeAuthHttpError {

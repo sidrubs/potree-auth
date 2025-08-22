@@ -3,7 +3,7 @@ use http::request::Parts;
 
 use super::super::application::service::ProjectAssetService;
 use super::state::State;
-use crate::common::utils::axum::api_error::ApiError;
+use crate::common::utils::http::api_error::ApiError;
 
 impl<S> FromRequestParts<S> for State
 where
