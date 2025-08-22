@@ -2,8 +2,8 @@ use std::fmt::Debug;
 
 use async_trait::async_trait;
 
-use crate::common::domain::project::Project;
-use crate::common::domain::value_objects::ProjectId;
+use super::super::domain::Project;
+use super::super::domain::ProjectId;
 
 /// Defines the functionality needed to for the application to interact with
 /// persisted [`Project`]s.

@@ -122,9 +122,8 @@ mod authorization_service_tests {
 
     mod can_on_type {
 
-        use crate::authorization::domain::resource::ResourceType;
-
         use super::*;
+        use crate::authorization::domain::resource::ResourceType;
 
         #[test]
         fn should_return_ok_if_the_user_is_an_admin() {

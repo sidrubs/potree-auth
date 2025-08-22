@@ -1,13 +1,13 @@
 use std::path::Path;
 
-use crate::{
-    authorization::domain::resource::{
-        Resource, ResourceIdentifier, ResourceInstance, ResourceType,
-    },
-    common::domain::project::Project,
-};
+use crate::authorization::domain::resource::Resource;
+use crate::authorization::domain::resource::ResourceIdentifier;
+use crate::authorization::domain::resource::ResourceInstance;
+use crate::authorization::domain::resource::ResourceType;
+use crate::project::domain::Project;
 
-/// A struct that is used to provide the required authZ data to the authorization engine.
+/// A struct that is used to provide the required authZ data to the
+/// authorization engine.
 #[derive(Debug)]
 pub struct ProjectAssetResource<'a> {
     pub associated_project: &'a Project,

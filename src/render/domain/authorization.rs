@@ -1,11 +1,11 @@
-use crate::{
-    authorization::domain::resource::{
-        Resource, ResourceIdentifier, ResourceInstance, ResourceType,
-    },
-    common::domain::project::Project,
-};
+use crate::authorization::domain::resource::Resource;
+use crate::authorization::domain::resource::ResourceIdentifier;
+use crate::authorization::domain::resource::ResourceInstance;
+use crate::authorization::domain::resource::ResourceType;
+use crate::project::domain::Project;
 
-/// A struct that is used to provide the required authZ data to the authorization engine for a potree render instance.
+/// A struct that is used to provide the required authZ data to the
+/// authorization engine for a potree render instance.
 #[derive(Debug)]
 pub struct PotreeRenderResource<'a> {
     pub associated_project: &'a Project,
@@ -27,7 +27,8 @@ impl ResourceInstance for PotreeRenderResource<'_> {
     }
 }
 
-/// A struct that is used to provide the required authZ data to the authorization engine for the projects dashboard.
+/// A struct that is used to provide the required authZ data to the
+/// authorization engine for the projects dashboard.
 #[derive(Debug)]
 pub struct ProjectDashboardResource;
 

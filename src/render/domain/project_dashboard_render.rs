@@ -2,8 +2,8 @@ use askama::Template;
 use web_route::ParameterizedRoute;
 use web_route::WebRoute;
 
-use crate::common::domain::value_objects::ProjectDescription;
-use crate::common::domain::value_objects::ProjectName;
+use crate::project::domain::ProjectDescription;
+use crate::project::domain::ProjectName;
 use crate::render::domain::error::RenderDomainError;
 
 /// Represents the the Project Dashboard page.
@@ -25,7 +25,7 @@ impl ProjectDashboard {
         default_render_route: &ParameterizedRoute,
     ) -> Result<Self, RenderDomainError>
     where
-        P: IntoIterator<Item = crate::common::domain::project::Project>,
+        P: IntoIterator<Item = crate::project::domain::Project>,
     {
         let projects = projects
             .into_iter()
@@ -57,7 +57,7 @@ impl Project {
     ///
     /// `default_render_route` is assumed to have a `{project_id}` token.
     pub fn from_domain_project(
-        project: crate::common::domain::project::Project,
+        project: crate::project::domain::Project,
         default_render_route: &ParameterizedRoute,
     ) -> Result<Self, RenderDomainError> {
         let render_route = default_render_route
@@ -88,7 +88,7 @@ mod project_tests {
         #[test]
         fn should_create_a_valid_render_route() {
             // Arrange
-            let domain_project = Faker.fake::<crate::common::domain::project::Project>();
+            let domain_project = Faker.fake::<crate::project::domain::Project>();
             let default_render_route =
                 ParameterizedRoute::new(Faker.fake::<WebRoute>()).join("/{project_id}");
 

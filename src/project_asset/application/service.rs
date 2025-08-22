@@ -9,8 +9,8 @@ use crate::authorization::domain::action::Action;
 use crate::authorization::ports::authorization_engine::AuthorizationEngine;
 use crate::common::domain::StaticAsset;
 use crate::common::domain::User;
-use crate::common::domain::value_objects::ProjectId;
-use crate::common::ports::project_repository::ProjectRepository;
+use crate::project::domain::ProjectId;
+use crate::project::ports::project_repository::ProjectRepository;
 use crate::project_asset::domain::authorization::ProjectAssetResource;
 
 /// A service for interacting with project assets.
@@ -72,7 +72,7 @@ mod project_asset_service_tests {
     use super::*;
     use crate::authorization::domain::error::AuthorizationEngineError;
     use crate::authorization::ports::authorization_engine::MockAuthorizationEngine;
-    use crate::common::ports::project_repository::MockProjectRepository;
+    use crate::project::ports::project_repository::MockProjectRepository;
 
     mod request_asset {
 

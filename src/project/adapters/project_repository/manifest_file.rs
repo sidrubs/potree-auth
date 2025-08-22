@@ -5,13 +5,13 @@ use async_trait::async_trait;
 use serde::Deserialize;
 use serde::Serialize;
 
+use super::super::super::domain::Project;
+use super::super::super::domain::ProjectId;
+use super::super::super::domain::ProjectName;
+use super::super::super::ports::project_repository::ProjectRepository;
+use super::super::super::ports::project_repository::ProjectRepositoryError;
 use crate::common::domain::group::Group;
-use crate::common::domain::project::Project;
-use crate::common::domain::value_objects::ProjectDescription;
-use crate::common::domain::value_objects::ProjectId;
-use crate::common::domain::value_objects::ProjectName;
-use crate::common::ports::project_repository::ProjectRepository;
-use crate::common::ports::project_repository::ProjectRepositoryError;
+use crate::project::domain::ProjectDescription;
 
 /// The name of the project manifest files.
 const MANIFEST_FILE_NAME: &str = "manifest.yml";

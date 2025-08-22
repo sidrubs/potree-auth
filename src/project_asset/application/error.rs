@@ -3,10 +3,11 @@ use std::path::PathBuf;
 use super::super::ports::project_asset_store::ProjectAssetStoreError;
 use crate::authorization::domain::action::Action;
 use crate::authorization::domain::error::AuthorizationEngineError;
-use crate::authorization::domain::resource::{ResourceIdentifier, ResourceType};
+use crate::authorization::domain::resource::ResourceIdentifier;
+use crate::authorization::domain::resource::ResourceType;
 use crate::common::domain::User;
-use crate::common::domain::value_objects::ProjectId;
-use crate::common::ports::project_repository::ProjectRepositoryError;
+use crate::project::domain::ProjectId;
+use crate::project::ports::project_repository::ProjectRepositoryError;
 
 #[derive(Debug, thiserror::Error)]
 pub enum ProjectAssetsServiceError {

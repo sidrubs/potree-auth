@@ -1,29 +1,12 @@
-use super::group::Group;
-use super::value_objects::ProjectId;
-use super::value_objects::ProjectName;
+//! AuthZ trait implementations for a [`Project`].
+
+use super::Project;
 use crate::authorization::domain::resource::Resource;
 use crate::authorization::domain::resource::ResourceIdentifier;
 use crate::authorization::domain::resource::ResourceInstance;
 use crate::authorization::domain::resource::ResourceType;
-use crate::common::domain::value_objects::ProjectDescription;
+use crate::common::domain::Group;
 
-/// Represents the metadata associated with a 3D model project.
-#[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(test, derive(fake::Dummy))]
-pub struct Project {
-    pub id: ProjectId,
-
-    /// A human readable name for the project.
-    pub name: ProjectName,
-
-    /// Optional additional context about the project.
-    pub description: Option<ProjectDescription>,
-
-    /// The groups that the project is a member of.
-    pub groups: Vec<Group>,
-}
-
-/// AuthZ trait implementations
 impl Resource for Project {
     fn resource_type(&self) -> crate::authorization::domain::resource::ResourceType {
         ResourceType::new("project".to_owned())

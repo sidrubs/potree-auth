@@ -1,7 +1,7 @@
 use askama::Template;
 use web_route::WebRoute;
 
-use crate::common::domain::value_objects::ProjectName;
+use crate::project::domain::ProjectName;
 
 /// Represents the the `potree` render page. Populates and renders the
 /// `potree_render.html` template.

@@ -9,7 +9,7 @@ use web_route::ParameterizedRoute;
 use super::super::application::service::ProjectAssetService;
 use super::route_handlers;
 use super::state::State;
-use crate::common::domain::value_objects::ProjectId;
+use crate::project::domain::ProjectId;
 use crate::project_asset::http::middleware::set_cache_control::set_cache_control;
 
 pub static ASSET_PATH: LazyLock<ParameterizedRoute> =
