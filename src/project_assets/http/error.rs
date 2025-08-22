@@ -10,12 +10,12 @@ impl From<ProjectAssetsServiceError> for ApiError {
             ProjectAssetsServiceError::NotAuthorized {
                 user,
                 action,
-                resource_name,
+                resource_identifier,
                 resource_type,
             } => Self::NotAuthorized {
                 user,
                 action,
-                resource_name,
+                resource_identifier,
                 resource_type,
             },
             ProjectAssetsServiceError::NotAuthenticated => Self::NotAuthenticated,

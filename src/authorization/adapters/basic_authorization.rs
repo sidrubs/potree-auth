@@ -37,7 +37,7 @@ impl SimpleAuthorizationEngine {
 
         match (action, resource.resource_type().as_str()) {
             (&Action::List, "project") => Ok(()),
-            (&Action::Read, "project_dashboard") => Ok(()),
+            (&Action::Read, "projects_dashboard") => Ok(()),
             _ => Err(AuthorizationEngineError::NotAuthorized {
                 user: Box::new(user.clone()),
                 action: action.clone(),
@@ -190,7 +190,7 @@ mod authorization_service_tests {
 
             let user = Faker.fake::<User>();
             let resource = MockedResource {
-                resource_type: ResourceType::new("project_dashboard".to_owned()),
+                resource_type: ResourceType::new("projects_dashboard".to_owned()),
                 ..Faker.fake()
             };
             let action = Action::Read;
@@ -211,7 +211,7 @@ mod authorization_service_tests {
 
             let user = Faker.fake::<User>();
             let resource = MockedResource {
-                resource_type: ResourceType::new("project_dashboard".to_owned()),
+                resource_type: ResourceType::new("projects_dashboard".to_owned()),
                 ..Faker.fake()
             };
 

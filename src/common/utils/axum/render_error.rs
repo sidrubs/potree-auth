@@ -2,7 +2,7 @@ use axum::response::IntoResponse;
 use http::StatusCode;
 
 use crate::authorization::domain::action::Action;
-use crate::authorization::domain::resource::ResourceType;
+use crate::authorization::domain::resource::{ResourceIdentifier, ResourceType};
 use crate::common::domain::User;
 
 /// Errors that can be experienced by a rendering (e.g. HTML) `axum` route
@@ -23,12 +23,12 @@ pub enum RenderError {
     #[error("unable to find resource: {resource_name}")]
     ResourceNotFound { resource_name: String },
 
-    #[error("{} is not authorized to {} the {:?}: {}", user.name, action, resource_type, resource_name)]
+    #[error("{} is not authorized to {} the {:?}: {:?}", user.name, action, resource_type, resource_identifier)]
     NotAuthorized {
         user: Box<User>,
-        action: Box<Action>,
-        resource_name: String,
-        resource_type: Box<ResourceType>,
+        action: Action,
+        resource_identifier: Option<ResourceIdentifier>,
+        resource_type: ResourceType,
     },
 
     #[error("user is not authenticated")]

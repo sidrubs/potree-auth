@@ -1,4 +1,3 @@
-use std::collections::HashSet;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -136,7 +135,7 @@ struct ProjectManifest {
     pub description: Option<ProjectDescription>,
 
     /// The groups that the project is a member of.
-    pub groups: HashSet<Group>,
+    pub groups: Vec<Group>,
 }
 
 impl ProjectManifest {

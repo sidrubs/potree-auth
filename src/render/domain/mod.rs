@@ -1,3 +1,4 @@
+pub mod authorization;
 pub mod error;
 pub mod not_found_render;
 pub mod potree_render;
