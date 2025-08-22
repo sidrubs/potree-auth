@@ -3,11 +3,11 @@
 //!
 //! This could be replaced by more robust policy engine in the future.
 
+use super::super::domain::action::Action;
+use super::super::domain::error::AuthorizationEngineError;
+use super::super::domain::resource::Resource;
+use super::super::ports::authorization_engine::AuthorizationEngine;
 use crate::common::domain::user::User;
-use crate::common::ports::authorization_engine::Action;
-use crate::common::ports::authorization_engine::AuthorizationEngine;
-use crate::common::ports::authorization_engine::AuthorizationEngineError;
-use crate::common::ports::authorization_engine::Resource;
 
 /// Handles authorization business logic for the application.
 #[derive(Debug, Clone)]

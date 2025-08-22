@@ -5,12 +5,12 @@ use web_route::WebRoute;
 
 use super::super::domain::potree_render::PotreeRender;
 use super::error::RenderingServiceError;
+use crate::authorization::domain::action::Action;
+use crate::authorization::domain::resource::Resource;
+use crate::authorization::ports::authorization_engine::AuthorizationEngine;
 use crate::common::domain::User;
 use crate::common::domain::project::Project;
 use crate::common::domain::value_objects::ProjectId;
-use crate::common::ports::authorization_engine::Action;
-use crate::common::ports::authorization_engine::AuthorizationEngine;
-use crate::common::ports::authorization_engine::Resource;
 use crate::common::ports::project_repository::ProjectRepository;
 use crate::render::domain::not_found_render::NotFound;
 use crate::render::domain::project_dashboard_render::ProjectDashboard;
@@ -146,9 +146,9 @@ mod project_rendering_service_tests {
 
     use super::super::super::application::error::RenderingServiceError;
     use super::super::super::application::service::RenderingService;
-    use crate::common::ports::authorization_engine::Action;
-    use crate::common::ports::authorization_engine::AuthorizationEngineError;
-    use crate::common::ports::authorization_engine::MockAuthorizationEngine;
+    use crate::authorization::domain::action::Action;
+    use crate::authorization::domain::error::AuthorizationEngineError;
+    use crate::authorization::ports::authorization_engine::MockAuthorizationEngine;
     use crate::common::ports::project_repository::MockProjectRepository;
 
     mod render_potree {
@@ -224,7 +224,9 @@ mod project_rendering_service_tests {
         use std::sync::Mutex;
 
         use super::*;
-        use crate::common::domain::project::Project;
+        use crate::{
+            authorization::domain::resource::ResourceType, common::domain::project::Project,
+        };
 
         #[tokio::test]
         async fn should_return_the_projects_that_the_user_is_allowed_to_read() {
@@ -289,7 +291,7 @@ mod project_rendering_service_tests {
                     user: Faker.fake(),
                     action: Box::new(Action::List),
                     resource_name: Faker.fake(),
-                    resource_type: Box::new(crate::common::domain::ResourceType::Project),
+                    resource_type: Box::new(ResourceType::Project),
                 },
             ));
 

@@ -7,9 +7,9 @@ use crate::authentication::adapters::authentication_engine::no_op::NoOpAuthentic
 use crate::authentication::adapters::authentication_engine::oidc::OidcAuthenticationEngine;
 use crate::authentication::http::CALLBACK;
 use crate::authentication::ports::authentication_engine::AuthenticationEngine;
-use crate::common::adapters::authorization_engine::basic_authorization::SimpleAuthorizationEngine;
-use crate::common::adapters::authorization_engine::no_op::NoOpAuthorizationEngine;
-use crate::common::ports::authorization_engine::AuthorizationEngine;
+use crate::authorization::adapters::basic_authorization::SimpleAuthorizationEngine;
+use crate::authorization::adapters::no_op::NoOpAuthorizationEngine;
+use crate::authorization::ports::authorization_engine::AuthorizationEngine;
 
 /// Initialize an authentication engine to handle OIDC authentication.
 ///

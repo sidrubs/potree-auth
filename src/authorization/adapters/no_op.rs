@@ -3,11 +3,11 @@
 //!
 //! This would be used in cases where authorization is not needed.
 
+use super::super::domain::action::Action;
+use super::super::domain::error::AuthorizationEngineError;
+use super::super::domain::resource::Resource;
+use super::super::ports::authorization_engine::AuthorizationEngine;
 use crate::common::domain::user::User;
-use crate::common::ports::authorization_engine::Action;
-use crate::common::ports::authorization_engine::AuthorizationEngine;
-use crate::common::ports::authorization_engine::AuthorizationEngineError;
-use crate::common::ports::authorization_engine::Resource;
 
 #[derive(Debug, Clone)]
 pub(crate) struct NoOpAuthorizationEngine;

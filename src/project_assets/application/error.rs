@@ -1,11 +1,11 @@
 use std::path::PathBuf;
 
 use super::super::ports::project_asset_store::ProjectAssetStoreError;
-use crate::common::domain::ResourceType;
+use crate::authorization::domain::action::Action;
+use crate::authorization::domain::error::AuthorizationEngineError;
+use crate::authorization::domain::resource::ResourceType;
 use crate::common::domain::User;
 use crate::common::domain::value_objects::ProjectId;
-use crate::common::ports::authorization_engine::Action;
-use crate::common::ports::authorization_engine::AuthorizationEngineError;
 use crate::common::ports::project_repository::ProjectRepositoryError;
 
 #[derive(Debug, thiserror::Error)]

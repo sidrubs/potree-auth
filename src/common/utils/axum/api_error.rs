@@ -1,9 +1,9 @@
 use axum::response::IntoResponse;
 use http::StatusCode;
 
-use crate::common::domain::ResourceType;
+use crate::authorization::domain::action::Action;
+use crate::authorization::domain::resource::ResourceType;
 use crate::common::domain::User;
-use crate::common::ports::authorization_engine::Action;
 
 /// Errors that can be experienced by an API `axum` route handler.
 ///

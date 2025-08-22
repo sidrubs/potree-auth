@@ -5,12 +5,12 @@ use http::HeaderMap;
 
 use super::super::ports::project_asset_store::ProjectAssetStore;
 use super::error::ProjectAssetsServiceError;
+use crate::authorization::domain::action::Action;
+use crate::authorization::domain::resource::Resource;
+use crate::authorization::ports::authorization_engine::AuthorizationEngine;
 use crate::common::domain::StaticAsset;
 use crate::common::domain::User;
 use crate::common::domain::value_objects::ProjectId;
-use crate::common::ports::authorization_engine::Action;
-use crate::common::ports::authorization_engine::AuthorizationEngine;
-use crate::common::ports::authorization_engine::Resource;
 use crate::common::ports::project_repository::ProjectRepository;
 
 /// A service for interacting with project assets.
@@ -65,10 +65,10 @@ mod project_asset_service_tests {
 
     use super::super::super::ports::project_asset_store::MockProjectAssetStore;
     use super::*;
-    use crate::common::domain::ResourceType;
+    use crate::authorization::domain::error::AuthorizationEngineError;
+    use crate::authorization::domain::resource::ResourceType;
+    use crate::authorization::ports::authorization_engine::MockAuthorizationEngine;
     use crate::common::domain::project::Project;
-    use crate::common::ports::authorization_engine::AuthorizationEngineError;
-    use crate::common::ports::authorization_engine::MockAuthorizationEngine;
     use crate::common::ports::project_repository::MockProjectRepository;
 
     mod request_asset {
