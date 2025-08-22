@@ -22,14 +22,13 @@ use crate::authentication::http::LOGIN;
 use crate::authentication::{self};
 use crate::common;
 use crate::common::adapters::project_repository::manifest_file::ManifestFileProjectRepository;
-use crate::potree_assets::adapters::potree_asset_store::embedded::EmbeddedPotreeAssetStore;
-use crate::potree_assets::application::service::PotreeAssetService;
-use crate::potree_assets::{self};
+use crate::potree_asset::adapters::potree_asset_store::embedded::EmbeddedPotreeAssetStore;
+use crate::potree_asset::application::service::PotreeAssetService;
 use crate::potree_auth::http::middleware::security_headers::apply_secure_headers_middleware;
-use crate::project_assets::adapters::project_asset_store::serve_dir::ServeDirProjectAssets;
-use crate::project_assets::application::service::ProjectAssetService;
-use crate::project_assets::http::ASSET_PATH;
-use crate::project_assets::{self};
+use crate::project_asset::adapters::project_asset_store::serve_dir::ServeDirProjectAssets;
+use crate::project_asset::application::service::ProjectAssetService;
+use crate::project_asset::http::ASSET_PATH;
+use crate::project_asset::{self};
 use crate::render::application::service::RenderingService;
 use crate::render::http::PROJECT_DASHBOARD;
 use crate::render::{self};
@@ -82,8 +81,8 @@ fn build_router(
 ) -> Result<NormalizePath<Router>, PotreeAuthHttpError> {
     // Initialize child routers
     let authentication_router = authentication::http::build_router(authentication_service);
-    let potree_asset_router = potree_assets::http::build_router(potree_asset_service);
-    let project_asset_router = project_assets::http::build_router(project_asset_service);
+    let potree_asset_router = crate::potree_asset::http::build_router(potree_asset_service);
+    let project_asset_router = project_asset::http::build_router(project_asset_service);
     let rendering_router =
         render::http::build_router(rendering_service, AUTH.join(LOGIN.as_ref()))?;
     let common_routes = common::utils::axum::common_routes::build_router();

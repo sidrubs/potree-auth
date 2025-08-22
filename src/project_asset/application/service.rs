@@ -11,7 +11,7 @@ use crate::common::domain::StaticAsset;
 use crate::common::domain::User;
 use crate::common::domain::value_objects::ProjectId;
 use crate::common::ports::project_repository::ProjectRepository;
-use crate::project_assets::domain::authorization::ProjectAssetResource;
+use crate::project_asset::domain::authorization::ProjectAssetResource;
 
 /// A service for interacting with project assets.
 #[derive(Debug, Clone)]
