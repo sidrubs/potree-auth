@@ -44,7 +44,7 @@ use crate::authentication::ports::authentication_engine::AuthenticationEngineErr
 use crate::user::domain::User;
 
 #[derive(Debug, Clone)]
-pub(crate) struct OidcAuthenticationEngine {
+pub struct OidcAuthenticationEngine {
     /// The oidc client that is performing interaction with the IdP.
     oidc_client: PotreeAuthClient,
 

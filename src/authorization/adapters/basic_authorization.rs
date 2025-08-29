@@ -12,7 +12,7 @@ use crate::user::domain::User;
 
 /// Handles authorization business logic for the application.
 #[derive(Debug, Clone)]
-pub(crate) struct SimpleAuthorizationEngine;
+pub struct SimpleAuthorizationEngine;
 
 impl SimpleAuthorizationEngine {
     #[tracing::instrument(
