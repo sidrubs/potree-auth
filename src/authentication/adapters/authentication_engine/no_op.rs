@@ -10,7 +10,7 @@ use crate::user::domain::User;
 /// A blank authentication service. Would be used if the application does not
 /// require authentication.
 #[derive(Debug, Clone)]
-pub(crate) struct NoOpAuthenticationEngine;
+pub struct NoOpAuthenticationEngine;
 
 #[async_trait]
 impl AuthenticationEngine for NoOpAuthenticationEngine {

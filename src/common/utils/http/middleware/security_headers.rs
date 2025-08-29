@@ -5,14 +5,14 @@ use tower_helmet::IntoHeader;
 use tower_helmet::header::ContentSecurityPolicy;
 use tower_http::set_header::SetResponseHeaderLayer;
 
-use crate::potree_auth::http::error::PotreeAuthHttpError;
+use super::super::initialization_error::InitializationError;
 
 /// Adds security headers middleware to the `router`.
 ///
 /// Adds OWASP's recommended [secure headers] to HTTP responses.
 ///
 /// [secure headers]: https://owasp.org/www-project-secure-headers/
-pub fn apply_secure_headers_middleware(router: Router) -> Result<Router, PotreeAuthHttpError> {
+pub fn apply_secure_headers_middleware(router: Router) -> Result<Router, InitializationError> {
     let helmet_layer = helmet_layer();
 
     let csp_layer = csp_layer()?;
@@ -39,13 +39,14 @@ fn helmet_layer() -> HelmetLayer {
 }
 
 /// Initialize a default CSP layer that is added if one is not already present.
-fn csp_layer() -> Result<SetResponseHeaderLayer<HeaderValue>, PotreeAuthHttpError> {
+fn csp_layer() -> Result<SetResponseHeaderLayer<HeaderValue>, InitializationError> {
     let csp = ContentSecurityPolicy::default();
 
     Ok(SetResponseHeaderLayer::if_not_present(
         http::header::CONTENT_SECURITY_POLICY,
         csp.header_value()
-            .map_err(|_e| PotreeAuthHttpError::ServerConfiguration {
+            .map_err(|_e| InitializationError::Middleware {
+                middleware_name: "security headers".to_owned(),
                 message: "invalid CSP header value".to_owned(),
             })?,
     ))

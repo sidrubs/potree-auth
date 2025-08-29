@@ -1,1 +1,1 @@
-pub(crate) mod serve_dir;
+pub mod serve_dir;

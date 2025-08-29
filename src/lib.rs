@@ -1,9 +1,9 @@
-pub(crate) mod authentication;
+pub mod authentication;
 pub mod authorization;
-pub(crate) mod common;
-pub(crate) mod potree_asset;
+pub mod common;
+pub mod potree_asset;
 pub mod potree_auth;
 pub mod project;
 pub mod project_asset;
-pub(crate) mod render;
+pub mod render;
 pub mod user;

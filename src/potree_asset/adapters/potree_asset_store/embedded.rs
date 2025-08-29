@@ -10,7 +10,7 @@ use crate::common::domain::StaticAsset;
 /// Provides access to built `potree` static assets that are embedded in the
 /// Rust binary.
 #[derive(Debug, Clone)]
-pub(crate) struct EmbeddedPotreeAssetStore;
+pub struct EmbeddedPotreeAssetStore;
 
 impl EmbeddedPotreeAssetStore {
     #[tracing::instrument]

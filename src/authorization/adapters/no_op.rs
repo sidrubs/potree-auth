@@ -11,7 +11,7 @@ use super::super::ports::authorization_engine::AuthorizationEngine;
 use crate::user::domain::User;
 
 #[derive(Debug, Clone)]
-pub(crate) struct NoOpAuthorizationEngine;
+pub struct NoOpAuthorizationEngine;
 
 impl NoOpAuthorizationEngine {
     #[tracing::instrument(

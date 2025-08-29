@@ -1,33 +1,32 @@
-use crate::common::utils::http::render_error::RenderError;
+use crate::common::utils::http::initialization_error::InitializationError;
 
 #[derive(Debug, Clone, thiserror::Error)]
 pub enum PotreeAuthHttpError {
-    #[error("unable to initialize {adapter_name} application: {message}")]
+    #[error("unable to initialize `{adapter_name}` application: {message}")]
     AdapterIntialization {
         adapter_name: String,
         message: String,
     },
 
+    #[error("unable to initialize `{middleware_name}` middleware: {message}")]
+    MiddlewareIntialization {
+        middleware_name: String,
+        message: String,
+    },
+
     #[error("the server is not configured correctly: {message}")]
     ServerConfiguration { message: String },
-
-    /// These should not be experienced or handled by this router.
-    #[error("a runtime error was experienced: {message}")]
-    Runtime { message: String },
 }
 
-impl From<RenderError> for PotreeAuthHttpError {
-    fn from(value: RenderError) -> Self {
+impl From<InitializationError> for PotreeAuthHttpError {
+    fn from(value: InitializationError) -> Self {
         match value {
-            RenderError::ServerConfiguration { message } => Self::ServerConfiguration { message },
-            RenderError::StateExtraction
-            | RenderError::ResourceNotFound { .. }
-            | RenderError::NotAuthorized { .. }
-            | RenderError::NotAuthenticated
-            | RenderError::ServerError { .. }
-            | RenderError::AuthenticationFlow { .. }
-            | RenderError::Infrastucture { .. } => Self::Runtime {
-                message: value.to_string(),
+            InitializationError::Middleware {
+                middleware_name,
+                message,
+            } => Self::MiddlewareIntialization {
+                middleware_name,
+                message,
             },
         }
     }
