@@ -2,9 +2,12 @@ use std::path::PathBuf;
 
 use bytes::Bytes;
 use http::HeaderMap;
+use http::HeaderValue;
 use http::Response;
 use http::header;
 use rust_embed::EmbeddedFile;
+
+use crate::common::domain::utils::last_modified::http_date_from_unix_time;
 
 /// Represents a static asset that can be served by a http server.
 #[derive(Debug, Clone)]
@@ -28,6 +31,20 @@ impl StaticAsset {
                     mime_type: mime.to_string(),
                 })?,
         );
+
+        // Add Last-Modified header to help with caching
+        if let Some(last_modified) = embedded_file.metadata.last_modified() {
+            let http_date = http_date_from_unix_time(last_modified);
+
+            headers.append(
+                header::LAST_MODIFIED,
+                HeaderValue::from_str(&http_date.to_string()).map_err(|_e| {
+                    StaticAssetError::InvalidLastModifiedHeader {
+                        http_date: http_date.to_string(),
+                    }
+                })?,
+            );
+        }
 
         let mut response = Response::builder()
             .body(Bytes::from(embedded_file.data.into_owned()))
@@ -53,6 +70,9 @@ impl StaticAsset {
 pub enum StaticAssetError {
     #[error("unable to create content-type header from {mime_type}")]
     InvalidContentTypeHeader { mime_type: String },
+
+    #[error("unable to create last-modified header from {http_date}")]
+    InvalidLastModifiedHeader { http_date: String },
 
     #[error("unable to convert {path} to bytes")]
     BytesConversion { path: PathBuf },

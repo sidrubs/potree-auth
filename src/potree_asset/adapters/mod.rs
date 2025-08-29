@@ -1,1 +1,1 @@
-pub(crate) mod potree_asset_store;
+pub mod potree_asset_store;

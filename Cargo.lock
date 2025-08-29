@@ -1793,6 +1793,7 @@ dependencies = [
  "futures",
  "http",
  "http-body-util",
+ "httpdate",
  "mime",
  "mime_guess",
  "mockall",

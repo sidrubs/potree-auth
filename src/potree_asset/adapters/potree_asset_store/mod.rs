@@ -1,1 +1,1 @@
-pub(crate) mod embedded;
+pub mod embedded;
