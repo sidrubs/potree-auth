@@ -109,10 +109,15 @@ impl ManifestFileProjectRepository {
 
         // Filter out the the projects that did not load successfully (e.g. invalid
         // manifest file).
-        loaded_projects
+        let mut loaded_projects = loaded_projects
             .into_iter()
             .filter(|res| res.is_ok())
-            .collect::<Result<Vec<_>, _>>()
+            .collect::<Result<Vec<_>, _>>()?;
+
+        // Sort the projects by name
+        loaded_projects.sort_by(|a, b| a.name.cmp(&b.name));
+
+        Ok(loaded_projects)
     }
 }
 
@@ -285,7 +290,7 @@ mod manifest_file_project_service_tests {
         use super::*;
 
         #[tokio::test]
-        async fn should_list_all_available_valid_projects() {
+        async fn should_list_all_available_valid_projects_sorted_by_name() {
             // Arrange
             let mut projects = fake::vec![Project; 1..40];
             let projects_dir = tempfile::tempdir().unwrap();
@@ -299,11 +304,10 @@ mod manifest_file_project_service_tests {
             let service = ManifestFileProjectRepository::new(&projects_dir);
 
             // Act
-            let mut recovered_projects = service.list().await.unwrap();
+            let recovered_projects = service.list().await.unwrap();
 
             // Assert
-            projects.sort_by_key(|p| p.id.clone());
-            recovered_projects.sort_by_key(|p| p.id.clone());
+            projects.sort_by_key(|p| p.name.clone());
             assert_eq!(recovered_projects, projects);
         }
 

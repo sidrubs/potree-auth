@@ -23,6 +23,8 @@ pub trait ProjectRepository: Debug + Send + Sync + 'static {
 
     /// List all the projects available in the datastore.
     ///
+    /// Should sort by project.name.
+    ///
     /// # Errors
     ///
     /// - [`ProjectRepositoryError::Parsing`] if the project has an invalid
