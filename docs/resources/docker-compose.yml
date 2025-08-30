@@ -1,0 +1,35 @@
+services:
+  potree-auth:
+    image: potree-auth:latest
+    restart: unless-stopped
+
+    # The externally accessible port of the application.
+    ports:
+      - "${SERVER_PORT:-3000}:3000"
+
+    # Various environment variables required by the application. Mostly
+    # related to `IdP` configuration. If one of the IdP related env vars
+    # are provided then all of the others should be as well. Else the
+    # `potree-auth` application won't start.
+    environment:
+      - IDP_URL
+      - IDP_CLIENT_ID
+      - IDP_CLIENT_SECRET
+      - IDP_GROUPS_CLAIM
+      - IDP_APPLICATION_EXTERNAL_URL
+      - DATA_DIR=/application-data
+      - SERVER_PORT=3000
+      - SERVER_HOST=0.0.0.0
+
+    volumes:
+      # The local path to the directory into which the project data
+      # (point clouds, etc.) will be stored.
+      - ${DATA_DIR:?path to project data required}:/application-data
+
+    # # Check that the container is ready to accept queries.
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl http://localhost:3000/_health | grep true"]
+    #   start_period: 3s
+    #   interval: 60s
+    #   retries: 3
+    #   timeout: 2s

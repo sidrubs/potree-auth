@@ -1,5 +1,13 @@
 # Potree Auth
 
+Easily share and manage your 3D point cloud projects — securely.
+
+`potree-auth` is a web server that adds authentication, access control, and a clean dashboard on top of [`potree`](https://github.com/potree/potree). Users log in with the configured Identity Provider (OIDC supported) and see only the projects they’re authorized to view.
+
+With Potree Auth you get:
+- 🔐 Secure access control for your Potree projects
+- 🖥️ A ready-to-use project dashboard for your users
+
 ## Quick Start
 
 ### Installation
@@ -28,6 +36,12 @@ Requires the [Docker Engine](https://docs.docker.com/engine/) to be installed.
 
 ```bash
 docker run -p 3000:3000 -v /<path-to>/project-data:/project-data -e DATA_DIR="/project-data" -e SERVER_HOST="0.0.0.0" potree-auth:latest
+```
+
+Can also be run using Docker Compose with [this example `docker-compose.yml` file](./docs/resources/docker-compose.yml).
+
+```bash
+DATA_DIR=/<path-to>/project-data docker compose -f /<path-to>/docker-compose.yml up
 ```
 
 ## Application Overview
@@ -73,41 +87,13 @@ Served at `/potree/{project_id}`.
 
 > To use custom Potree HTML, create it in an `index.html` file and add it to the _project directory_. Access it via `/project-assets/{project_id}/index.html`.
 
+
 ### Project dashboard
 
 Displays all the projects that a user has authorization to read.
 
 Served at `/projects`.
 
-## Installation
-
-### Rust Binary
-
-If you have Rust installed you can build and install `potree-auth` natively.
-
-#### Prerequisites
-
-- [Rust](https://www.rust-lang.org/tools/install)
-
-#### Building
-
-```bash
-cargo install --path .
-```
-
-### Docker
-
-You can also build a Docker container by running the following from the root of the project.
-
-#### Prerequisites
-
-- [Docker](https://www.docker.com/)
-
-#### Building
-
-```bash
-make docker-build
-```
 
 ## Usage
 
@@ -152,3 +138,13 @@ For authentication-specific settings, see the [Authentication section](#authenti
 Authentication is handled via the OIDC Authorization Code flow, supported by most modern Identity Providers (IdPs). Relevant configuration parameters are prefixed with `idp-`. If these values are not set, authentication is disabled and all users are granted access to all projects.
 
 > **Note:** Users in the `admin` group have full access to all projects, even if `admin` is not explicitly listed in the project metadata.
+
+## Development
+
+Prerequisites:
+
+- Rust stable
+- Rust nightly (optional, for formatting)
+- Docker (optional, for building Docker containers)
+
+The [Makefile](./Makefile) contains commonly used commands during development for reference.
