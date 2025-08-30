@@ -30,12 +30,12 @@ potree-auth --data-dir /<path-to>/project-data
 
 Navigate to [http://localhost:3000](http://localhost:3000).
 
-#### Docker, TODO: UPDATE WITH CORRECT DOCKER IMAGE NAMES.
+#### Docker
 
 Requires the [Docker Engine](https://docs.docker.com/engine/) to be installed.
 
 ```bash
-docker run -p 3000:3000 -v /<path-to>/project-data:/project-data -e DATA_DIR="/project-data" -e SERVER_HOST="0.0.0.0" potree-auth:latest
+docker run -p 3000:3000 -v /<path-to>/project-data:/project-data -e DATA_DIR="/project-data" -e SERVER_HOST="0.0.0.0" sidrubs/potree-auth:latest
 ```
 
 Can also be run using Docker Compose with [this example `docker-compose.yml` file](./docs/resources/docker-compose.yml).
