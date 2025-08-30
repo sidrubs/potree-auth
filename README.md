@@ -30,7 +30,7 @@ potree-auth --data-dir /<path-to>/project-data
 
 Navigate to [http://localhost:3000](http://localhost:3000).
 
-#### Docker
+#### Docker, TODO: UPDATE WITH CORRECT DOCKER IMAGE NAMES.
 
 Requires the [Docker Engine](https://docs.docker.com/engine/) to be installed.
 
@@ -46,54 +46,23 @@ DATA_DIR=/<path-to>/project-data docker compose -f /<path-to>/docker-compose.yml
 
 ## Application Overview
 
-The core components of the application are:
+`potree-auth` sits in front of your `potree` projects and makes them easy to manage, secure, and serve.
+Here are the main pieces that work together:
 
-1. Project
-2. Authenticated project asset server
-3. Potree asset server
-4. Pre-configured potree rendering template
-5. Project dashboard
+1. **Projects**
+   A *project* is a collection of point-cloud data plus a simple [`manifest.yml`](./docs/resources/manifest.yml) file that describes it. Each project lives in its own folder inside your data directory, and access is controlled per project.
 
-### Project
+2. **Project Asset Server**
+   Serves files (point clouds, metadata, etc.) from each project directory — but **only** to users who are authorized for that project. Assets are available at: `/project-assets/{project_id}/{*path}`
 
-Groups data and manages access to it. Project metadata is defined in a [manifest file](./docs/resources/manifest.yml).
+3. **Potree Asset Server**
+   Serves the standard Potree viewer files (JavaScript, CSS, etc.) that don’t require authentication. Available at: `/potree-assets/{*path}`
 
-A project is created by placing a YAML-formatted `manifest.yml` (note: use `.yml`, not `.yaml`) in a subdirectory of the _data directory_ (as specified in the [application config](#configuration)).
+4. **Potree Rendering Template**
+   A pre-configured Potree HTML template is provided so you can spin up visualizations quickly. Each `potree` project define its rendering properties in a standard [`potree.json5`](./docs/resources/potree.json5) file. Access is restricted to authorized users at: `/potree/{project_id}`
 
-The subdirectory (_project directory_) name serves as the `project_id` and should be URL-safe — `kebab-case` is recommended.
-
-
-### Project Asset Server
-
-Provides authenticated access to files within a _project directory_, identified by `project_id`. Access is granted only to users belonging to at least one of the project's groups.
-
-Assets are served at `/project-assets/{project_id}/{*path}`.
-
-
-### Potree Asset Server
-
-Serves standard [`potree`](https://github.com/potree/potree) assets. No authentication required.
-
-Served at `/potree-assets/{*path}`.
-
-
-### Potree Rendering Template
-
-A pre-configured Potree HTML template ([example](./templates/potree_render.html)) is available. It loads settings from a [`potree.json5`](./docs/resources/potree.json5) file in the root of the _project directory_ (`project_id`).
-
-Access requires the user to belong to at least one of the [project](#project) groups.
-
-Served at `/potree/{project_id}`.
-
-> To use custom Potree HTML, create it in an `index.html` file and add it to the _project directory_. Access it via `/project-assets/{project_id}/index.html`.
-
-
-### Project dashboard
-
-Displays all the projects that a user has authorization to read.
-
-Served at `/projects`.
-
+5. **Project Dashboard**
+   The home page for users. After logging in, they’ll see a clean dashboard listing all the projects they can access — nothing more, nothing less. Available at: `/projects`
 
 ## Usage
 
@@ -117,6 +86,8 @@ A directory containing all the [_project directories_](#project) should be set u
             ├── file-one.bin
             └── file-two.bin
 ```
+
+> **Note:** Project directory names should be URL safe as they are used as the `project_id` in the URL.
 
 ### Configuration
 
