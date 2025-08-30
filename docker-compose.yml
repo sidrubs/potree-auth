@@ -12,15 +12,14 @@ services:
     # are provided then all of the others should be as well. Else the
     # `potree-auth` application won't start.
     environment:
-      IDP_URL: ${IDP_URL}
-      IDP_CLIENT_ID: ${IDP_CLIENT_ID}
-      IDP_CLIENT_SECRET: ${IDP_CLIENT_SECRET}
-      IDP_GROUPS_CLAIM: ${IDP_GROUPS_CLAIM}
-      IDP_APPLICATION_EXTERNAL_URL: ${IDP_APPLICATION_EXTERNAL_URL}
-
-      DATA_DIR: /application-data
-      SERVER_PORT: 3000
-      SERVER_HOST: 0.0.0.0
+      - IDP_URL
+      - IDP_CLIENT_ID
+      - IDP_CLIENT_SECRET
+      - IDP_GROUPS_CLAIM
+      - IDP_APPLICATION_EXTERNAL_URL
+      - DATA_DIR=/application-data
+      - SERVER_PORT=3000
+      - SERVER_HOST=0.0.0.0
 
     volumes:
       # The local path to the directory into which the project data

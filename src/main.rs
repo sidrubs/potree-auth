@@ -26,8 +26,11 @@ async fn main() -> Result<(), anyhow::Error> {
     // Parse arguments from the CLI.
     let cli = Cli::parse();
 
-    let listener =
-        tokio::net::TcpListener::bind(format!("{}:{}", &cli.server.host, &cli.server.port)).await?;
+    let listener = tokio::net::TcpListener::bind(format!(
+        "{}:{}",
+        &cli.server.server_host, &cli.server.server_port
+    ))
+    .await?;
 
     let application = init_application(cli.into()).await?;
 
