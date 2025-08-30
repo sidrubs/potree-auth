@@ -1,5 +1,35 @@
 # Potree Auth
 
+## Quick Start
+
+### Installation
+
+The two suggested methods to run `potree-auth` are installing with `cargo` or via Docker.
+
+Both these examples make use of an example project directory that can be downloaded from [here](https://sidrubs.github.io/potree-auth-example-data/project-data.zip) and unzipped. More details on the structure of the project directory and the authentication configuration can be seen in the [**Usage**](#usage) section.
+
+#### Cargo
+
+Requires the [Rust toolchain to be installed](https://www.rust-lang.org/tools/install) on your system.
+
+```bash
+# Install `potree-auth`.
+cargo install potree-auth
+
+# Run `potree-auth` indicating where it can find the project data directory.
+potree-auth --data-dir /<path-to>/project-data
+```
+
+Navigate to [http://localhost:3000](http://localhost:3000).
+
+#### Docker
+
+Requires the [Docker Engine](https://docs.docker.com/engine/) to be installed.
+
+```bash
+docker run -p 3000:3000 -v /<path-to>/project-data:/project-data -e DATA_DIR="/project-data" -e SERVER_HOST="0.0.0.0" potree-auth:latest
+```
+
 ## Application Overview
 
 The core components of the application are:
@@ -119,6 +149,6 @@ For authentication-specific settings, see the [Authentication section](#authenti
 
 ### Authentication
 
-Authentication is handled via the OIDC Authorization Code flow, supported by most modern Identity Providers (IdPs). Relevant configuration parameters are prefixed with `idp_`. If these values are not set, authentication is disabled and all users are granted access to all projects.
+Authentication is handled via the OIDC Authorization Code flow, supported by most modern Identity Providers (IdPs). Relevant configuration parameters are prefixed with `idp-`. If these values are not set, authentication is disabled and all users are granted access to all projects.
 
 > **Note:** Users in the `admin` group have full access to all projects, even if `admin` is not explicitly listed in the project metadata.
