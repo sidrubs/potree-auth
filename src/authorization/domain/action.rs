@@ -2,7 +2,7 @@
 ///
 /// Used for authorization purposes.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(test, derive(fake::Dummy))]
+#[cfg_attr(any(test, feature = "fake"), derive(fake::Dummy))]
 pub enum Action {
     Read,
     List,

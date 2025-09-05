@@ -30,14 +30,12 @@ pub trait ResourceInstance: Resource {
 new_type![
     /// The identifier of a resource type (type-level). E.g. a "user", a "group",
     /// a "file", etc.
-    #[cfg_attr(test, derive(fake::Dummy))]
     ResourceType(String)
 ];
 
 new_type![
     /// The identifier of a specific resource instance (instance-level). E.g. a
     /// user id, a group id, a file id, etc.
-    #[cfg_attr(test, derive(fake::Dummy))]
     ResourceIdentifier(String)
 ];
 

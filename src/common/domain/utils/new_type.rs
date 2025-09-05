@@ -92,6 +92,7 @@ macro_rules! new_type {
     ) => {
         $(#[$attr])*
         #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+        #[cfg_attr(any(test, feature = "fake"), derive(fake::Dummy))]
         pub struct $name(
             $(#[$type_attr])*
             $type
