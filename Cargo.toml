@@ -59,6 +59,9 @@ web-route = "0.2.4"
 # `fake` feature
 fake = { version = "4.4.0", optional = true, features = ["derive", "url", "http"] }
 
+# `mock` feature
+mockall = { version = "0.13.1", optional = true }
+
 [dev-dependencies]
 axum-test = "18.0.0"
 fake = { version = "4.4.0", features = ["derive", "url", "http"] }
@@ -68,7 +71,12 @@ test-case = "3.3.1"
 web-route = { version = "0.2.4", features = ["fake"] }
 
 [features]
+# Expose implementation of `fake::Dummy` on structs and enums.
 fake = ["dep:fake"]
+# Expose mocking functionality externally.
+mock = ["dep:fake", "dep:mockall"]
+# Expose functionality useful for testing
+test = ["fake", "mock"]
 
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = "0.6"

@@ -43,7 +43,7 @@ new_type![
 /// traits for testing purposes.
 ///
 /// I was struggling to get mockall to deal with the supertrait mocking.
-#[cfg(test)]
+#[cfg(any(test, feature = "mock"))]
 pub mod mocked_resource {
     use super::EmailAddress;
     use super::Group;

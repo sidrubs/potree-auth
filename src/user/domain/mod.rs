@@ -26,7 +26,7 @@ impl User {
     }
 }
 
-#[cfg(test)]
+#[cfg(any(test, feature = "fake"))]
 impl User {
     pub fn dummy_admin() -> Self {
         use fake::Fake;
