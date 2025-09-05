@@ -23,6 +23,7 @@
 /// ```
 ///
 /// [1]: https://github.com/ramosbugs/oauth2-rs/blob/main/src/types.rs
+#[macro_export]
 macro_rules! new_type {
     // Convenience pattern without an impl.
     (
