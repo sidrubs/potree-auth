@@ -6,10 +6,12 @@ use crate::authorization::domain::resource::ResourceIdentifier;
 use crate::authorization::domain::resource::ResourceInstance;
 use crate::authorization::domain::resource::ResourceType;
 use crate::common::domain::Group;
+use crate::common::domain::resource_type;
+use crate::user::domain::EmailAddress;
 
 impl Resource for Project {
     fn resource_type(&self) -> crate::authorization::domain::resource::ResourceType {
-        ResourceType::new("project".to_owned())
+        ResourceType::new(resource_type::PROJECT.to_owned())
     }
 }
 
@@ -18,8 +20,12 @@ impl ResourceInstance for Project {
         ResourceIdentifier::new(self.id.to_string())
     }
 
-    fn groups(&self) -> Vec<Group> {
-        self.groups.clone()
+    fn groups(&self) -> Option<Vec<Group>> {
+        Some(self.groups.clone())
+    }
+
+    fn user_emails(&self) -> Option<Vec<EmailAddress>> {
+        None
     }
 }
 
@@ -29,6 +35,6 @@ pub struct ProjectTypeResource;
 
 impl Resource for ProjectTypeResource {
     fn resource_type(&self) -> crate::authorization::domain::resource::ResourceType {
-        ResourceType::new("project".to_owned())
+        ResourceType::new(resource_type::PROJECT.to_owned())
     }
 }
