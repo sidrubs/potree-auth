@@ -5,7 +5,7 @@ use crate::common::domain::utils::new_type::new_type;
 
 /// Represents the metadata associated with a 3D model project.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(test, derive(fake::Dummy))]
+#[cfg_attr(any(test, feature = "fake"), derive(fake::Dummy))]
 pub struct Project {
     pub id: ProjectId,
 
@@ -22,14 +22,12 @@ pub struct Project {
 new_type![
     /// The unique identifying slug of a [`Project`].
     #[derive(serde::Deserialize, serde::Serialize)]
-    #[cfg_attr(test, derive(fake::Dummy))]
     ProjectId(String)
 ];
 
 new_type![
     /// The name of a [`Project`].
     #[derive(serde::Deserialize, serde::Serialize)]
-    #[cfg_attr(test, derive(fake::Dummy))]
     ProjectName(
         #[cfg_attr(test, dummy(faker = "fake::faker::name::en::Name()"))]
         String
@@ -39,6 +37,5 @@ new_type![
 new_type![
     /// A high-level description of a [`Project`]. Gives the user more context.
     #[derive(serde::Deserialize, serde::Serialize)]
-    #[cfg_attr(test, derive(fake::Dummy))]
     ProjectDescription(String)
 ];

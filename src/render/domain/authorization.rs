@@ -2,7 +2,10 @@ use crate::authorization::domain::resource::Resource;
 use crate::authorization::domain::resource::ResourceIdentifier;
 use crate::authorization::domain::resource::ResourceInstance;
 use crate::authorization::domain::resource::ResourceType;
+use crate::common::domain::Group;
+use crate::common::domain::resource_type;
 use crate::project::domain::Project;
+use crate::user::domain::EmailAddress;
 
 /// A struct that is used to provide the required authZ data to the
 /// authorization engine for a potree render instance.
@@ -13,7 +16,7 @@ pub struct PotreeRenderResource<'a> {
 
 impl Resource for PotreeRenderResource<'_> {
     fn resource_type(&self) -> crate::authorization::domain::resource::ResourceType {
-        ResourceType::new("potree_render".to_owned())
+        ResourceType::new(resource_type::POTREE_RENDER.to_owned())
     }
 }
 
@@ -22,8 +25,12 @@ impl ResourceInstance for PotreeRenderResource<'_> {
         ResourceIdentifier::new(format!("potree render: {}", self.associated_project.name))
     }
 
-    fn groups(&self) -> Vec<crate::common::domain::Group> {
-        self.associated_project.groups.clone()
+    fn groups(&self) -> Option<Vec<Group>> {
+        Some(self.associated_project.groups.clone())
+    }
+
+    fn user_emails(&self) -> Option<Vec<EmailAddress>> {
+        None
     }
 }
 
@@ -34,6 +41,6 @@ pub struct ProjectDashboardResource;
 
 impl Resource for ProjectDashboardResource {
     fn resource_type(&self) -> crate::authorization::domain::resource::ResourceType {
-        ResourceType::new("projects_dashboard".to_owned())
+        ResourceType::new(resource_type::PROJECTS_DASHBOARD.to_owned())
     }
 }

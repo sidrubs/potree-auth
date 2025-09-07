@@ -8,6 +8,7 @@ use super::super::domain::error::AuthorizationEngineError;
 use super::super::domain::resource::Resource;
 use super::super::domain::resource::ResourceInstance;
 use super::super::ports::authorization_engine::AuthorizationEngine;
+use crate::common::domain::resource_type;
 use crate::user::domain::User;
 
 /// Handles authorization business logic for the application.
@@ -36,8 +37,8 @@ impl SimpleAuthorizationEngine {
         };
 
         match (action, resource.resource_type().as_str()) {
-            (&Action::List, "project") => Ok(()),
-            (&Action::Read, "projects_dashboard") => Ok(()),
+            (&Action::List, resource_type::PROJECT) => Ok(()),
+            (&Action::Read, resource_type::PROJECTS_DASHBOARD) => Ok(()),
             _ => Err(AuthorizationEngineError::NotAuthorized {
                 user: Box::new(user.clone()),
                 action: action.clone(),
@@ -66,10 +67,9 @@ impl SimpleAuthorizationEngine {
         match action {
             &Action::Read => {
                 if user.is_admin()
-                    || resource
-                        .groups()
-                        .iter()
-                        .any(|group| user.groups.contains(group))
+                    || resource.groups().map_or(false, |groups| {
+                        groups.iter().any(|group| user.groups.contains(group))
+                    })
                 {
                     Ok(())
                 } else {
@@ -147,7 +147,7 @@ mod authorization_service_tests {
 
             let user = Faker.fake::<User>();
             let resource = MockedResource {
-                resource_type: ResourceType::new("project".to_owned()),
+                resource_type: ResourceType::new(resource_type::PROJECT.to_owned()),
                 ..Faker.fake()
             };
             let action = Action::List;
@@ -168,7 +168,7 @@ mod authorization_service_tests {
 
             let user = Faker.fake::<User>();
             let resource = MockedResource {
-                resource_type: ResourceType::new("project".to_owned()),
+                resource_type: ResourceType::new(resource_type::PROJECT.to_owned()),
                 ..Faker.fake()
             };
 
@@ -189,7 +189,7 @@ mod authorization_service_tests {
 
             let user = Faker.fake::<User>();
             let resource = MockedResource {
-                resource_type: ResourceType::new("projects_dashboard".to_owned()),
+                resource_type: ResourceType::new(resource_type::PROJECTS_DASHBOARD.to_owned()),
                 ..Faker.fake()
             };
             let action = Action::Read;
@@ -210,7 +210,7 @@ mod authorization_service_tests {
 
             let user = Faker.fake::<User>();
             let resource = MockedResource {
-                resource_type: ResourceType::new("projects_dashboard".to_owned()),
+                resource_type: ResourceType::new(resource_type::PROJECTS_DASHBOARD.to_owned()),
                 ..Faker.fake()
             };
 
@@ -274,7 +274,8 @@ mod authorization_service_tests {
                 ..Faker.fake()
             };
             let resource = MockedResource {
-                groups: vec![shared_group],
+                groups: Some(vec![shared_group]),
+                user_emails: None,
                 ..Faker.fake()
             };
 
@@ -292,7 +293,8 @@ mod authorization_service_tests {
 
             let user = Faker.fake::<User>();
             let resource = MockedResource {
-                groups: vec![],
+                groups: Some(vec![]),
+                user_emails: None,
                 ..Faker.fake()
             };
 
@@ -339,7 +341,8 @@ mod authorization_service_tests {
                 ..Faker.fake()
             };
             let resource = MockedResource {
-                groups: vec![shared_group],
+                groups: Some(vec![shared_group]),
+                user_emails: None,
                 ..Faker.fake()
             };
 

@@ -8,7 +8,7 @@ use crate::common::domain::utils::new_type::new_type;
 
 /// Represents an authenticated user of the application.
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
-#[cfg_attr(test, derive(fake::Dummy))]
+#[cfg_attr(any(test, feature = "fake"), derive(fake::Dummy))]
 pub struct User {
     pub id: UserId,
     pub name: UserName,
@@ -26,7 +26,7 @@ impl User {
     }
 }
 
-#[cfg(test)]
+#[cfg(any(test, feature = "fake"))]
 impl User {
     pub fn dummy_admin() -> Self {
         use fake::Fake;
@@ -44,9 +44,8 @@ impl User {
 new_type![
     /// The name of a [`crate::domain::User`].
     #[derive(Deserialize, Serialize)]
-    #[cfg_attr(test, derive(fake::Dummy))]
     UserName(
-        #[cfg_attr(test, dummy(faker = "fake::faker::name::en::Name()"))]
+        #[cfg_attr(any(test, feature = "fake"), dummy(faker = "fake::faker::name::en::Name()"))]
         String
     )
 ];
@@ -56,9 +55,8 @@ new_type![
     ///
     /// > **Note:** This is not validated.
     #[derive(Deserialize, Serialize)]
-    #[cfg_attr(test, derive(fake::Dummy))]
     EmailAddress(
-        #[cfg_attr(test, dummy(faker = "fake::faker::internet::en::FreeEmail()"))]
+        #[cfg_attr(any(test, feature = "fake"), dummy(faker = "fake::faker::internet::en::FreeEmail()"))]
         String
     )
 ];
@@ -66,7 +64,6 @@ new_type![
 new_type![
     /// The unique id of a [`crate::domain::User`].
     #[derive(Deserialize, Serialize)]
-    #[cfg_attr(test, derive(fake::Dummy))]
     UserId(String)
 ];
 

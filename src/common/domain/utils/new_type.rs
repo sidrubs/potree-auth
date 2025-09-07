@@ -23,6 +23,7 @@
 /// ```
 ///
 /// [1]: https://github.com/ramosbugs/oauth2-rs/blob/main/src/types.rs
+#[macro_export]
 macro_rules! new_type {
     // Convenience pattern without an impl.
     (
@@ -91,6 +92,7 @@ macro_rules! new_type {
     ) => {
         $(#[$attr])*
         #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+        #[cfg_attr(any(test, feature = "fake"), derive(fake::Dummy))]
         pub struct $name(
             $(#[$type_attr])*
             $type
