@@ -3,6 +3,7 @@ name = "potree-auth"
 version = "0.1.0"
 edition = "2024"
 license = "MIT"
+description = "Authentication and project management for `potree` point clouds."
 
 [lib]
 path = "src/lib.rs"
