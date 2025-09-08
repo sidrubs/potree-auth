@@ -28,7 +28,7 @@ RUN make build-release
 ####################################################################################################
 
 # Version pinned so that it can be maintained by renovate bot.
-FROM debian:13.0-slim
+FROM debian:13.1-slim
 
 # Import user from builder.
 COPY --from=builder --chmod=444 /etc/passwd /etc/passwd
