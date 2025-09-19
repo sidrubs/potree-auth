@@ -33,7 +33,7 @@ reqwest = { version = "0.12.23", default-features = false, features = [
 rust-embed = "8.7.2"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.143"
-serde_yml = "0.0.12"
+serde_norway = "0.9.42"
 thiserror = "2.0.16"
 time = "0.3.41"
 tokio = { version = "1.47.1", features = [
