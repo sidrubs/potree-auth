@@ -52,11 +52,12 @@ impl ManifestFileProjectRepository {
                 id: project_id.clone(),
             })?;
 
-        let manifest = serde_yml::from_slice::<ProjectManifest>(&manifest_bytes).map_err(|_e| {
-            ProjectRepositoryError::Parsing {
-                id: project_id.clone(),
-            }
-        })?;
+        let manifest =
+            serde_norway::from_slice::<ProjectManifest>(&manifest_bytes).map_err(|_e| {
+                ProjectRepositoryError::Parsing {
+                    id: project_id.clone(),
+                }
+            })?;
 
         Ok(manifest.into_project(&project_id))
     }
@@ -202,7 +203,7 @@ mod manifest_file_project_service_tests {
 
         std::fs::write(
             project_dir.join(TEST_MANIFEST_FILE_NAME),
-            serde_yml::to_string(&manifest_file).unwrap(),
+            serde_norway::to_string(&manifest_file).unwrap(),
         )
         .unwrap();
     }
@@ -272,7 +273,7 @@ mod manifest_file_project_service_tests {
 
             std::fs::write(
                 project_dir.join(TEST_MANIFEST_FILE_NAME),
-                serde_yml::to_string(&invalid_manifest_file).unwrap(),
+                serde_norway::to_string(&invalid_manifest_file).unwrap(),
             )
             .unwrap();
 
