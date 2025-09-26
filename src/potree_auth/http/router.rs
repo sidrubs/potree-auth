@@ -25,6 +25,7 @@ use crate::common::utils::http::middleware::tracing::apply_tracing_middleware;
 use crate::potree_asset::adapters::potree_asset_store::embedded::EmbeddedPotreeAssetStore;
 use crate::potree_asset::application::service::PotreeAssetService;
 use crate::project::adapters::project_repository::manifest_file::ManifestFileProjectRepository;
+use crate::project::application::service::ProjectService;
 use crate::project_asset::adapters::project_asset_store::serve_dir::ServeDirProjectAssets;
 use crate::project_asset::application::service::ProjectAssetService;
 use crate::project_asset::http::ASSET_PATH;
@@ -42,23 +43,27 @@ pub static PROJECT_ASSETS: LazyLock<ParameterizedRoute> =
 pub async fn init_application(
     config: PotreeAuthConfiguration,
 ) -> Result<NormalizePath<Router>, PotreeAuthHttpError> {
-    // Initialize adaptors
+    // Initialize adapters
     let authorization_engine = init_authorization_engine(config.idp.is_some());
     let authentication_engine = init_authentication_engine(config.idp).await?;
-    let project_datastore = Arc::new(ManifestFileProjectRepository::new(&config.data_dir));
+    let project_repository = Arc::new(ManifestFileProjectRepository::new(&config.data_dir));
     let potree_asset_store = Arc::new(EmbeddedPotreeAssetStore);
     let project_asset_store = Arc::new(ServeDirProjectAssets::new(&config.data_dir));
 
-    // Intialize services
+    // Initialize services
     let authentication_service = AuthenticationService::new(authentication_engine);
     let potree_asset_service = PotreeAssetService::new(potree_asset_store);
+    let project_service = Arc::new(ProjectService::new(
+        project_repository.clone(),
+        authorization_engine.clone(),
+    ));
     let project_asset_service = ProjectAssetService::new(
-        project_datastore.clone(),
+        project_service.clone(),
         project_asset_store,
         authorization_engine.clone(),
     );
     let rendering_service = RenderingService::new(
-        project_datastore,
+        project_service,
         authorization_engine,
         PROJECT_ASSETS.join(ASSET_PATH.as_ref()),
         WebRoute::new(POTREE_ASSETS.as_ref()),

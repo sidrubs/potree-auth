@@ -67,7 +67,7 @@ impl SimpleAuthorizationEngine {
         match action {
             &Action::Read => {
                 if user.is_admin()
-                    || resource.groups().map_or(false, |groups| {
+                    || resource.groups().is_some_and(|groups| {
                         groups.iter().any(|group| user.groups.contains(group))
                     })
                 {
