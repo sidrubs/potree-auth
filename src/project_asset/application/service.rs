@@ -8,27 +8,27 @@ use super::error::ProjectAssetsServiceError;
 use crate::authorization::domain::action::Action;
 use crate::authorization::ports::authorization_engine::AuthorizationEngine;
 use crate::common::domain::StaticAsset;
+use crate::project::application::port::ProjectServicePort;
 use crate::project::domain::ProjectId;
-use crate::project::ports::project_repository::ProjectRepository;
 use crate::project_asset::domain::authorization::ProjectAssetResource;
 use crate::user::domain::User;
 
 /// A service for interacting with project assets.
 #[derive(Debug, Clone)]
 pub struct ProjectAssetService {
-    project_datastore: Arc<dyn ProjectRepository>,
+    project_service: Arc<dyn ProjectServicePort>,
     project_asset_store: Arc<dyn ProjectAssetStore>,
     authorization_engine: Arc<dyn AuthorizationEngine>,
 }
 
 impl ProjectAssetService {
     pub fn new(
-        project_datastore: Arc<dyn ProjectRepository>,
+        project_service: Arc<dyn ProjectServicePort>,
         project_asset_store: Arc<dyn ProjectAssetStore>,
         authorization_engine: Arc<dyn AuthorizationEngine>,
     ) -> Self {
         Self {
-            project_datastore,
+            project_service,
             project_asset_store,
             authorization_engine,
         }
@@ -44,7 +44,7 @@ impl ProjectAssetService {
         asset_path: &Path,
         request_headers: Option<HeaderMap>,
     ) -> Result<StaticAsset, ProjectAssetsServiceError> {
-        let project = self.project_datastore.read(project_id).await?;
+        let project = self.project_service.read(user, project_id).await?;
 
         let project_asset = ProjectAssetResource {
             associated_project: &project,
@@ -72,7 +72,7 @@ mod project_asset_service_tests {
     use super::*;
     use crate::authorization::domain::error::AuthorizationEngineError;
     use crate::authorization::ports::authorization_engine::MockAuthorizationEngine;
-    use crate::project::ports::project_repository::MockProjectRepository;
+    use crate::project::application::port::MockProjectServicePort;
 
     mod request_asset {
 
@@ -81,7 +81,7 @@ mod project_asset_service_tests {
         #[tokio::test]
         async fn should_return_the_correct_error_if_user_not_authenticated() {
             // Arrange
-            let mut project_datastore = MockProjectRepository::new();
+            let mut project_datastore = MockProjectServicePort::new();
             project_datastore
                 .expect_read()
                 .return_const(Ok(Faker.fake()));
@@ -115,7 +115,7 @@ mod project_asset_service_tests {
         // Arrange
         let dummy_user = Faker.fake::<User>();
 
-        let mut project_datastore = MockProjectRepository::new();
+        let mut project_datastore = MockProjectServicePort::new();
         project_datastore
             .expect_read()
             .return_const(Ok(Faker.fake()));

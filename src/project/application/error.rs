@@ -6,7 +6,7 @@ use crate::project::domain::ProjectId;
 use crate::project::ports::project_repository::ProjectRepositoryError;
 use crate::user::domain::User;
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, Clone, thiserror::Error)]
 pub enum ProjectServiceError {
     #[error("project ({id}) not found")]
     ProjectNotFound { id: ProjectId },
