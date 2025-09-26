@@ -63,7 +63,7 @@ pub async fn init_application(
         authorization_engine.clone(),
     );
     let rendering_service = RenderingService::new(
-        project_repository,
+        project_service,
         authorization_engine,
         PROJECT_ASSETS.join(ASSET_PATH.as_ref()),
         WebRoute::new(POTREE_ASSETS.as_ref()),
