@@ -1,3 +1,4 @@
+use axum::Json;
 use axum::response::IntoResponse;
 use http::StatusCode;
 
@@ -9,7 +10,7 @@ use crate::user::domain::User;
 /// Errors that can be experienced by an API `axum` route handler.
 ///
 /// All API route handlers should return this error. All domain specific errors
-/// should be marshalled into an [`ApiError`] to ensure consistent HTTP
+/// should be marshaled into an [`ApiError`] to ensure consistent HTTP
 /// responses.
 #[derive(Debug, Clone, thiserror::Error)]
 pub enum ApiError {
@@ -18,6 +19,9 @@ pub enum ApiError {
 
     #[error("unable to find resource: {resource_name}")]
     ResourceNotFound { resource_name: String },
+
+    #[error("the resource already exists: {resource_name}")]
+    ResourceAlreadyExists { resource_name: String },
 
     #[error("{} is not authorized to {} the {:?}: {:?}", user.name, action, resource_type, resource_identifier)]
     NotAuthorized {
@@ -35,6 +39,9 @@ pub enum ApiError {
 
     #[error("there is an issue with the the server infrastructure: {message}")]
     Infrastucture { message: String },
+
+    #[error("there was a generic server error: {body}")]
+    GenericServerError { body: Box<serde_json::Value> },
 }
 
 impl IntoResponse for ApiError {
@@ -50,10 +57,14 @@ impl IntoResponse for ApiError {
             ApiError::ResourceNotFound { .. } => {
                 (StatusCode::NOT_FOUND, self.to_string()).into_response()
             }
+            ApiError::ResourceAlreadyExists { .. } => (StatusCode::CONFLICT).into_response(),
             ApiError::NotAuthorized { .. } => {
                 (StatusCode::FORBIDDEN, self.to_string()).into_response()
             }
             ApiError::NotAuthenticated => (StatusCode::UNAUTHORIZED).into_response(),
+            ApiError::GenericServerError { body } => {
+                (StatusCode::INTERNAL_SERVER_ERROR, Json(body)).into_response()
+            }
         }
     }
 }
