@@ -19,6 +19,9 @@ pub enum ApiError {
     #[error("unable to find resource: {resource_name}")]
     ResourceNotFound { resource_name: String },
 
+    #[error("the resource already exists: {resource_name}")]
+    ResourceAlreadyExists { resource_name: String },
+
     #[error("{} is not authorized to {} the {:?}: {:?}", user.name, action, resource_type, resource_identifier)]
     NotAuthorized {
         user: Box<User>,
@@ -50,6 +53,7 @@ impl IntoResponse for ApiError {
             ApiError::ResourceNotFound { .. } => {
                 (StatusCode::NOT_FOUND, self.to_string()).into_response()
             }
+            ApiError::ResourceAlreadyExists { .. } => (StatusCode::CONFLICT).into_response(),
             ApiError::NotAuthorized { .. } => {
                 (StatusCode::FORBIDDEN, self.to_string()).into_response()
             }
