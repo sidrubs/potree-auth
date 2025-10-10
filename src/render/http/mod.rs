@@ -1,6 +1,6 @@
 mod error;
 mod extractors;
-mod middleware;
+pub mod middleware;
 mod route_handlers;
 mod router;
 mod state;
