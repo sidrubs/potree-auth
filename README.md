@@ -1,83 +1,68 @@
 # Potree Auth
 
+Easily share and manage your 3D point cloud projects — securely.
+
+`potree-auth` is a web server that adds authentication, access control, and a clean dashboard on top of [`potree`](https://github.com/potree/potree). Users log in with the configured Identity Provider (OIDC supported) and see only the projects they’re authorized to view.
+
+With Potree Auth you get:
+- 🔐 Secure access control for your Potree projects
+- 🖥️ A ready-to-use project dashboard for your users
+
+## Quick Start
+
+### Installation
+
+The two suggested methods to run `potree-auth` are installing with `cargo` or via Docker.
+
+Both these examples make use of an example project directory that can be downloaded from [here](https://sidrubs.github.io/potree-auth-example-data/project-data.zip) and unzipped. More details on the structure of the project directory and the authentication configuration can be seen in the [**Usage**](#usage) section.
+
+#### Cargo
+
+Requires the [Rust toolchain to be installed](https://www.rust-lang.org/tools/install) on your system.
+
+```bash
+# Install `potree-auth`.
+cargo install potree-auth
+
+# Run `potree-auth` indicating where it can find the project data directory.
+potree-auth --data-dir /<path-to>/project-data
+```
+
+Navigate to [http://localhost:3000](http://localhost:3000).
+
+#### Docker
+
+Requires the [Docker Engine](https://docs.docker.com/engine/) to be installed.
+
+```bash
+docker run -p 3000:3000 -v /<path-to>/project-data:/project-data -e DATA_DIR="/project-data" -e SERVER_HOST="0.0.0.0" sidrubs/potree-auth:latest
+```
+
+Can also be run using Docker Compose with [this example `docker-compose.yml` file](./docs/resources/docker-compose.yml).
+
+```bash
+DATA_DIR=/<path-to>/project-data docker compose -f /<path-to>/docker-compose.yml up
+```
+
 ## Application Overview
 
-The core components of the application are:
+`potree-auth` sits in front of your `potree` projects and makes them easy to manage, secure, and serve.
+Here are the main pieces that work together:
 
-1. Project
-2. Authenticated project asset server
-3. Potree asset server
-4. Pre-configured potree rendering template
-5. Project dashboard
+1. **Projects**
+   A *project* is a collection of point-cloud data plus a simple [`manifest.yml`](./docs/resources/manifest.yml) file that describes it. Each project lives in its own folder inside your data directory, and access is controlled per project.
 
-### Project
+2. **Project Asset Server**
+   Serves files (point clouds, metadata, etc.) from each project directory — but **only** to users who are authorized for that project. Assets are available at: `/project-assets/{project_id}/{*path}`
 
-Groups data and manages access to it. Project metadata is defined in a [manifest file](./docs/resources/manifest.yml).
+3. **Potree Asset Server**
+   Serves the standard Potree viewer files (JavaScript, CSS, etc.) that don’t require authentication. Available at: `/potree-assets/{*path}`
 
-A project is created by placing a YAML-formatted `manifest.yml` (note: use `.yml`, not `.yaml`) in a subdirectory of the _data directory_ (as specified in the [application config](#configuration)).
+4. **Potree Rendering Template**
+   A pre-configured Potree HTML template is provided so you can spin up visualizations quickly. Each `potree` project define its rendering properties in a standard [`potree.json5`](./docs/resources/potree.json5) file. Access is restricted to authorized users at: `/potree/{project_id}`
 
-The subdirectory (_project directory_) name serves as the `project_id` and should be URL-safe — `kebab-case` is recommended.
-
-
-### Project Asset Server
-
-Provides authenticated access to files within a _project directory_, identified by `project_id`. Access is granted only to users belonging to at least one of the project's groups.
-
-Assets are served at `/project-assets/{project_id}/{*path}`.
-
-
-### Potree Asset Server
-
-Serves standard [`potree`](https://github.com/potree/potree) assets. No authentication required.
-
-Served at `/potree-assets/{*path}`.
-
-
-### Potree Rendering Template
-
-A pre-configured Potree HTML template ([example](./templates/potree_render.html)) is available. It loads settings from a [`potree.json5`](./docs/resources/potree.json5) file in the root of the _project directory_ (`project_id`).
-
-Access requires the user to belong to at least one of the [project](#project) groups.
-
-Served at `/potree/{project_id}`.
-
-> To use custom Potree HTML, create it in an `index.html` file and add it to the _project directory_. Access it via `/project-assets/{project_id}/index.html`.
-
-### Project dashboard
-
-Displays all the projects that a user has authorization to read.
-
-Served at `/projects`.
-
-## Installation
-
-### Rust Binary
-
-If you have Rust installed you can build and install `potree-auth` natively.
-
-#### Prerequisites
-
-- [Rust](https://www.rust-lang.org/tools/install)
-
-#### Building
-
-```bash
-cargo install --path .
-```
-
-### Docker
-
-You can also build a Docker container by running the following from the root of the project.
-
-#### Prerequisites
-
-- [Docker](https://www.docker.com/)
-
-#### Building
-
-```bash
-make docker-build
-```
+5. **Project Dashboard**
+   The home page for users. After logging in, they’ll see a clean dashboard listing all the projects they can access — nothing more, nothing less. Available at: `/projects`
 
 ## Usage
 
@@ -102,6 +87,8 @@ A directory containing all the [_project directories_](#project) should be set u
             └── file-two.bin
 ```
 
+> **Note:** Project directory names should be URL safe as they are used as the `project_id` in the URL.
+
 ### Configuration
 
 Configuration options can be set via command-line arguments, environment variables, or a mixture of both.
@@ -119,6 +106,16 @@ For authentication-specific settings, see the [Authentication section](#authenti
 
 ### Authentication
 
-Authentication is handled via the OIDC Authorization Code flow, supported by most modern Identity Providers (IdPs). Relevant configuration parameters are prefixed with `idp_`. If these values are not set, authentication is disabled and all users are granted access to all projects.
+Authentication is handled via the OIDC Authorization Code flow, supported by most modern Identity Providers (IdPs). Relevant configuration parameters are prefixed with `idp-`. If these values are not set, authentication is disabled and all users are granted access to all projects.
 
 > **Note:** Users in the `admin` group have full access to all projects, even if `admin` is not explicitly listed in the project metadata.
+
+## Development
+
+Prerequisites:
+
+- Rust stable
+- Rust nightly (optional, for formatting)
+- Docker (optional, for building Docker containers)
+
+The [Makefile](./Makefile) contains commonly used commands during development for reference.

@@ -68,11 +68,11 @@ pub struct ServerConfiguration {
     /// Commonly `localhost`/`127.0.0.1` to serve on the local machine or
     /// `0.0.0.0` to serve on all interfaces.
     #[arg(long, default_value = "127.0.0.1", env = "SERVER_HOST")]
-    pub host: String,
+    pub server_host: String,
 
     /// The port on which the server should be listening.
     #[arg(long, default_value_t = 3000, env = "SERVER_PORT")]
-    pub port: u16,
+    pub server_port: u16,
 }
 
 impl From<Cli> for PotreeAuthConfiguration {
